@@ -1,0 +1,16 @@
+alias se="vim ~/.zshrc"
+alias sr="source ~/.zshrc"
+
+alias la="ll -a"
+
+alias b="bundle"
+
+alias g="git"
+alias glog='git log --pretty="format:%C(yellow)%h%C(green)%d %C(white)%s %C(cyan)%an, %ar %Creset"'
+alias gll='glog --graph'
+alias glla='gll --all'
+
+alias r="./script/rails"
+alias rs="./script/rails server"
+
+alias pryr="pry -r ./config/environment -r rails/console/app -r rails/console/helpers"

@@ -1,0 +1,28 @@
+[user]
+  name = Fred Wu
+  email = ifredwu@gmail.com
+[color]
+  branch = auto
+  diff = auto
+  status = auto
+[color "branch"]
+  current = yellow reverse
+  local = yellow
+  remote = green
+[color "diff"]
+  meta = yellow bold
+  frag = magenta bold
+  old = red bold
+  new = green bold
+[color "status"]
+  added = yellow
+  changed = green
+  untracked = cyan
+[core]
+  quotepath = false
+[mergetool]
+  keepBackup = true
+[heroku]
+  account = personal
+[github]
+  user = fredwu
