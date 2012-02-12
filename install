@@ -51,3 +51,5 @@ for fname in cwd:
 
   call('ln -s "$PWD/%s" "$HOME/.%s"' % (fname, fname), shell=True)
   print('%s is linked.' % fname)
+
+call('source ~/.zshrc', shell=True, executable='/bin/zsh')

@@ -1,5 +1,5 @@
 alias se="vim ~/.zshrc"
-alias sr="source ~/.zshrc"
+alias sr="source ~/.zshrc && echo '.zshrc reloaded!'"
 
 alias la="ll -a"
 
