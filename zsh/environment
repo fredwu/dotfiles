@@ -4,6 +4,7 @@ HISTSIZE=1000000
 SAVEHIST=HISTSIZE
 
 export PATH="$HOME/bin:/usr/local/bin:/usr/local/sbin:$PATH"
+export NODE_PATH=/usr/local/lib/node_modules
 export EDITOR=mate
 
 # ruby 1.9.3 falcon
