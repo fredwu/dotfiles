@@ -4,7 +4,8 @@
 
 ```shell
 git clone git://github.com/fredwu/dotfiles ~/.dotfiles
-~/.dotfiles/install
+cd ~/.dotfiles
+./install
 ```
 ## Customisations
 
