@@ -37,5 +37,3 @@ source $ZSH/oh-my-zsh.sh
 
 . ~/.zsh/aliases
 . ~/.zsh/environment
-
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
