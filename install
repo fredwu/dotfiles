@@ -51,7 +51,7 @@ for fname in cwd:
       shutil.move(target_file, '%s.backup.%s' % (target_file, int(time.time())))
       print('%s is backed up.' % target_file)
 
-  call('ln -s "$PWD/%s" "$HOME/.%s"' % (fname, fname), shell=True)
+  call('ln -s "$PWD/%(fname)s" "$HOME/.%(fname)s"' % locals(), shell=True)
   print('%s is linked.' % fname)
 
 call('source ~/.zshrc', shell=True, executable='/bin/zsh')
