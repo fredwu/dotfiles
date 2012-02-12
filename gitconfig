@@ -1,6 +1,3 @@
-[user]
-  name = Fred Wu
-  email = ifredwu@gmail.com
 [color]
   branch = auto
   diff = auto
@@ -24,5 +21,3 @@
   keepBackup = true
 [heroku]
   account = personal
-[github]
-  user = fredwu
