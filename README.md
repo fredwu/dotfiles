@@ -4,8 +4,7 @@
 
 ```shell
 git clone git://github.com/fredwu/dotfiles ~/.dotfiles
-cd ~/.dotfiles
-rake
+~/.dotfiles/install
 ```
 ## Customisations
 
