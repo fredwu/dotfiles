@@ -35,6 +35,7 @@ source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
 
+. ~/.zsh/custom
 . ~/.zsh/aliases
 . ~/.zsh/environment
 . ~/.zsh/rvm
