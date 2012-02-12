@@ -37,3 +37,4 @@ source $ZSH/oh-my-zsh.sh
 
 . ~/.zsh/aliases
 . ~/.zsh/environment
+. ~/.zsh/rvm
