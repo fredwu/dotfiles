@@ -13,6 +13,12 @@ else:
   print('Installing oh-my-zsh ...')
   call('curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh', shell=True)
 
+if exists(join(os.getenv('HOME'), '.oh-my-zsh', 'custom', 'plugins', 'zsh-syntax-highlighting')):
+  print('zsh-syntax-highlighting exists, ignored.')
+else:
+  print('Installing zsh-syntax-highlighting ...')
+  call('git clone git://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting', shell=True)
+
 if exists(join(os.getenv('HOME'), '.vimrc')) and \
    exists(join(os.getenv('HOME'), '.vim', 'janus')):
   print('Janus exists, ignored.')
