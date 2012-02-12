@@ -9,7 +9,8 @@ if exists(join(os.getenv('HOME'), '.rvm')):
   print('RVM exists, ignored.')
 else:
   print('Installing RVM ...')
-  call('bash -s stable < <(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)', shell=True)
+  call('bash -s stable < <(curl -s \
+        https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)', shell=True)
 
 if exists(join(os.getenv('HOME'), '.oh-my-zsh')):
   print('oh-my-zsh exists, ignored.')
