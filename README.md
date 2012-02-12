@@ -10,7 +10,10 @@ rake
 ## Customisations
 
 - [oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh)
+- [Janus](https://github.com/carlhuda/janus)
 - .ackrc
 - .gemrc
 - .gitconfig
+- .vimrc.after
+- .vimrc.before
 - .zshrc

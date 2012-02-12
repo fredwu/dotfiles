@@ -3,10 +3,17 @@ require 'rake'
 desc 'installs the dot files into the user home directory'
 task :install do
   if File.exists?(File.join(ENV['HOME'], '.oh-my-zsh'))
-    puts "oh-my-zsh exists, ignored."
+    puts 'oh-my-zsh exists, ignored.'
   else
-    puts "Installing oh-my-zsh"
+    puts 'Installing oh-my-zsh ...'
     system 'curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh'
+  end
+
+  if File.exists?(File.join(ENV['HOME'], '.vimrc')) && File.exists?(File.join(ENV['HOME'], '.vim', 'janus'))
+    puts 'Janus exists, ignored.'
+  else
+    puts 'Installing Janus ...'
+    system 'curl -Lo- http://bit.ly/janus-bootstrap | bash'
   end
 
   Dir['*'].each do |file|
