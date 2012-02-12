@@ -15,7 +15,6 @@ else:
     call('rvm install 1.9.3-falcon --with-gcc=clang', shell=True)
   else:
     call('rvm install 1.9.3-falcon', shell=True)
-  call('rvm 1.9.3-falcon --default', shell=True)
 
 if exists(join(os.getenv('HOME'), '.oh-my-zsh')):
   print('oh-my-zsh exists, ignored.')
