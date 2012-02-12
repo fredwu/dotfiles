@@ -1,8 +1,6 @@
 #! /usr/bin/env python
 
-import os
-import shutil
-import time
+import os, shutil, time
 from os.path import exists, join, islink
 from subprocess import call
 from filecmp import cmp
@@ -11,16 +9,18 @@ if exists(join(os.getenv('HOME'), '.oh-my-zsh')):
   print('oh-my-zsh exists, ignored.')
 else:
   print('Installing oh-my-zsh ...')
-  call('curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh', shell=True)
+  call('curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh \
+        | sh', shell=True)
 
-if exists(join(os.getenv('HOME'), '.oh-my-zsh', 'custom', 'plugins', 'zsh-syntax-highlighting')):
+if exists(join(os.getenv('HOME'), '.oh-my-zsh/custom/plugins/zsh-syntax-highlighting')):
   print('zsh-syntax-highlighting exists, ignored.')
 else:
   print('Installing zsh-syntax-highlighting ...')
-  call('git clone git://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting', shell=True)
+  call('git clone git://github.com/zsh-users/zsh-syntax-highlighting.git \
+        ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting', shell=True)
 
-if exists(join(os.getenv('HOME'), '.vimrc')) and \
-   exists(join(os.getenv('HOME'), '.vim', 'janus')):
+if exists(join(os.getenv('HOME'), '.vim', 'janus')) and \
+   islink(join(os.getenv('HOME'), '.vimrc')):
   print('Janus exists, ignored.')
 else:
   print('Installing Janus ...')
