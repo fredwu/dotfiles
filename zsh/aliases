@@ -7,6 +7,7 @@ alias b="bundle"
 
 alias g="git"
 alias glog='git log --pretty="format:%C(yellow)%h%C(green)%d %C(white)%s %C(cyan)%an, %ar %Creset"'
+alias glll='git log --pretty="format:%C(yellow)%H%C(green)%d %C(white)%s %C(cyan)%an, %ar %Creset"'
 alias gll='glog --graph'
 alias glla='gll --all'
 
