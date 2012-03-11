@@ -12,9 +12,9 @@ else:
   call('curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer \
         | bash', shell=True)
   if platform.system() == 'Darwin':
-    call('rvm install 1.9.3-falcon --with-gcc=clang', shell=True)
+    call('rvm install 1.9.3 --with-gcc=clang', shell=True)
   else:
-    call('rvm install 1.9.3-falcon', shell=True)
+    call('rvm install 1.9.3', shell=True)
 
 if exists(join(os.getenv('HOME'), '.oh-my-zsh')):
   print('oh-my-zsh exists, ignored.')
