@@ -1,4 +1,6 @@
 # zsh
+unsetopt correct_all
+
 HISTFILE=~/.zsh_history
 HISTSIZE=1000000
 SAVEHIST=HISTSIZE
