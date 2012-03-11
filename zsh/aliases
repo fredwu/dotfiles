@@ -2,6 +2,7 @@ alias se="vim ~/.zshrc"
 alias sr="source ~/.zshrc && echo '.zshrc reloaded!'"
 
 alias la="ll -a"
+alias time="command time"
 
 alias b="bundle"
 
