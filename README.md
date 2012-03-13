@@ -18,7 +18,7 @@
 - [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
 - [Janus](https://github.com/carlhuda/janus)
 - [RVM](http://beginrescueend.com/)
-- [ruby-1.9.3-p0-falcon](https://gist.github.com/1688857)
+- ruby-1.9.3-p125
 - .ackrc
 - .gemrc
 - .gitconfig
