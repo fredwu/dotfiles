@@ -21,3 +21,6 @@
   keepBackup = true
 [heroku]
   account = personal
+[user]
+  name = Fred Wu
+  email = ifredwu@gmail.com
