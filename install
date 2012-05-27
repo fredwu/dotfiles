@@ -10,6 +10,7 @@ if exists(join(os.getenv('HOME'), '.rvm')):
 else:
   print('Installing RVM ...')
   call('curl -L get.rvm.io | bash -s head', shell=True)
+  call('rvm pkg install zlib', shell=True)
   if platform.system() == 'Darwin':
     call('rvm install 1.9.3 --with-gcc=clang', shell=True)
   else:
