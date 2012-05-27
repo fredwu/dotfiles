@@ -37,6 +37,12 @@ else:
   print('Installing Janus ...')
   call('curl -Lo- http://bit.ly/janus-bootstrap | bash', shell=True)
 
+if exists(join(os.getenv('HOME'), '.dotfiles/zsh/custom')):
+  print('custom variables file exists, ignored.')
+else:
+  print('Copying custom variables file ...')
+  call('cp zsh/custom{.example,}', shell=True)
+
 cwd = os.listdir(os.getcwd())
 for fname in cwd:
   if fname in ['.git', 'install', 'README.md']: continue
