@@ -40,7 +40,7 @@ if exists(join(os.getenv('HOME'), '.dotfiles/zsh/custom')):
   print('custom variables file exists, ignored.')
 else:
   print('Copying custom variables file ...')
-  call('cp zsh/custom{.example,}', shell=True)
+  call('cp zsh/custom.example zsh/custom', shell=True)
 
 cwd = os.listdir(os.getcwd())
 for fname in cwd:
