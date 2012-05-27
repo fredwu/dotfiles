@@ -9,8 +9,7 @@ if exists(join(os.getenv('HOME'), '.rvm')):
   print('RVM exists, ignored.')
 else:
   print('Installing RVM ...')
-  call('curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer \
-        | bash', shell=True)
+  call('curl -L get.rvm.io | bash -s head', shell=True)
   if platform.system() == 'Darwin':
     call('rvm install 1.9.3 --with-gcc=clang', shell=True)
   else:
