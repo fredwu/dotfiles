@@ -1,5 +1,13 @@
 # Fred Wu's Dot Files
 
+## Prerequisites
+
+The following packages need to be installed:
+
+- git
+- zsh
+- vim
+
 ## Installation
 
     git clone git://github.com/fredwu/dotfiles ~/.dotfiles
@@ -8,7 +16,6 @@
 
 ## Custom Configuration
 
-- Copy `zsh/custom.example` to `zsh/custom`
 - Make changes to `zsh/custom`
 - Use the command `sr` to reload the `.zshrc` source
 
