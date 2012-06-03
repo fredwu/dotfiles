@@ -7,6 +7,7 @@ alias time="command time"
 alias b="bundle"
 
 alias g="git"
+alias glr="git pull --rebase"
 alias glog='git log --pretty="format:%C(yellow)%h%C(green)%d %C(white)%s %C(cyan)%an, %ar %Creset"'
 alias gll='glog --graph'
 alias glla='gll --all'
