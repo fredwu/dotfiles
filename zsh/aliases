@@ -17,6 +17,7 @@ alias gllla='glll --all'
 alias r="rails"
 alias rs="r s"
 alias rc="r c"
+alias rt="ruby -I'lib:test'"
 
 alias pryr="pry -r ./config/environment -r rails/console/app -r rails/console/helpers"
 
