@@ -14,8 +14,9 @@ alias glla='gll --all'
 alias glll='git log --pretty="format:%C(yellow)%H%C(green)%d %C(white)%s %C(cyan)%an, %ar %Creset" --graph'
 alias gllla='glll --all'
 
-alias r="./script/rails"
-alias rs="./script/rails server"
+alias r="rails"
+alias rs="r s"
+alias rc="r c"
 
 alias pryr="pry -r ./config/environment -r rails/console/app -r rails/console/helpers"
 
