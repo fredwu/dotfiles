@@ -8,6 +8,8 @@ The following packages need to be installed:
 - zsh
 - vim
 
+For OS X, either Xcode or [Command Line Tools](https://developer.apple.com/downloads/).
+
 ## Installation
 
     git clone git://github.com/fredwu/dotfiles ~/.dotfiles
