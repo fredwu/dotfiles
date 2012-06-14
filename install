@@ -30,6 +30,12 @@ else:
   call('git clone git://github.com/zsh-users/zsh-syntax-highlighting.git \
         ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting', shell=True)
 
+if exists(join(os.getenv('HOME'), '.oh-my-zsh/custom/fredwu.zsh-theme')):
+  print('Custom oh-my-zsh theme already linked, ignored.')
+else
+  print('Symlinking custom oh-my-zsh theme ...')
+  call('ln -s $PWD/zsh/fredwu.zsh-theme ~/.oh-my-zsh/custom/', shell=True)
+
 if exists(join(os.getenv('HOME'), '.vim/janus')) and \
    islink(join(os.getenv('HOME'), '.vimrc')):
   print('Janus exists, ignored.')
