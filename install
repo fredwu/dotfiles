@@ -32,7 +32,7 @@ else:
 
 if exists(join(os.getenv('HOME'), '.oh-my-zsh/custom/fredwu.zsh-theme')):
   print('Custom oh-my-zsh theme already linked, ignored.')
-else
+else:
   print('Symlinking custom oh-my-zsh theme ...')
   call('ln -s $PWD/zsh/fredwu.zsh-theme ~/.oh-my-zsh/custom/', shell=True)
 
