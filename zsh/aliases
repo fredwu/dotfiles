@@ -18,6 +18,7 @@ alias r="rails"
 alias rs="r s"
 alias rc="r c"
 alias rt="ruby -I'lib:test'"
+alias ret="RAILS_ENV=test"
 
 alias pryr="pry -r ./config/environment -r rails/console/app -r rails/console/helpers"
 
