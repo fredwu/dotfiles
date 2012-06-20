@@ -18,4 +18,4 @@ ZSH_THEME_GIT_PROMPT_CLEAN=" ✔ "
 ZSH_THEME_GIT_PROMPT_DIRTY=" $red✗$green "
 
 PROMPT='$red%n@%m $blue➜ [ $red%~ $green$(git_prompt_info)$yellow$(rvm_prompt_info)$blue ]$reset_color
-$blue $ $reset_color'
+$ '
