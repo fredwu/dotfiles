@@ -22,5 +22,5 @@ alias ret="RAILS_ENV=test"
 
 alias pryr="pry -r ./config/environment -r rails/console/app -r rails/console/helpers"
 
-alias ct="ctags -R -f .tags --exclude="*.min.js" --exclude="*.pack.js""
+alias ct="ctags -R -f .tags --exclude='*.min.js' --exclude='*.pack.js'"
 
