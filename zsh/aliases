@@ -22,4 +22,5 @@ alias ret="RAILS_ENV=test"
 
 alias pryr="pry -r ./config/environment -r rails/console/app -r rails/console/helpers"
 
-alias yoda="ssh spdev@yoda"
+alias ct="ctags -R -f .tags"
+
