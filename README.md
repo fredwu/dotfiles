@@ -14,7 +14,7 @@ For OS X, either Xcode or [Command Line Tools](https://developer.apple.com/downl
 
     git clone git://github.com/fredwu/dotfiles ~/.dotfiles
     cd ~/.dotfiles
-    ./install
+    ./install.sh
 
 ## Custom Configuration
 
@@ -31,6 +31,7 @@ For OS X, either Xcode or [Command Line Tools](https://developer.apple.com/downl
 - .ackrc
 - .gemrc
 - .gitconfig
+- .railsrc
 - .vimrc.after
 - .vimrc.before
 - .zshrc
