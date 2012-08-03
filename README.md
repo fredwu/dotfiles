@@ -27,7 +27,6 @@ For OS X, either Xcode or [Command Line Tools](https://developer.apple.com/downl
 - [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
 - [Janus](https://github.com/carlhuda/janus)
 - [RVM](http://beginrescueend.com/)
-- ruby-1.9.3
 - .ackrc
 - .gemrc
 - .gitconfig
@@ -35,3 +34,7 @@ For OS X, either Xcode or [Command Line Tools](https://developer.apple.com/downl
 - .vimrc.after
 - .vimrc.before
 - .zshrc
+
+## Notes
+
+Ruby should be installed manually with RVM, as the requirements change from time to time.
