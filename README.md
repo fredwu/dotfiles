@@ -18,7 +18,7 @@ For OS X, either Xcode or [Command Line Tools](https://developer.apple.com/downl
 
 ## Custom Configuration
 
-- Make changes to `zsh/custom`
+- Make changes to `~/.zsh_custom`
 - Use the command `sr` to reload the `.zshrc` source
 
 ## Features

@@ -6,8 +6,10 @@ feature_exist() {
 
   if [[ -e ~/$feature ]]; then
     echo "$label exists, ignored."
+    true
   else
     echo "Installing $label ..."
+    false
   fi
 }
 
@@ -40,13 +42,10 @@ element_in_array() {
 
 if ! feature_exist "RVM" ".rvm" ; then
   curl -L get.rvm.io | bash -s head
-  rvm pkg install zlib
-  rvm install 1.9.3
 fi
 
 if ! feature_exist "Oh-my-zsh" ".oh-my-zsh" ; then
-  curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/\
-  install.sh | sh
+  curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh
 fi
 
 if ! feature_exist "Zsh-syntax-highlighting" \
@@ -64,8 +63,8 @@ if ! feature_exist "Janus" ".vim/janus" ; then
   curl -Lo- http://bit.ly/janus-bootstrap | bash
 fi
 
-if ! feature_exist "Custom ZSH variables" ".dotfiles/zsh/custom" ; then
-  cp zsh/custom.example zsh/custom
+if ! feature_exist "Custom ZSH variables" ".zsh_custom" ; then
+  cp $PWD/zsh/custom.example ~/.zsh_custom
 fi
 
 for f in $PWD/*; do
