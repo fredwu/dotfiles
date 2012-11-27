@@ -8,3 +8,6 @@ SAVEHIST=HISTSIZE
 export PATH="/usr/local/bin:/usr/local/sbin:$PATH:$HOME/.rvm/bin"
 export NODE_PATH=/usr/local/lib/node_modules
 export EDITOR=vim
+
+export RUBY_GC_MALLOC_LIMIT=60000000
+export RUBY_FREE_MIN=200000
