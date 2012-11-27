@@ -24,3 +24,5 @@
 [user]
 	name = Fred Wu
 	email = ifredwu@gmail.com
+[push]
+	default = simple
