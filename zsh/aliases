@@ -14,6 +14,13 @@ alias glla='gll --all'
 alias glll='git log --pretty="format:%C(yellow)%H%C(green)%d %C(white)%s %C(cyan)%an, %ar %Creset" --graph'
 alias gllla='glll --all'
 
+# Remove local fully merged branches
+alias gccl="git branch --merged master | grep -v 'master$' | grep -v 'production$' | xargs git branch -d"
+# Remove remote fully merged branches
+alias gccm="git fetch && git remote prune origin && git branch -r --merged master | sed 's/ *origin\///' | grep -v 'master$' | grep -v 'production$' |xargs -I% git push origin :%"
+# Remove all remote branches
+alias gccc="git fetch && git remote prune origin && git branch -r | sed 's/ *origin\///' | grep -v 'master$' | grep -v 'production$' | xargs -I% git push origin :%"
+
 alias r="rails"
 alias rs="r s"
 alias rc="r c"
