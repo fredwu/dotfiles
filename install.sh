@@ -67,6 +67,10 @@ if ! feature_exist "Custom ZSH variables" ".zsh_custom" ; then
   cp $PWD/zsh/custom.example ~/.zsh_custom
 fi
 
+if ! feature_exist "SSH config" ".ssh/config" ; then
+  ln -s $PWD/ssh/config ~/.ssh/config
+fi
+
 for f in $PWD/*; do
   filename="$(basename $f)"
   files_to_ignore=(".git" "install.sh" "README.md")

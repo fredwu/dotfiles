@@ -1,0 +1,19 @@
+Host minimote
+  Hostname 10.0.0.246
+  User minimote
+
+Host ci
+  Hostname puffy.local
+  User loco
+
+Host tmp-local
+  HostName tmp-systest.33.33.33.10.xip.io
+  User vagrant
+
+Host tmp-staging
+  HostName staging.locomotetmp.com
+  User loco
+
+Host tmp-uat
+  HostName uat.locomotetmp.com
+  User loco
