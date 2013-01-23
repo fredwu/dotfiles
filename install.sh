@@ -83,3 +83,4 @@ done
 
 /bin/zsh
 source ~/.zshrc
+chsh -s /bin/zsh
