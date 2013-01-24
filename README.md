@@ -4,11 +4,18 @@
 
 The following packages need to be installed:
 
-- git
+- git (1.8.0+)
 - zsh
 - vim
 
 For OS X, either Xcode or [Command Line Tools](https://developer.apple.com/downloads/).
+
+For Ubuntu, install `python-software-properties` and [add the Git PPA](https://launchpad.net/~git-core/+archive/ppa):
+
+- `apt-get install python-software-properties`
+- `add-apt-repository ppa:git-core/ppa`
+- `apt-get update`
+- `apt-get install git`
 
 ## Installation
 
