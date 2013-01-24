@@ -31,6 +31,7 @@ ZSH_THEME="fredwu"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 plugins=(brew bundler fasd gem git github git-flow heroku history-substring-search node npm osx pow powder rails rails3 ruby rvm sublime textmate zsh-syntax-highlighting)
 
+source /etc/profile
 source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
