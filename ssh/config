@@ -21,3 +21,7 @@ Host tmp-staging
 Host tmp-uat
   HostName uat.locomotetmp.com
   User loco
+
+Host tmp-prod
+  HostName www.locomotetmp.com
+  User loco
