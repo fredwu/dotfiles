@@ -8,7 +8,7 @@ Host minimote
 
 Host ci
   Hostname puffy.local
-  User loco
+  User jenkins
 
 Host tmp-local
   HostName tmp-systest.33.33.33.10.xip.io
