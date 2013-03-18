@@ -17,6 +17,7 @@
 	untracked = cyan
 [core]
 	quotepath = false
+	excludesfile = /Users/fredwu/.gitignore_global
 [mergetool]
 	keepBackup = true
 [heroku]
