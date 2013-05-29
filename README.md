@@ -1,5 +1,7 @@
 # Fred Wu's Dot Files
 
+![](screenshot.png)
+
 ## Prerequisites
 
 The following packages need to be installed:
