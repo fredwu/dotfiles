@@ -14,10 +14,10 @@ For OS X, either Xcode or [Command Line Tools](https://developer.apple.com/downl
 
 For Ubuntu, install `python-software-properties` and [add the Git PPA](https://launchpad.net/~git-core/+archive/ppa):
 
-- `apt-get install python-software-properties`
-- `add-apt-repository ppa:git-core/ppa`
-- `apt-get update`
-- `apt-get install git`
+    apt-get install python-software-properties
+    add-apt-repository ppa:git-core/ppa
+    apt-get update
+    apt-get install git
 
 ## Installation
 
