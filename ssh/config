@@ -1,6 +1,6 @@
 Host home
   Hostname Shanghai
-  User admin
+  User root
 
 Host flare
   Hostname flare.wuit.net
