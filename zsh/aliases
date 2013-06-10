@@ -40,6 +40,7 @@ alias rs9="rs -p 3009"
 alias rc="r c"
 alias rt="ruby -I'lib:test'"
 alias ret="RAILS_ENV=test"
+alias red="RAILS_ENV=development"
 alias rar="rake app:reset"
 
 alias rbp="rails_best_practices"
