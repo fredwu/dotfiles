@@ -7,6 +7,7 @@ SAVEHIST=HISTSIZE
 
 export EDITOR=vim
 export BUNDLER_EDITOR=subl
+export JULIA_EDITOR=subl
 
 export ANDROID_HOME=/Users/fredwu/Projects/Android/_sdk/adt-bundle-mac-x86_64/sdk
 
