@@ -16,6 +16,11 @@ alias gll='glog --graph'
 alias glla='gll --all'
 alias glll='git log --pretty="format:%C(yellow)%H%C(green)%d %C(white)%s %C(cyan)%an, %ar %Creset" --graph'
 alias gllla='glll --all'
+alias gra='git rebase --abort'
+alias grc='git rebase --continue'
+alias gri='git rebase -i'
+alias gsu='git stash -u'
+alias gsp='git stash pop'
 
 # Remove local fully merged branches
 alias gccl="git branch --merged master | grep -v 'master$' | grep -v 'production$' | xargs git branch -d"
