@@ -22,6 +22,8 @@ alias gri='git rebase -i'
 alias gsu='git stash -u'
 alias gsp='git stash pop'
 
+# Clean up deleted remote branches references
+alias gcco="git remote prune origin"
 # Remove local fully merged branches
 alias gccl="git branch --merged master | grep -v 'master$' | grep -v 'production$' | xargs git branch -d"
 # Remove remote fully merged branches
