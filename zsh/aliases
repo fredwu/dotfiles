@@ -51,6 +51,8 @@ alias ret="RAILS_ENV=test"
 alias red="RAILS_ENV=development"
 alias rar="rake app:reset"
 
+alias q="rake quality"
+
 alias rbp="rails_best_practices"
 
 alias pryr="pry -r ./config/environment -r rails/console/app -r rails/console/helpers"
