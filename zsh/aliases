@@ -33,8 +33,9 @@ alias gccm="git fetch && git remote prune origin && git branch -r --merged maste
 # Remove all remote branches
 alias gccc="git fetch && git remote prune origin && git branch -r | sed 's/ *origin\///' | grep -v 'master$' | grep -v 'production$' | xargs -I% git push origin :%"
 
-alias rr="rspec"
-alias rrf="rspec --fail-fast"
+alias rr="NO_COV=1 rspec"
+alias rrf="NO_COV=1 rspec --fail-fast"
+alias crr="COV=1 rspec"
 
 alias r="rails"
 alias rs="r s"
