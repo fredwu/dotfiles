@@ -6,6 +6,7 @@ alias updatedb="sudo /usr/libexec/locate.updatedb"
 alias l="ll"
 alias la="ll -a"
 alias time="command time"
+alias pwdd="pwd | pbcopy"
 
 alias b="bundle install -j8"
 alias bo="bundle open"
