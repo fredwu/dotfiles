@@ -9,6 +9,7 @@ alias time="command time"
 
 alias b="bundle install -j8"
 alias bo="bundle open"
+alias bu="bundle update"
 
 alias g="git"
 alias glr="git pull --rebase"
