@@ -8,6 +8,7 @@ alias la="ll -a"
 alias time="command time"
 
 alias b="bundle install -j8"
+alias bo="bundle open"
 
 alias g="git"
 alias glr="git pull --rebase"
@@ -60,7 +61,5 @@ alias q="rake quality"
 alias rbp="rails_best_practices"
 
 alias pryr="pry -r ./config/environment -r rails/console/app -r rails/console/helpers"
-alias bo="EDITOR=subl bundle open"
 
 alias ct="ctags -R -f .tags --exclude='*.min.js' --exclude='*.pack.js'"
-
