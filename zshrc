@@ -35,9 +35,11 @@ source /etc/profile
 
 # Customize to your needs...
 
-. ~/.dotfiles/zsh/aliases
 . ~/.dotfiles/zsh/environment
 . ~/.dotfiles/zsh/rvm
+. ~/.dotfiles/zsh/travis
 . ~/.zsh_custom
 
 source $ZSH/oh-my-zsh.sh
+
+. ~/.dotfiles/zsh/aliases
