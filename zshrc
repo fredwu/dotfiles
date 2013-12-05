@@ -43,3 +43,5 @@ source /etc/profile
 source $ZSH/oh-my-zsh.sh
 
 . ~/.dotfiles/zsh/aliases
+
+unsetopt correct_all
