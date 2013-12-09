@@ -46,6 +46,7 @@ element_in_array() {
 if homebrew_exist ; then
   brew install chruby
   brew install ruby-install
+  brew install direnv
 else
   if ! feature_exist "chruby" ".chruby" ; then
     git clone git@github.com:postmodern/chruby.git ~/.chruby
@@ -59,6 +60,12 @@ else
     make install
 
     ruby-install ruby
+  fi
+
+  if ! feature_exist "direnv" ".direnv" ; then
+    git clone git@github.com:zimbatm/direnv.git ~/.direnv
+    cd ~/.direnv
+    make install
   fi
 fi
 
