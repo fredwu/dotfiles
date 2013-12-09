@@ -68,5 +68,3 @@ alias rbp="rails_best_practices"
 alias pryr="pry -r ./config/environment -r rails/console/app -r rails/console/helpers"
 
 alias ct="ctags -R -f .tags --exclude='*.min.js' --exclude='*.pack.js'"
-
-unalias rspec

@@ -35,7 +35,8 @@ For Ubuntu, install `python-software-properties` and [add the Git PPA](https://l
 - [oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh)
 - [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
 - [Janus](https://github.com/carlhuda/janus)
-- [RVM](http://beginrescueend.com/)
+- [chruby](https://github.com/postmodern/chruby)
+- [ruby-install](https://github.com/postmodern/ruby-install)
 - .ackrc
 - .gemrc
 - .gitconfig
@@ -43,7 +44,3 @@ For Ubuntu, install `python-software-properties` and [add the Git PPA](https://l
 - .vimrc.after
 - .vimrc.before
 - .zshrc
-
-## Notes
-
-Ruby should be installed manually with RVM, as the requirements change from time to time.

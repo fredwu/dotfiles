@@ -29,19 +29,19 @@ ZSH_THEME="fredwu"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(brew bundler fasd gem git github history-substring-search node npm osx rails ruby rvm sublime textmate zsh-syntax-highlighting)
+plugins=(brew bundler chruby fasd gem git github history-substring-search node npm osx ruby sublime textmate zsh-syntax-highlighting)
 
 source /etc/profile
 
 # Customize to your needs...
 
 . ~/.dotfiles/zsh/environment
-. ~/.dotfiles/zsh/rvm
 . ~/.dotfiles/zsh/travis
 . ~/.zsh_custom
 
 source $ZSH/oh-my-zsh.sh
 
+. ~/.dotfiles/zsh/rubies
 . ~/.dotfiles/zsh/aliases
 
 unsetopt correct_all

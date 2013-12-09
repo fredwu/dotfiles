@@ -13,6 +13,10 @@ feature_exist() {
   fi
 }
 
+homebrew_exist() {
+  which brew &> /dev/null
+}
+
 backup_and_link_file() {
   local file=$1
   local filename="$(basename $file)"
@@ -39,9 +43,23 @@ element_in_array() {
   return 1
 }
 
+if homebrew_exist ; then
+  brew install chruby
+  brew install ruby-install
+else
+  if ! feature_exist "chruby" ".chruby" ; then
+    git clone git@github.com:postmodern/chruby.git ~/.chruby
+    cd ~/.chruby
+    make install
+  fi
 
-if ! feature_exist "RVM" ".rvm" ; then
-  curl -L get.rvm.io | bash -s head
+  if ! feature_exist "ruby-install" ".ruby-install" ; then
+    git clone git@github.com:postmodern/ruby-install.git ~/.ruby-install
+    cd ~/.ruby-install
+    make install
+
+    ruby-install ruby
+  fi
 fi
 
 if ! feature_exist "Oh-my-zsh" ".oh-my-zsh" ; then
@@ -70,6 +88,8 @@ fi
 if ! feature_exist "SSH config" ".ssh/config" ; then
   ln -s $PWD/ssh/config ~/.ssh/config
 fi
+
+cd ~/.dotfiles
 
 for f in $PWD/*; do
   filename="$(basename $f)"
