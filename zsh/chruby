@@ -3,17 +3,17 @@
 alias rubies='chruby'
 
 function current_ruby() {
-    local _ruby
-    _ruby="$(chruby |grep \* |tr -d '* ')"
-    if [[ $(chruby |grep -c \*) -eq 1 ]]; then
-echo ${_ruby}
-    else
-echo "system"
-    fi
+  local _ruby
+  _ruby="$(chruby |grep \* |tr -d '* ')"
+  if [[ $(chruby |grep -c \*) -eq 1 ]]; then
+    echo ${_ruby}
+  else
+    echo "system"
+  fi
 }
 
 function chruby_prompt_info() {
-    echo "$(current_ruby)"
+  echo "$(current_ruby)"
 }
 
 source /usr/local/opt/chruby/share/chruby/chruby.sh
