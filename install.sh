@@ -69,19 +69,13 @@ else
   fi
 fi
 
-if ! feature_exist "Oh-my-zsh" ".oh-my-zsh" ; then
-  curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh
+if ! feature_exist "Prezto" ".zprezto" ; then
+  git clone --recursive git@github.com:sorin-ionescu/prezto.git ~/.zprezto
 fi
 
-if ! feature_exist "Zsh-syntax-highlighting" \
-  ".oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ; then
-  git clone git://github.com/zsh-users/zsh-syntax-highlighting.git \
-  ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
-fi
-
-if ! feature_exist "Custom oh-my-zsh theme" \
-  ".oh-my-zsh/custom/fredwu.zsh-theme" ; then
-  ln -s $PWD/zsh/fredwu.zsh-theme ~/.oh-my-zsh/custom/
+if ! feature_exist "Custom Prezto theme" \
+  ".zprezto/modules/prompt/functions/prompt_fredwu_setup" ; then
+  ln -s $PWD/zsh/prompt_fredwu_setup ~/.zprezto/modules/prompt/functions/
 fi
 
 if ! feature_exist "Janus" ".vim/janus" ; then

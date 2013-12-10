@@ -1,3 +1,4 @@
+unsetopt correct
 unsetopt correct_all
 
 eval "$(direnv hook zsh)"

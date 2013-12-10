@@ -1,0 +1,89 @@
+#
+# Authors:
+#   Fred Wu <ifredwu@gmail.com>
+#   based on peeopcode by Geoffrey Grosenbach <boss@topfunky.com>
+#   based on steef by steeef <steeef@gmail.com>
+#   based on sorin by Sorin Ionescu <sorin.ionescu@gmail.com>
+#
+# Screenshots:
+#   https://github.com/fredwu/dotfiles/raw/master/screenshot.png
+#
+
+# Load dependencies.
+pmodload 'helper'
+
+function ruby_version() {
+  local dir
+  dir="$RUBY_ROOT"
+  ruby_version_msg=${dir##*/}
+}
+
+function prompt_fredwu_precmd {
+  setopt LOCAL_OPTIONS
+  unsetopt XTRACE KSH_ARRAYS
+
+  ruby_version
+
+  if (( $+functions[ruby-info] )); then
+    ruby-info
+  fi
+
+  if (( $+functions[git-info] )); then
+    git-info
+  fi
+}
+
+function prompt_fredwu_setup {
+  setopt LOCAL_OPTIONS
+  unsetopt XTRACE KSH_ARRAYS
+  prompt_opts=(cr percent subst)
+
+  # Load required functions.
+  autoload -Uz add-zsh-hook
+
+  # Add hook for calling git-info before each command.
+  add-zsh-hook precmd prompt_fredwu_precmd
+
+  # Set editor-info parameters.
+  zstyle ':prezto:module:editor:info:completing' format '%B%F{red}...%f%b'
+  zstyle ':prezto:module:editor:info:keymap:primary' format ' %B%F{red}❯%F{yellow}❯%F{green}❯%f%b'
+  zstyle ':prezto:module:editor:info:keymap:primary:overwrite' format ' %F{red}♺%f'
+  zstyle ':prezto:module:editor:info:keymap:alternate' format ' %B%F{green}❮%F{yellow}❮%F{red}❮%f%b'
+
+  # Set ruby-info parameters.
+  # zstyle ':prezto:module:ruby:info:version' format ' %F{yellow}%v%f'
+
+  # Set editor-info parameters.
+  zstyle ':prezto:module:editor:info:completing' format '%B%F{red}...%f%b'
+  zstyle ':prezto:module:editor:info:keymap:primary' format ' %B%F{red}❯%F{yellow}❯%F{green}❯%f%b'
+  zstyle ':prezto:module:editor:info:keymap:primary:overwrite' format ' %F{red}♺%f'
+  zstyle ':prezto:module:editor:info:keymap:alternate' format ' %B%F{green}❮%F{yellow}❮%F{red}❮%f%b'
+
+  # Set git-info parameters.
+  zstyle ':prezto:module:git:info' verbose 'yes'
+  zstyle ':prezto:module:git:info:action' format '%F{yellow}%s%f'
+  zstyle ':prezto:module:git:info:added' format ''
+  zstyle ':prezto:module:git:info:ahead' format ' %F{cyan}⬆%f'
+  zstyle ':prezto:module:git:info:behind' format ' %F{cyan}⬇%f'
+  zstyle ':prezto:module:git:info:branch' format '%F{green}%b%f'
+  zstyle ':prezto:module:git:info:clean' format ' %F{green}✔%f'
+  zstyle ':prezto:module:git:info:commit' format '%F{green}%.7c%f'
+  zstyle ':prezto:module:git:info:deleted' format ''
+  zstyle ':prezto:module:git:info:dirty' format ' %F{red}✗%f'
+  zstyle ':prezto:module:git:info:modified' format ''
+  zstyle ':prezto:module:git:info:position' format '%F{red}%p%f'
+  zstyle ':prezto:module:git:info:renamed' format ''
+  zstyle ':prezto:module:git:info:stashed' format ' %F{cyan}●%f'
+  zstyle ':prezto:module:git:info:unmerged' format ''
+  zstyle ':prezto:module:git:info:untracked' format ''
+  zstyle ':prezto:module:git:info:keys' format \
+    'prompt' ' %F{green}(%f$(coalesce "%b" "%p" "%c")${git_info[rprompt]} %s%F{green})%f' \
+    'rprompt' '%C%D%A%B%S%a%d%m%r%U%u'
+
+  # Define prompts.
+  PROMPT='%B%F{red}%n@%m%f %F{blue}➜ [%f %F{red}%~%f${git_info:+${(e)git_info[prompt]}}%(!. %B%F{red}#%f%b.) %F{yellow}(${ruby_version_msg})%f %F{blue}]%f
+${editor_info[keymap]} '
+  RPROMPT='${editor_info[overwrite]}%(?:: %F{red}⏎%f)${VIM:+" %B%F{green}V%f%b"}'
+}
+
+prompt_fredwu_setup "$@"

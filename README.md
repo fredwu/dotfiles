@@ -32,8 +32,7 @@ For Ubuntu, install `python-software-properties` and [add the Git PPA](https://l
 
 ## Features
 
-- [oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh)
-- [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
+- [Prezto](https://github.com/sorin-ionescu/prezto)
 - [Janus](https://github.com/carlhuda/janus)
 - [chruby](https://github.com/postmodern/chruby)
 - [ruby-install](https://github.com/postmodern/ruby-install)

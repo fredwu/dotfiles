@@ -14,19 +14,21 @@ alias bo="bundle open"
 alias bu="bundle update"
 
 alias g="git"
+alias ga="git add"
 alias glr="git pull --rebase"
 alias glog='git log --pretty="format:%C(yellow)%h%C(green)%d %C(white)%s %C(cyan)%an, %ar %Creset"'
-alias gll='glog --graph'
-alias glla='gll --all'
+alias gll="glog --graph"
+alias glla="gll --all"
 alias glll='git log --pretty="format:%C(yellow)%H%C(green)%d %C(white)%s %C(cyan)%an, %ar %Creset" --graph'
-alias gllla='glll --all'
-alias gra='git rebase --abort'
-alias grc='git rebase --continue'
-alias gri='git rebase -i'
-alias grm='git rebase master'
-alias gsu='git stash -u'
-alias gsp='git stash pop'
-alias gsl='git stash list'
+alias gllla="glll --all"
+alias gra="git rebase --abort"
+alias grc="git rebase --continue"
+alias gri="git rebase -i"
+alias grm="git rebase master"
+alias gst="git status"
+alias gsu="git stash -u"
+alias gsp="git stash pop"
+alias gsl="git stash list"
 
 # Clean up deleted remote branches references
 alias gcco="git remote prune origin"
@@ -36,6 +38,9 @@ alias gccl="git branch --merged master | grep -v 'master$' | grep -v 'production
 alias gccm="git fetch && git remote prune origin && git branch -r --merged master | sed 's/ *origin\///' | grep -v 'master$' | grep -v 'production$' |xargs -I% git push origin :%"
 # Remove all remote branches
 alias gccc="git fetch && git remote prune origin && git branch -r | sed 's/ *origin\///' | grep -v 'master$' | grep -v 'production$' | xargs -I% git push origin :%"
+
+alias st="subl"
+alias stt="subl ."
 
 alias rr="NO_COV=1 rspec"
 alias rrf="NO_COV=1 rspec --fail-fast"
@@ -60,6 +65,8 @@ alias ret="RAILS_ENV=test"
 alias red="RAILS_ENV=development"
 alias rar="rake app:reset"
 alias rarr="RAILS_ENV=development rake app:reset && RAILS_ENV=test rake app:reset"
+
+alias z="j"
 
 alias q="rake quality"
 
