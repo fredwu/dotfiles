@@ -43,6 +43,8 @@ alias gccc="git fetch && git remote prune origin && git branch -r | sed 's/ *ori
 alias st="subl"
 alias stt="subl ."
 
+alias be="bundle exec"
+
 alias rr="NO_COV=1 rspec"
 alias rrf="NO_COV=1 rspec --fail-fast"
 alias rrr="RAILS_ENV=test rake app:reset && NO_COV=1 rspec"
