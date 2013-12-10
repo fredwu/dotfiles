@@ -15,6 +15,7 @@ alias bu="bundle update"
 
 alias g="git"
 alias ga="git add"
+alias gl="git pull"
 alias glr="git pull --rebase"
 alias glog='git log --pretty="format:%C(yellow)%h%C(green)%d %C(white)%s %C(cyan)%an, %ar %Creset"'
 alias gll="glog --graph"
