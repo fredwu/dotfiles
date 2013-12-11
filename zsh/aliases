@@ -15,6 +15,7 @@ alias bu="bundle update"
 
 alias g="git"
 alias ga="git add"
+alias gbi="git bisect"
 alias gl="git pull"
 alias glr="git pull --rebase"
 alias glog='git log --pretty="format:%C(yellow)%h%C(green)%d %C(white)%s %C(cyan)%an, %ar %Creset"'
@@ -69,9 +70,9 @@ alias red="RAILS_ENV=development"
 alias rar="rake app:reset"
 alias rarr="RAILS_ENV=development rake app:reset && RAILS_ENV=test rake app:reset"
 
-alias z="j"
-
 alias q="rake quality"
+
+alias z="j"
 
 alias rbp="rails_best_practices"
 
