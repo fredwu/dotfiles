@@ -1,0 +1,3 @@
+# Git branch autocompletion: only autocomplete local branches
+# http://stackoverflow.com/questions/12175277/disable-auto-completion-of-remote-branches-in-zsh
+zstyle :completion::complete:git-checkout:argument-rest:headrefs command "git for-each-ref --format='%(refname)' refs/heads 2>/dev/null"

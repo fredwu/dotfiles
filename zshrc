@@ -13,6 +13,7 @@ fi
 # Customize to your needs...
 
 . ~/.dotfiles/zsh/environment
+. ~/.dotfiles/zsh/zsh-tweaks
 . ~/.dotfiles/zsh/chruby
 . ~/.dotfiles/zsh/rubies
 . ~/.dotfiles/zsh/travis
