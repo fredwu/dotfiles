@@ -70,7 +70,7 @@ alias rt="ruby -I'lib:test'"
 alias ret="RAILS_ENV=test"
 alias red="RAILS_ENV=development"
 alias rar="rake app:reset"
-alias rarr="RAILS_ENV=development rake app:reset && RAILS_ENV=test rake app:reset"
+alias rarr="RAILS_ENV=development rake app:reset && RAILS_ENV=test rake app:reset && annotate"
 
 alias q="rake quality"
 
