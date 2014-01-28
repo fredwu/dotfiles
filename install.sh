@@ -63,6 +63,9 @@ else
   fi
 
   if ! feature_exist "direnv" ".direnv" ; then
+    wget https://go.googlecode.com/files/go1.2.linux-386.tar.gz
+    tar -C /usr/local -xzf go1.2.linux-386.tar.gz
+
     git clone git@github.com:zimbatm/direnv.git ~/.direnv
     cd ~/.direnv
     make install

@@ -8,7 +8,7 @@ export JULIA_EDITOR=subl
 
 export ANDROID_HOME=$HOME/Projects/Android/_sdk/adt-bundle-mac-x86_64/sdk
 
-export PATH="$HOME/Projects/julia:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:/usr/local/share/npm/bin:$PATH"
+export PATH="/usr/local/share/npm/bin:$PATH:/usr/local/go/bin:$HOME/Projects/julia:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools"
 export NODE_PATH=/usr/local/lib/node_modules
 
 export RUBY_GC_MALLOC_LIMIT=90000000
