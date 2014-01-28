@@ -70,6 +70,8 @@ else
     cd ~/.direnv
     make install
   fi
+
+  cd ~
 fi
 
 if ! feature_exist "Prezto" ".zprezto" ; then
