@@ -1,3 +1,7 @@
+Host *
+  ServerAliveInterval 300
+  ServerAliveCountMax 2
+
 Host home
   Hostname Shanghai
   User root
@@ -10,18 +14,22 @@ Host ci
   Hostname puffy.local
   User jenkins
 
-Host tmp-local
-  HostName tmp-systest.33.33.33.10.xip.io
-  User vagrant
+Host mos-staging
+  Hostname ec2-54-206-13-236.ap-southeast-2.compute.amazonaws.com
+  User root
+  IdentityFile ~/.ssh/mos-sydney.pem
 
-Host tmp-staging
-  HostName staging.locomotetmp.com
-  User loco
+Host mos-systest
+  Hostname ec2-54-206-73-241.ap-southeast-2.compute.amazonaws.com
+  User root
+  IdentityFile ~/.ssh/mos-sydney.pem
 
-Host tmp-uat
-  HostName uat.locomotetmp.com
-  User loco
+Host mos-uat
+  Hostname ec2-54-206-44-21.ap-southeast-2.compute.amazonaws.com
+  User root
+  IdentityFile ~/.ssh/mos-sydney.pem
 
-Host tmp-prod
-  HostName www.locomotetmp.com
-  User loco
+Host mos-production
+  Hostname ec2-54-206-56-145.ap-southeast-2.compute.amazonaws.com
+  User root
+  IdentityFile ~/.ssh/mos-sydney.pem
