@@ -12,6 +12,7 @@ fi
 
 # Customize to your needs...
 
+. ~/.zsh_pre_custom
 . ~/.dotfiles/zsh/environment
 . ~/.dotfiles/zsh/zsh-tweaks
 . ~/.dotfiles/zsh/chruby

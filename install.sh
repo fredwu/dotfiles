@@ -95,6 +95,8 @@ if ! feature_exist "SSH config" ".ssh/config" ; then
   ln -s $PWD/ssh/config ~/.ssh/config
 fi
 
+touch ~/.zsh_pre_custom
+
 cd ~/.dotfiles
 
 for f in $PWD/*; do
