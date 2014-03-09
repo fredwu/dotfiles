@@ -33,7 +33,7 @@ For Ubuntu, install `python-software-properties` and [add the Git PPA](https://l
 ## Features
 
 - [Prezto](https://github.com/sorin-ionescu/prezto)
-- [Janus](https://github.com/carlhuda/janus)
+- [spf13-vim](https://github.com/spf13/spf13-vim)
 - [chruby](https://github.com/postmodern/chruby)
 - [ruby-install](https://github.com/postmodern/ruby-install)
 - [direnv](https://github.com/zimbatm/direnv)

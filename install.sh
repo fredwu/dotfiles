@@ -83,8 +83,8 @@ if ! feature_exist "Custom Prezto theme" \
   ln -s $PWD/zsh/prompt_fredwu_setup ~/.zprezto/modules/prompt/functions/
 fi
 
-if ! feature_exist "Janus" ".vim/janus" ; then
-  curl -Lo- http://bit.ly/janus-bootstrap | bash
+if ! feature_exist "spf13-vim" ".spf13-vim-3" ; then
+  curl http://j.mp/spf13-vim3 -L -o - | bash
 fi
 
 if ! feature_exist "Custom ZSH variables" ".zsh_custom" ; then
