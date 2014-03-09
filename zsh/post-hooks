@@ -1,4 +1,6 @@
 unsetopt correct
 unsetopt correct_all
 
-eval "$(direnv hook zsh)"
+if [[ -s "which direnv" ]]; then
+  eval "$(direnv hook zsh)"
+fi
