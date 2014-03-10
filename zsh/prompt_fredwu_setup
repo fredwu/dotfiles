@@ -12,10 +12,18 @@
 # Load dependencies.
 pmodload 'helper'
 
-function ruby_version() {
+function ruby_version {
   local dir
   dir="$RUBY_ROOT"
   ruby_version_msg=${dir##*/}
+}
+
+function ruby_version_prompt {
+  if (( $+commands[ruby] )); then
+    ruby_version_msg_prompt="%F{yellow}(${ruby_version_msg})%f "
+  else
+    ruby_version_msg_prompt=''
+  fi
 }
 
 function prompt_fredwu_precmd {
@@ -23,6 +31,7 @@ function prompt_fredwu_precmd {
   unsetopt XTRACE KSH_ARRAYS
 
   ruby_version
+  ruby_version_prompt
 
   if (( $+functions[ruby-info] )); then
     ruby-info
@@ -75,7 +84,7 @@ function prompt_fredwu_setup {
     'rprompt' '%C%D%A%B%S%a%d%m%r%U%u'
 
   # Define prompts.
-  PROMPT='%B%F{red}%n@%m%f %F{blue}➜ [%f %F{red}%~%f${git_info:+${(e)git_info[prompt]}}%(!. %B%F{red}#%f%b.) %F{yellow}(${ruby_version_msg})%f %F{blue}]%f
+  PROMPT='%B%F{red}%n@%m%f %F{blue}➜ [%f %F{red}%~%f${git_info:+${(e)git_info[prompt]}}%(!. %B%F{red}#%f%b.) ${ruby_version_msg_prompt}%F{blue}]%f
 ${editor_info[keymap]} '
   RPROMPT='${editor_info[overwrite]}%(?:: %F{red}⏎%f)${VIM:+" %B%F{green}V%f%b"}'
 }
