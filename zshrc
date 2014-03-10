@@ -15,8 +15,12 @@ fi
 . ~/.zsh_pre_custom
 . ~/.dotfiles/zsh/environment
 . ~/.dotfiles/zsh/zsh-tweaks
-. ~/.dotfiles/zsh/chruby
-. ~/.dotfiles/zsh/rubies
+
+if (( $+commands[ruby] )); then
+  . ~/.dotfiles/zsh/chruby
+  . ~/.dotfiles/zsh/rubies
+fi
+
 . ~/.dotfiles/zsh/travis
 . ~/.dotfiles/zsh/aliases
 . ~/.dotfiles/zsh/post-hooks
