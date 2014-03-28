@@ -32,7 +32,7 @@ backup_and_link_file() {
   fi
 
   if [[ ! -e ~/.$filename ]]; then
-    ln -s $PWD/$filename ~/.$filename
+    ln -s ~/.dotfiles/$filename ~/.$filename
     echo ".$filename is linked."
   fi
 }
@@ -80,7 +80,7 @@ fi
 
 if ! feature_exist "Custom Prezto theme" \
   ".zprezto/modules/prompt/functions/prompt_fredwu_setup" ; then
-  ln -s $PWD/zsh/prompt_fredwu_setup ~/.zprezto/modules/prompt/functions/
+  ln -s ~/.dotfiles/zsh/prompt_fredwu_setup ~/.zprezto/modules/prompt/functions/
 fi
 
 if ! feature_exist "spf13-vim" ".spf13-vim-3" ; then
@@ -88,18 +88,18 @@ if ! feature_exist "spf13-vim" ".spf13-vim-3" ; then
 fi
 
 if ! feature_exist "Custom ZSH variables" ".zsh_custom" ; then
-  cp $PWD/zsh/custom.example ~/.zsh_custom
+  cp ~/.dotfiles/zsh/custom.example ~/.zsh_custom
 fi
 
 if ! feature_exist "SSH config" ".ssh/config" ; then
-  ln -s $PWD/ssh/config ~/.ssh/config
+  ln -s ~/.dotfiles/ssh/config ~/.ssh/config
 fi
 
 touch ~/.zsh_pre_custom
 
 cd ~/.dotfiles
 
-for f in $PWD/*; do
+for f in ~/.dotfiles/*; do
   filename="$(basename $f)"
   files_to_ignore=(".git" "install.sh" "README.md")
 
