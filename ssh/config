@@ -10,6 +10,10 @@ Host flare
   Hostname flare.wuit.net
   User root
 
+Host binary
+  Hostname binary.wuit.net
+  User root
+
 Host ci
   Hostname puffy.local
   User jenkins
