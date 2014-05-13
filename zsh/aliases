@@ -74,6 +74,7 @@ alias rarr="RAILS_ENV=development rake app:reset && RAILS_ENV=test rake app:rese
 alias rarrr="rarr && rs"
 alias rarrr2="rarr && rs2"
 alias rarrr3="rarr && rs3"
+alias rdm="rake db:migrate"
 alias rpp="rake parallel:prepare"
 alias rp="rake parallel"
 alias rppp="rake parallel:prepare parallel"
