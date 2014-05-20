@@ -9,7 +9,7 @@ alias time="command time"
 alias pwdd="pwd | pbcopy"
 
 alias b="bundle"
-alias bb="bundle install -j8"
+alias bb="bundle install --jobs 8"
 alias bo="bundle open"
 alias bu="bundle update"
 
