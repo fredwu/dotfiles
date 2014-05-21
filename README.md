@@ -23,7 +23,7 @@ For Ubuntu, install `python-software-properties` and [add the Git PPA](https://l
 
     git clone git://github.com/fredwu/dotfiles ~/.dotfiles
     cd ~/.dotfiles
-    ./install.sh
+    ./install
 
 ## Custom Configuration
 
