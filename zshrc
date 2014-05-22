@@ -16,7 +16,7 @@ fi
 . ~/.dotfiles/zsh/environment
 . ~/.dotfiles/zsh/zsh-tweaks
 
-if [[ -s ~/.chruby ]]; then
+if [[ -s ~/.chruby ]] || [[ -s ~/.rubies ]]; then
   . ~/.dotfiles/zsh/chruby
   . ~/.dotfiles/zsh/rubies
 fi
