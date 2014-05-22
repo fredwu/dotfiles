@@ -49,13 +49,13 @@ if homebrew_exist ; then
   brew install direnv
 else
   if ! feature_exist "chruby" ".chruby" ; then
-    git clone git@github.com:postmodern/chruby.git ~/.chruby
+    git clone https://github.com/postmodern/chruby.git ~/.chruby
     cd ~/.chruby
     make install
   fi
 
   if ! feature_exist "ruby-install" ".ruby-install" ; then
-    git clone git@github.com:postmodern/ruby-install.git ~/.ruby-install
+    git clone https://github.com/postmodern/ruby-install.git ~/.ruby-install
     cd ~/.ruby-install
     make install
 
@@ -66,7 +66,7 @@ else
     wget https://go.googlecode.com/files/go1.2.linux-386.tar.gz
     tar -C /usr/local -xzf go1.2.linux-386.tar.gz
 
-    git clone git@github.com:zimbatm/direnv.git ~/.direnv
+    git clone https://github.com/zimbatm/direnv.git ~/.direnv
     cd ~/.direnv
     make install
   fi
@@ -75,7 +75,7 @@ else
 fi
 
 if ! feature_exist "Prezto" ".zprezto" ; then
-  git clone --recursive git@github.com:sorin-ionescu/prezto.git ~/.zprezto
+  git clone --recursive https://github.com/sorin-ionescu/prezto.git ~/.zprezto
 fi
 
 if ! feature_exist "Custom Prezto theme" \
