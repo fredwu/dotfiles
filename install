@@ -17,6 +17,10 @@ homebrew_exist() {
   which brew &> /dev/null
 }
 
+apt_get_exist() {
+  which apt-get &> /dev/null
+}
+
 backup_and_link_file() {
   local file=$1
   local filename="$(basename $file)"
@@ -43,11 +47,18 @@ element_in_array() {
   return 1
 }
 
-if homebrew_exist ; then
-  brew install chruby
-  brew install ruby-install
-  brew install direnv
+if [[ "$(uname -s)" == "Darwin" ]] ; then
+  if ! homebrew_exist ; then
+    ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+  fi
+
+  brew install git zsh vim chruby ruby-install direnv
 else
+  if apt_get_exist ; then
+    sudo apt-get update
+    sudo apt-get install -y git zsh vim python-software-properties build-essential
+  fi
+
   if ! feature_exist "chruby" ".chruby" ; then
     git clone https://github.com/postmodern/chruby.git ~/.chruby
     cd ~/.chruby
