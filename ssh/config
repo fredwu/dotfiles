@@ -18,6 +18,10 @@ Host ci
   Hostname puffy.local
   User jenkins
 
+Host mosmini
+  Hostname 10.0.1.7
+  User mos
+
 Host mos-staging
   Hostname ec2-54-206-13-236.ap-southeast-2.compute.amazonaws.com
   User root
