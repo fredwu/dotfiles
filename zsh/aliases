@@ -79,6 +79,8 @@ alias rpp="rake parallel:prepare"
 alias rp="rake parallel"
 alias rppp="rake parallel:prepare parallel"
 
+alias p="padrino"
+
 alias q="rake quality"
 
 alias z="j"
