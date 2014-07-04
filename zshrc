@@ -22,6 +22,7 @@ if [[ -s ~/.chruby ]] || [[ -s ~/.rubies ]]; then
 fi
 
 . ~/.dotfiles/zsh/travis
+. ~/.dotfiles/zsh/git
 . ~/.dotfiles/zsh/aliases
 . ~/.dotfiles/zsh/post-hooks
 . ~/.zsh_custom
