@@ -1,5 +1,7 @@
 function git_push_set_upstream {
   branch_name="$(git symbolic-ref --short -q HEAD)"
 
-  git push --set-upstream origin ${branch_name}
+  remote_name=${1:-origin}
+
+  git push --set-upstream ${remote_name} ${branch_name}
 }
