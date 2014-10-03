@@ -6,38 +6,6 @@ Host home
   Hostname Shanghai
   User root
 
-Host flare
-  Hostname flare.wuit.net
-  User root
-
 Host binary
   Hostname binary.wuit.net
   User root
-
-Host ci
-  Hostname puffy.local
-  User jenkins
-
-Host mosmini
-  Hostname 10.0.1.7
-  User mos
-
-Host mos-staging
-  Hostname ec2-54-206-13-236.ap-southeast-2.compute.amazonaws.com
-  User root
-  IdentityFile ~/.ssh/mos-sydney.pem
-
-Host mos-systest
-  Hostname ec2-54-206-73-241.ap-southeast-2.compute.amazonaws.com
-  User root
-  IdentityFile ~/.ssh/mos-sydney.pem
-
-Host mos-uat
-  Hostname ec2-54-206-44-21.ap-southeast-2.compute.amazonaws.com
-  User root
-  IdentityFile ~/.ssh/mos-sydney.pem
-
-Host mos-production
-  Hostname ec2-54-206-56-145.ap-southeast-2.compute.amazonaws.com
-  User root
-  IdentityFile ~/.ssh/mos-sydney.pem
