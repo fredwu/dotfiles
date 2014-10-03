@@ -1,4 +1,3 @@
---old-style-hash
 --skip-bundle
 --skip-test-unit
---database=mysql
+--database=postgres
