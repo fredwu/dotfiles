@@ -14,6 +14,10 @@ For Linux, only Ubuntu is supported.
     cd ~/.dotfiles
     ./install
 
+After the installation you might want to set the default login shell to zsh:
+
+    chsh -s /bin/zsh
+
 ## Custom Configuration
 
 - Make changes to `~/.zsh_custom`
