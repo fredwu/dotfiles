@@ -70,7 +70,7 @@ else
     cd ~/.ruby-install
     make install
 
-    ruby-install ruby 2.1
+    ruby-install ruby 2.2.2
   fi
 
   if ! feature_exist "direnv" ".direnv" ; then
