@@ -9,3 +9,7 @@ Host home
 Host binary
   Hostname binary.wuit.net
   User root
+
+Host git.realestate.com.au
+  Port 65422
+
