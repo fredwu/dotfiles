@@ -87,8 +87,6 @@ alias p="padrino"
 
 alias q="rake quality"
 
-alias z="j"
-
 alias rbp="rails_best_practices"
 
 alias pryr="pry -r ./config/environment -r rails/console/app -r rails/console/helpers"

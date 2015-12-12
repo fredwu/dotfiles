@@ -52,11 +52,11 @@ if [[ "$(uname -s)" == "Darwin" ]] ; then
     ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
   fi
 
-  brew install git zsh vim chruby ruby-install direnv
+  brew install git zsh vim chruby ruby-install direnv fasd
 else
   if apt_get_exist ; then
     sudo apt-get update
-    sudo apt-get install -y git zsh vim python-software-properties build-essential
+    sudo apt-get install -y git zsh vim fasd python-software-properties build-essential
   fi
 
   if ! feature_exist "chruby" ".chruby" ; then

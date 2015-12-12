@@ -30,6 +30,7 @@ After the installation you might want to set the default login shell to zsh:
 - [chruby](https://github.com/postmodern/chruby)
 - [ruby-install](https://github.com/postmodern/ruby-install)
 - [direnv](https://github.com/zimbatm/direnv)
+- [fasd](https://github.com/clvv/fasd)
 - .ackrc
 - .gemrc
 - .gitconfig
