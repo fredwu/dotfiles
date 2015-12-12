@@ -3,8 +3,8 @@ HISTSIZE=1000000
 SAVEHIST=HISTSIZE
 
 export EDITOR=vim
-export BUNDLER_EDITOR=subl
-export JULIA_EDITOR=subl
+export BUNDLER_EDITOR=atom
+export JULIA_EDITOR=atom
 
 export ANDROID_HOME=$HOME/Projects/Android/_sdk/adt-bundle-mac-x86_64/sdk
 
