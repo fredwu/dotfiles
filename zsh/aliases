@@ -8,6 +8,8 @@ alias la="ll -a"
 alias time="command time"
 alias pwdd="pwd | pbcopy"
 
+alias aa="atom-beta"
+
 alias b="bundle"
 alias bb="bundle install --jobs 8"
 alias bo="bundle open"
