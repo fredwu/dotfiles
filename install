@@ -106,6 +106,10 @@ if ! feature_exist "SSH config" ".ssh/config" ; then
   ln -s ~/.dotfiles/ssh/config ~/.ssh/config
 fi
 
+if feature_exist "PGP Agent" ".gnupg/gpg.conf" ; then
+  sed -i -e 's/^# use-agent/use-agent/g' ~/.gnupg/gpg.conf
+fi
+
 touch ~/.zsh_pre_custom
 
 cd ~/.dotfiles
