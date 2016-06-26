@@ -6,9 +6,6 @@ export EDITOR=vim
 export BUNDLER_EDITOR=atom
 export JULIA_EDITOR=atom
 
-export ANDROID_HOME=$HOME/Projects/Android/_sdk/adt-bundle-mac-x86_64/sdk
-
-export PATH="/usr/local/share/npm/bin:/opt/bin:/usr/local/go/bin:$HOME/Projects/julia:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$PATH"
 export NODE_PATH=/usr/local/lib/node_modules
 
 export RUBY_GC_MALLOC_LIMIT=90000000
