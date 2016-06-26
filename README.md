@@ -12,7 +12,7 @@ For Linux, only Ubuntu is supported.
 
     git clone git://github.com/fredwu/dotfiles ~/.dotfiles
     cd ~/.dotfiles
-    ./install
+    ./install.sh
 
 After the installation you might want to set the default login shell to zsh:
 
