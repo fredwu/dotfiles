@@ -94,6 +94,10 @@ if ! feature_exist "Custom Prezto theme" \
   ln -s ~/.dotfiles/zsh/prompt_fredwu_setup ~/.zprezto/modules/prompt/functions/
 fi
 
+if ! feature_exist "zsh-autosuggestions" ".zsh/zsh-autosuggestions" ; then
+  git clone https://github.com/zsh-users/zsh-autosuggestions.git ~/.zsh/zsh-autosuggestions
+fi
+
 if ! feature_exist "spf13-vim" ".spf13-vim-3" ; then
   curl http://j.mp/spf13-vim3 -L -o - | bash
 fi
