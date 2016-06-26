@@ -13,17 +13,17 @@ fi
 # Customize to your needs...
 
 . ~/.zsh_pre_custom
-. ~/.dotfiles/zsh/environment
-. ~/.dotfiles/zsh/pgp
-. ~/.dotfiles/zsh/zsh-tweaks
+. ~/.dotfiles/zsh/environment.zsh
+. ~/.dotfiles/zsh/pgp.zsh
+. ~/.dotfiles/zsh/zsh-tweaks.zsh
 
 if [[ -s ~/.chruby ]] || [[ -s ~/.rubies ]]; then
-  . ~/.dotfiles/zsh/chruby
-  . ~/.dotfiles/zsh/rubies
+  . ~/.dotfiles/zsh/chruby.zsh
+  . ~/.dotfiles/zsh/rubies.zsh
 fi
 
-. ~/.dotfiles/zsh/travis
-. ~/.dotfiles/zsh/git
-. ~/.dotfiles/zsh/aliases
-. ~/.dotfiles/zsh/post-hooks
+. ~/.dotfiles/zsh/travis.zsh
+. ~/.dotfiles/zsh/git.zsh
+. ~/.dotfiles/zsh/aliases.zsh
+. ~/.dotfiles/zsh/post-hooks.zsh
 . ~/.zsh_custom
