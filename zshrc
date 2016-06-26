@@ -14,6 +14,7 @@ fi
 
 . ~/.zsh_pre_custom
 . ~/.dotfiles/zsh/environment
+. ~/.dotfiles/zsh/pgp
 . ~/.dotfiles/zsh/zsh-tweaks
 
 if [[ -s ~/.chruby ]] || [[ -s ~/.rubies ]]; then
