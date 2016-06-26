@@ -36,7 +36,7 @@ backup_and_link_file() {
   fi
 
   if [[ ! -e ~/.$filename ]]; then
-    ln -s ~/.dotfiles/$filename ~/.$filename
+    ln -s ~/.dotfiles/templates/$filename ~/.$filename
     echo ".$filename is linked."
   fi
 }
@@ -91,11 +91,7 @@ fi
 
 if ! feature_exist "Custom Prezto theme" \
   ".zprezto/modules/prompt/functions/prompt_fredwu_setup" ; then
-  ln -s ~/.dotfiles/zsh/prompt_fredwu_setup ~/.zprezto/modules/prompt/functions/
-fi
-
-if ! feature_exist "zsh-autosuggestions" ".zsh/zsh-autosuggestions" ; then
-  git clone https://github.com/zsh-users/zsh-autosuggestions.git ~/.zsh/zsh-autosuggestions
+  ln -s ~/.dotfiles/templates/zprezto/prompt_fredwu_setup ~/.zprezto/modules/prompt/functions/
 fi
 
 if ! feature_exist "spf13-vim" ".spf13-vim-3" ; then
@@ -107,7 +103,7 @@ if ! feature_exist "Custom ZSH variables" ".zsh_custom" ; then
 fi
 
 if ! feature_exist "SSH config" ".ssh/config" ; then
-  ln -s ~/.dotfiles/ssh/config ~/.ssh/config
+  ln -s ~/.dotfiles/templates/ssh/config ~/.ssh/config
 fi
 
 if feature_exist "PGP Agent" ".gnupg/gpg.conf" ; then
@@ -116,17 +112,17 @@ fi
 
 touch ~/.zsh_pre_custom
 
-cd ~/.dotfiles
+cd ~/.dotfiles/templates
 
-for f in ~/.dotfiles/*; do
+for f in ~/.dotfiles/templates/*; do
   filename="$(basename $f)"
-  files_to_ignore=(".git" "install.sh" "README.md")
 
-  if [[ -f $filename ]] \
-    && ! element_in_array $filename "${files_to_ignore[@]}" ; then
+  if [[ -f $filename ]] ; then
     backup_and_link_file $f
   fi
 done
+
+cd ~/.dotfiles
 
 /bin/zsh
 source ~/.zshrc
