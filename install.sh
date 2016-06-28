@@ -110,6 +110,10 @@ if feature_exist "PGP Agent" ".gnupg/gpg.conf" ; then
   sed -i -e 's/^# use-agent/use-agent/g' ~/.gnupg/gpg.conf
 fi
 
+if ! feature_exist "PGP Agent Config" ".gnupg/gpg-agent.conf" ; then
+  ln -s ~/.dotfiles/templates/gnupg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
+fi
+
 touch ~/.zsh_pre_custom
 
 cd ~/.dotfiles/templates
