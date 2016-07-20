@@ -56,7 +56,7 @@ if [[ "$(uname -s)" == "Darwin" ]] ; then
 else
   if apt_get_exist ; then
     sudo apt-get update
-    sudo apt-get install -y git zsh vim python-software-properties build-essential gpg-agent
+    sudo apt-get install -y git zsh vim python-software-properties build-essential gnupg-agent
   fi
 
   if ! feature_exist "chruby" ".chruby" ; then
