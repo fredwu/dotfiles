@@ -16,6 +16,7 @@ fi
 . ~/.dotfiles/zsh/environment.zsh
 . ~/.dotfiles/zsh/pgp.zsh
 . ~/.dotfiles/zsh/zsh-tweaks.zsh
+. ~/.dotfiles/zsh/mix_autocomplete.zsh
 
 if [[ -s ~/.chruby ]] || [[ -s ~/.rubies ]]; then
   . ~/.dotfiles/zsh/chruby.zsh
