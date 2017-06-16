@@ -2,6 +2,8 @@ HISTFILE=~/.zsh_history
 HISTSIZE=1000000
 SAVEHIST=HISTSIZE
 
+export GPG_TTY=$(tty)
+
 export EDITOR=vim
 export BUNDLER_EDITOR=atom
 export JULIA_EDITOR=atom
