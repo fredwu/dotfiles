@@ -10,6 +10,9 @@ alias pwdd="pwd | pbcopy"
 
 alias aa="atom ."
 alias aaa="atom-beta ."
+alias vs="code ."
+
+alias mt="mix test"
 
 alias b="bundle"
 alias bb="bundle install --jobs 8"
