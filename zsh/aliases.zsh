@@ -13,6 +13,8 @@ alias aaa="atom-beta ."
 alias vs="code ."
 
 alias mt="mix test"
+alias md="mix deps.get --all"
+alias mdu="mix deps.update --all"
 
 alias b="bundle"
 alias bb="bundle install --jobs 8"
