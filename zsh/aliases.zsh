@@ -15,6 +15,7 @@ alias vs="code ."
 alias mt="mix test"
 alias md="mix deps.get --all"
 alias mdu="mix deps.update --all"
+alias mdn="mix deps.unlock --all"
 
 alias b="bundle"
 alias bb="bundle install --jobs 8"
