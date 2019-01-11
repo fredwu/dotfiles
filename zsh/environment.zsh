@@ -5,8 +5,8 @@ SAVEHIST=HISTSIZE
 export GPG_TTY=$(tty)
 
 export EDITOR=vim
-export BUNDLER_EDITOR=atom
-export JULIA_EDITOR=atom
+export BUNDLER_EDITOR=code
+export JULIA_EDITOR=code
 
 export NODE_PATH=/usr/local/lib/node_modules
 
