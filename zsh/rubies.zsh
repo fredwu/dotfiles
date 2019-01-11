@@ -1,1 +1,1 @@
-rubies ruby-2.5
+rubies ruby-2.6
