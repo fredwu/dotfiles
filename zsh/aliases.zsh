@@ -3,6 +3,9 @@ alias sr="source ~/.zshrc && echo '.zshrc reloaded!'"
 
 alias updatedb="sudo /usr/libexec/locate.updatedb"
 
+alias now="date +%FT%T%z"
+alias nowu="date -u +%FT%TZz"
+
 alias l="ll"
 alias la="ll -a"
 alias time="command time"
