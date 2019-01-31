@@ -106,3 +106,6 @@ alias rbp="rails_best_practices"
 alias pryr="pry -r ./config/environment -r rails/console/app -r rails/console/helpers"
 
 alias ct="ctags -R -f .tags --exclude='*.min.js' --exclude='*.pack.js'"
+
+alias "awsls"="aws ec2 describe-instances --query 'Reservations[].Instances[].[ [Tags[?Key==\`Name\`].Value][0][0],PrivateIpAddress,State.Name]' --output table"
+alias "awslsp"="aws ec2 describe-instances --query 'Reservations[].Instances[].[ [Tags[?Key==\`Name\`].Value][0][0],PublicIpAddress,State.Name]' --output table"
