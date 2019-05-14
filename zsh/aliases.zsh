@@ -31,6 +31,7 @@ alias gba="git branch --all"
 alias gbi="git bisect"
 alias gcp="git cherry-pick"
 alias gd="git diff"
+alias gdc="git diff --cached"
 alias gl="git pull"
 alias glr="git pull --rebase"
 alias glog='git log --pretty="format:%C(yellow)%h%C(green)%d %C(white)%s %C(cyan)%an, %ar %Creset"'
