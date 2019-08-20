@@ -6,3 +6,5 @@ if [[ -s "which direnv" ]]; then
 fi
 
 eval "$(fasd --init auto)"
+
+[[ -e ~/.phpbrew/bashrc ]] && source ~/.phpbrew/bashrc
