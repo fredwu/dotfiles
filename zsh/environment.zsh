@@ -15,3 +15,8 @@ export RUBY_GC_HEAP_FREE_SLOTS=200000
 export JRUBY_OPTS=-J-Xmx2048m
 
 export ERL_AFLAGS="-kernel shell_history enabled"
+export LDFLAGS="-L/usr/local/opt/bzip2/lib"
+export CPPFLAGS="-I/usr/local/opt/bzip2/include"
+
+export PKG_CONFIG_PATH="/usr/local/opt/zlib/lib/pkgconfig"
+export PATH="/usr/local/opt/bzip2/bin:$PATH"
