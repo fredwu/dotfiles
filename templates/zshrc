@@ -12,6 +12,9 @@ fi
 
 # Customize to your needs...
 
+autoload bashcompinit
+bashcompinit
+
 . ~/.zsh_pre_custom
 . ~/.dotfiles/zsh/environment.zsh
 . ~/.dotfiles/zsh/zsh-tweaks.zsh
@@ -20,6 +23,11 @@ fi
 if [[ -s ~/.chruby ]] || [[ -s ~/.rubies ]]; then
   . ~/.dotfiles/zsh/chruby.zsh
   . ~/.dotfiles/zsh/rubies.zsh
+fi
+
+if [[ -f /usr/local/etc/bash_completion.d/asdf.bash ]]; then
+  . $(brew --prefix asdf)/asdf.sh
+  . $(brew --prefix asdf)/etc/bash_completion.d/asdf.bash
 fi
 
 . ~/.dotfiles/zsh/travis.zsh
