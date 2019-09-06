@@ -18,11 +18,9 @@ bashcompinit
 . ~/.zsh_pre_custom
 . ~/.dotfiles/zsh/environment.zsh
 . ~/.dotfiles/zsh/zsh-tweaks.zsh
-. ~/.dotfiles/zsh/mix_autocomplete.zsh
 
 if [[ -s ~/.chruby ]] || [[ -s ~/.rubies ]]; then
   . ~/.dotfiles/zsh/chruby.zsh
-  . ~/.dotfiles/zsh/rubies.zsh
 fi
 
 if [[ -f /usr/local/etc/bash_completion.d/asdf.bash ]]; then
@@ -30,8 +28,12 @@ if [[ -f /usr/local/etc/bash_completion.d/asdf.bash ]]; then
   . $(brew --prefix asdf)/etc/bash_completion.d/asdf.bash
 fi
 
+. ~/.dotfiles/zsh/mix_autocomplete.zsh
 . ~/.dotfiles/zsh/travis.zsh
 . ~/.dotfiles/zsh/git.zsh
 . ~/.dotfiles/zsh/aliases.zsh
 . ~/.dotfiles/zsh/post-hooks.zsh
 . ~/.zsh_custom
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh

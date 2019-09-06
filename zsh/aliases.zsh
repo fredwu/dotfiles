@@ -1,5 +1,8 @@
+alias rm="rm"
+
 alias se="vim ~/.zshrc"
 alias sr="source ~/.zshrc && echo '.zshrc reloaded!'"
+alias zr="cd $ZPREZTODIR && git pull && git submodule update --init --recursive"
 
 alias updatedb="sudo /usr/libexec/locate.updatedb"
 

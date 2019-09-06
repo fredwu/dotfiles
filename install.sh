@@ -89,11 +89,6 @@ if ! feature_exist "Prezto" ".zprezto" ; then
   git clone --recursive https://github.com/sorin-ionescu/prezto.git ~/.zprezto
 fi
 
-if ! feature_exist "Custom Prezto theme" \
-  ".zprezto/modules/prompt/functions/prompt_fredwu_setup" ; then
-  ln -s ~/.dotfiles/templates/zprezto/prompt_fredwu_setup ~/.zprezto/modules/prompt/functions/
-fi
-
 if ! feature_exist "spf13-vim" ".spf13-vim-3" ; then
   curl http://j.mp/spf13-vim3 -L -o - | bash
 fi
