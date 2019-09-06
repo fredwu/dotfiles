@@ -52,7 +52,7 @@ if [[ "$(uname -s)" == "Darwin" ]] ; then
     ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
   fi
 
-  brew install git zsh vim chruby ruby-install direnv fasd gpg gpg-agent
+  brew install git zsh vim chruby ruby-install direnv fasd gpg gpg-agent openssl
 else
   if apt_get_exist ; then
     sudo apt-get update
