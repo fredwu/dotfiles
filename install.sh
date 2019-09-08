@@ -87,6 +87,8 @@ fi
 
 if ! feature_exist "Prezto" ".zprezto" ; then
   git clone --recursive https://github.com/sorin-ionescu/prezto.git ~/.zprezto
+  cd ~/.zprezto
+  git clone --recurse-submodules https://github.com/belak/prezto-contrib contrib
 fi
 
 if ! feature_exist "spf13-vim" ".spf13-vim-3" ; then

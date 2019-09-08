@@ -32,6 +32,7 @@ zstyle ':prezto:load' pmodule \
   'spectrum' \
   'utility' \
   'completion' \
+  'contrib-prompt' \
   'prompt' \
   'fasd' \
   'git' \
@@ -92,7 +93,7 @@ zstyle ':prezto:module:history-substring-search' globbing-flags ''
 # Set the prompt theme to load.
 # Setting it to 'random' loads a random theme.
 # Auto set to 'off' on dumb terminals.
-zstyle ':prezto:module:prompt' theme 'powerlevel10k'
+zstyle ':prezto:module:prompt' theme 'spaceship'
 
 #
 # Screen

@@ -26,6 +26,7 @@ After the installation you might want to set the default login shell to zsh:
 ## Features
 
 - [Prezto](https://github.com/sorin-ionescu/prezto)
+- [Spaceship ZSH](https://github.com/denysdovhan/spaceship-prompt/)
 - [spf13-vim](https://github.com/spf13/spf13-vim)
 - [chruby](https://github.com/postmodern/chruby)
 - [ruby-install](https://github.com/postmodern/ruby-install)
