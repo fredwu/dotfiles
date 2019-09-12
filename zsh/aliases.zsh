@@ -1,4 +1,5 @@
 alias rm="rm"
+alias mv="mv"
 
 alias se="vim ~/.zshrc"
 alias sr="source ~/.zshrc && echo '.zshrc reloaded!'"
