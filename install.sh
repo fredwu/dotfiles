@@ -53,6 +53,8 @@ if [[ "$(uname -s)" == "Darwin" ]] ; then
   fi
 
   brew install git zsh vim chruby ruby-install direnv fasd gpg gpg-agent openssl
+  brew tap homebrew/cask-fonts
+  brew cask install font-hack-nerd-font
 else
   if apt_get_exist ; then
     sudo apt-get update
@@ -81,6 +83,9 @@ else
     cd ~/.direnv
     make install
   fi
+
+  mkdir -p ~/.local/share/fonts
+  cd ~/.local/share/fonts && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/DroidSansMono/complete/Droid%20Sans%20Mono%20Nerd%20Font%20Complete.otf
 
   cd ~
 fi
