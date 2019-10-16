@@ -24,8 +24,8 @@ if [[ -s ~/.chruby ]] || [[ -s ~/.rubies ]]; then
 fi
 
 if [[ -f /usr/local/etc/bash_completion.d/asdf.bash ]]; then
-  . $(brew --prefix asdf)/asdf.sh
-  . $(brew --prefix asdf)/etc/bash_completion.d/asdf.bash
+  . /usr/local/opt/asdf/asdf.sh
+  . /usr/local/opt/asdf/etc/bash_completion.d/asdf.bash
 fi
 
 . ~/.dotfiles/zsh/mix_autocomplete.zsh
