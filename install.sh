@@ -72,7 +72,7 @@ else
     cd ~/.ruby-install
     make install
 
-    ruby-install ruby
+    ruby-install ruby -- --with-openssl-dir=$(brew --prefix openssl)
   fi
 
   if ! feature_exist "direnv" ".direnv" ; then
