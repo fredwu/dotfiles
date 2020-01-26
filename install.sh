@@ -92,7 +92,10 @@ fi
 
 if ! feature_exist "Prezto" ".zprezto" ; then
   git clone --recursive https://github.com/sorin-ionescu/prezto.git ~/.zprezto
-  cd ~/.zprezto
+fi
+
+if ! feature_exist "Prezto" ".zprezto/contrib" ; then
+  cd $ZPREZTODIR
   git clone --recurse-submodules https://github.com/belak/prezto-contrib contrib
 fi
 
