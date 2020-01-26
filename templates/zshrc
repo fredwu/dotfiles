@@ -12,6 +12,7 @@ fi
 
 # Customize to your needs...
 
+prompt spaceship
 autoload bashcompinit
 bashcompinit
 
