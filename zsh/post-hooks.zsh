@@ -6,5 +6,6 @@ if [[ -s "which direnv" ]]; then
 fi
 
 eval "$(fasd --init auto)"
+eval "$(ssh-agent -s)"
 
 [[ -e ~/.phpbrew/bashrc ]] && source ~/.phpbrew/bashrc
