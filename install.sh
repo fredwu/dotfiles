@@ -49,30 +49,16 @@ element_in_array() {
 
 if [[ "$(uname -s)" == "Darwin" ]] ; then
   if ! homebrew_exist ; then
-    ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
 
-  brew install git zsh vim chruby ruby-install direnv fasd gpg gpg-agent openssl
+  brew install git zsh vim direnv fasd gpg openssl
   brew tap homebrew/cask-fonts
   brew cask install font-hack-nerd-font
 else
   if apt_get_exist ; then
     sudo apt-get update
     sudo apt-get install -y git zsh vim python-software-properties build-essential gnupg-agent
-  fi
-
-  if ! feature_exist "chruby" ".chruby" ; then
-    git clone https://github.com/postmodern/chruby.git ~/.chruby
-    cd ~/.chruby
-    make install
-  fi
-
-  if ! feature_exist "ruby-install" ".ruby-install" ; then
-    git clone https://github.com/postmodern/ruby-install.git ~/.ruby-install
-    cd ~/.ruby-install
-    make install
-
-    ruby-install ruby -- --with-openssl-dir=$(brew --prefix openssl)
   fi
 
   if ! feature_exist "direnv" ".direnv" ; then

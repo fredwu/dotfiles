@@ -20,10 +20,6 @@ bashcompinit
 . ~/.dotfiles/zsh/environment.zsh
 . ~/.dotfiles/zsh/zsh-tweaks.zsh
 
-if [[ -s ~/.chruby ]] || [[ -s ~/.rubies ]]; then
-  . ~/.dotfiles/zsh/chruby.zsh
-fi
-
 if [[ -f /usr/local/etc/bash_completion.d/asdf.bash ]]; then
   . /usr/local/opt/asdf/asdf.sh
   . /usr/local/opt/asdf/etc/bash_completion.d/asdf.bash
