@@ -54,7 +54,7 @@ if [[ "$(uname -s)" == "Darwin" ]] ; then
 
   brew install git vim direnv fasd gpg openssl
   brew tap homebrew/cask-fonts
-  brew cask install font-hack-nerd-font
+  brew install font-hack-nerd-font
 else
   if apt_get_exist ; then
     sudo apt-get update
