@@ -26,7 +26,6 @@ if [[ -f /usr/local/etc/bash_completion.d/asdf.bash ]]; then
 fi
 
 . ~/.dotfiles/zsh/mix_autocomplete.zsh
-. ~/.dotfiles/zsh/travis.zsh
 . ~/.dotfiles/zsh/git.zsh
 . ~/.dotfiles/zsh/aliases.zsh
 . ~/.dotfiles/zsh/post-hooks.zsh
