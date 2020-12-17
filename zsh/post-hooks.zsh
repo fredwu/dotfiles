@@ -7,5 +7,6 @@ fi
 
 eval "$(fasd --init auto)"
 eval "$(ssh-agent -s)" &> /dev/null
+grep -slR "PRIVATE" ~/.ssh | xargs ssh-add &> /dev/null
 
 [[ -e ~/.phpbrew/bashrc ]] && source ~/.phpbrew/bashrc

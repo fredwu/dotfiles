@@ -2,14 +2,11 @@ Host *
   ServerAliveInterval 300
   ServerAliveCountMax 2
 
-Host home
+Host shanghai
   Hostname Shanghai
-  User root
+  User admin
+  Port 233
 
-Host binary
-  Hostname binary.wuit.net
-  User root
-
-Host git.realestate.com.au
-  Port 65422
-
+Match host github.com exec "pwd | grep verrency"
+  IdentitiesOnly yes
+  IdentityFile ~/.ssh/id_verrency
