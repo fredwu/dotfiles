@@ -19,12 +19,6 @@ bashcompinit
 . ~/.zsh_pre_custom
 . ~/.dotfiles/zsh/environment.zsh
 . ~/.dotfiles/zsh/zsh-tweaks.zsh
-
-if [[ -f /usr/local/etc/bash_completion.d/asdf.bash ]]; then
-  . /usr/local/opt/asdf/asdf.sh
-  . /usr/local/opt/asdf/etc/bash_completion.d/asdf.bash
-fi
-
 . ~/.dotfiles/zsh/mix_autocomplete.zsh
 . ~/.dotfiles/zsh/git.zsh
 . ~/.dotfiles/zsh/aliases.zsh

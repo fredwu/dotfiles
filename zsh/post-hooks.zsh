@@ -1,8 +1,12 @@
 unsetopt correct
 unsetopt correct_all
 
-if [[ -s "which direnv" ]]; then
+if command -v direnv >/dev/null; then
   eval "$(direnv hook zsh)"
+fi
+
+if command -v asdf >/dev/null; then
+  . $(brew --prefix asdf)/asdf.sh
 fi
 
 eval "$(fasd --init auto)"
