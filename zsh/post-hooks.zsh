@@ -5,7 +5,7 @@ if command -v direnv >/dev/null; then
   eval "$(direnv hook zsh)"
 fi
 
-if command -v asdf >/dev/null; then
+if command -v asdf >/dev/null && command -v brew >/dev/null; then
   . $(brew --prefix asdf)/asdf.sh
 fi
 
