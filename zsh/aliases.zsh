@@ -2,6 +2,7 @@ alias rm="rm"
 alias mv="mv"
 
 alias x86="arch -x86_64 zsh"
+alias arm="arch -arm64 zsh"
 
 alias se="vim ~/.zshrc"
 alias sr="source ~/.zshrc && echo '.zshrc reloaded!'"
