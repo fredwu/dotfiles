@@ -4,6 +4,8 @@ alias mv="mv"
 alias x86="arch -x86_64 zsh"
 alias arm="arch -arm64 zsh"
 
+alias ibrew="arch -x86_64 /usr/local/bin/brew"
+
 alias se="vim ~/.zshrc"
 alias sr="source ~/.zshrc && echo '.zshrc reloaded!'"
 alias zr="cd $ZPREZTODIR && git pull && git submodule update --init --recursive"
