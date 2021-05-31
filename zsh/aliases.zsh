@@ -25,6 +25,8 @@ alias aaa="atom-beta ."
 alias vs="code ."
 
 alias mt="mix test"
+alias mtt="mix test --trace"
+alias mttt="iex -S mix test --trace"
 alias md="mix deps.get --all"
 alias mdu="mix deps.update --all"
 alias mdn="mix deps.unlock --all"
