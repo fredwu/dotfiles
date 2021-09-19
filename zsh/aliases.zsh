@@ -1,6 +1,8 @@
 alias rm="rm"
 alias mv="mv"
 
+alias drm='docker rm -f $(docker ps -a -q) && docker rmi $(docker images -q)'
+
 alias x86="arch -x86_64 zsh"
 alias arm="arch -arm64 zsh"
 
@@ -80,6 +82,7 @@ alias rrf="NO_COV=1 bundle exec rspec --fail-fast"
 alias rrr="RAILS_ENV=test bundle exec rake app:reset && NO_COV=1 bundle exec rspec"
 alias rrrf="RAILS_ENV=test bundle exec rake app:reset && NO_COV=1 bundle exec rspec --fail-fast"
 alias crr="COV=1 bundle exec rspec"
+alias ccc="bundle exec cucumber"
 
 alias r="bundle exec rails"
 alias rc="r c"
