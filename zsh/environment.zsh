@@ -10,4 +10,4 @@ export JULIA_EDITOR=code
 
 export NODE_PATH=/usr/local/lib/node_modules
 
-export PATH="/opt/homebrew/bin:$PATH"
+export PATH="/opt/homebrew/sbin:/opt/homebrew/bin:$PATH"
