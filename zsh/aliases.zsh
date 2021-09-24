@@ -79,8 +79,7 @@ alias be="bundle exec"
 
 alias rr="NO_COV=1 bundle exec rspec"
 alias rrf="NO_COV=1 bundle exec rspec --fail-fast"
-alias rrr="RAILS_ENV=test bundle exec rake app:reset && NO_COV=1 bundle exec rspec"
-alias rrrf="RAILS_ENV=test bundle exec rake app:reset && NO_COV=1 bundle exec rspec --fail-fast"
+alias rrr="bundle exec rubocop -A"
 alias crr="COV=1 bundle exec rspec"
 alias ccc="bundle exec cucumber"
 
