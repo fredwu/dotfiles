@@ -26,6 +26,7 @@ alias aa="atom ."
 alias aaa="atom-beta ."
 alias vs="code ."
 
+alias ms="mix phx.server"
 alias mt="mix test"
 alias mtt="mix test --trace"
 alias mttt="iex -S mix test --trace"
