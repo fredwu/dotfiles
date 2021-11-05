@@ -33,6 +33,7 @@ alias mttt="iex -S mix test --trace"
 alias md="mix deps.get --all"
 alias mdu="mix deps.update --all"
 alias mdn="mix deps.unlock --all"
+alias mf="mix format"
 
 alias b="bundle"
 alias bb="bundle install --jobs 8"
