@@ -6,7 +6,7 @@ if command -v direnv >/dev/null; then
 fi
 
 if command -v asdf >/dev/null && command -v brew >/dev/null; then
-  . $(brew --prefix asdf)/asdf.sh
+  . $(brew --prefix asdf)/libexec/asdf.sh
 fi
 
 eval "$(fasd --init auto)"
