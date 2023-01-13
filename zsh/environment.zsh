@@ -16,4 +16,4 @@ export KERL_CONFIGURE_OPTIONS="--disable-debug --disable-silent-rules --enable-d
 
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
-export PATH="/opt/homebrew/opt/python@3.9/libexec/bin:/opt/homebrew/opt/openjdk/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:/opt/homebrew/opt/node@18/bin:/opt/homebrew/sbin:/opt/homebrew/bin:$PATH"
+export PATH="/opt/homebrew/opt/python/libexec/bin:/opt/homebrew/opt/openjdk/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:/opt/homebrew/opt/node@18/bin:/opt/homebrew/sbin:/opt/homebrew/bin:$PATH"
