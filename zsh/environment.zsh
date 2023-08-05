@@ -12,7 +12,7 @@ export NODE_PATH=/usr/local/lib/node_modules
 
 export KERL_BUILD_DOCS="yes"
 export KERL_BUILD_PLT="yes"
-export KERL_CONFIGURE_OPTIONS="--disable-debug --disable-silent-rules --enable-dynamic-ssl-lib --disable-hipe --enable-shared-zlib --enable-smp-support --enable-threads --enable-wx --with-odbc=/opt/homebrew/opt/unixodbc --with-ssl=/opt/homebrew/opt/openssl@1.1 --without-javac --enable-darwin-64bit --enable-kernel-poll --with-dynamic-trace=dtrace"
+export KERL_CONFIGURE_OPTIONS="--disable-debug --disable-silent-rules --enable-dynamic-ssl-lib --disable-hipe --enable-shared-zlib --enable-smp-support --enable-threads --enable-wx --with-odbc=/opt/homebrew/opt/unixodbc --with-ssl=$(brew --prefix openssl) --without-javac --enable-darwin-64bit --enable-kernel-poll --with-dynamic-trace=dtrace"
 
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
