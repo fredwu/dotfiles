@@ -14,11 +14,11 @@ feature_exist() {
 }
 
 homebrew_exist() {
-  which brew &> /dev/null
+  which brew &>/dev/null
 }
 
 apt_get_exist() {
-  which apt-get &> /dev/null
+  which apt-get &>/dev/null
 }
 
 backup_and_link_file() {
@@ -27,7 +27,7 @@ backup_and_link_file() {
   local target_file=~/.$filename
 
   if [[ -e $target_file ]]; then
-    if [[ -h $target_file ]] && cmp $target_file $file ; then
+    if [[ -L $target_file ]] && cmp $target_file $file; then
       echo ".$filename is identical, ignored."
     else
       mv $target_file "$target_file.backup.$(date +%s)"
@@ -47,21 +47,21 @@ element_in_array() {
   return 1
 }
 
-if [[ "$(uname -s)" == "Darwin" ]] ; then
-  if ! homebrew_exist ; then
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  if ! homebrew_exist; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
 
-  brew install git vim direnv fasd gpg openssl asdf
+  brew install git vim direnv fasd gpg openssl rtx
   brew tap homebrew/cask-fonts
   brew install font-hack-nerd-font
 else
-  if apt_get_exist ; then
+  if apt_get_exist; then
     sudo apt-get update
     sudo apt-get install -y git zsh vim python-software-properties build-essential gnupg-agent
   fi
 
-  if ! feature_exist "direnv" ".direnv" ; then
+  if ! feature_exist "direnv" ".direnv"; then
     wget https://go.googlecode.com/files/go1.2.linux-386.tar.gz
     tar -C /usr/local -xzf go1.2.linux-386.tar.gz
 
@@ -76,28 +76,28 @@ else
   cd ~
 fi
 
-if ! feature_exist "Prezto" ".zprezto" ; then
+if ! feature_exist "Prezto" ".zprezto"; then
   git clone --recursive https://github.com/sorin-ionescu/prezto.git ~/.zprezto
 fi
 
-if ! feature_exist "Prezto" ".zprezto/contrib" ; then
+if ! feature_exist "Prezto" ".zprezto/contrib"; then
   cd $ZPREZTODIR
   git clone --recurse-submodules https://github.com/belak/prezto-contrib contrib
 fi
 
-if ! feature_exist "spf13-vim" ".spf13-vim-3" ; then
+if ! feature_exist "spf13-vim" ".spf13-vim-3"; then
   curl http://j.mp/spf13-vim3 -L -o - | bash
 fi
 
-if ! feature_exist "Custom ZSH variables" ".zsh_custom" ; then
+if ! feature_exist "Custom ZSH variables" ".zsh_custom"; then
   cp ~/.dotfiles/zsh/custom.example ~/.zsh_custom
 fi
 
-if ! feature_exist "SSH config" ".ssh/config" ; then
+if ! feature_exist "SSH config" ".ssh/config"; then
   ln -s ~/.dotfiles/templates/ssh/config ~/.ssh/config
 fi
 
-if feature_exist "PGP Agent" ".gnupg/gpg.conf" ; then
+if feature_exist "PGP Agent" ".gnupg/gpg.conf"; then
   sed -i -e 's/^# use-agent/use-agent/g' ~/.gnupg/gpg.conf
 fi
 
@@ -108,7 +108,7 @@ cd ~/.dotfiles/templates
 for f in ~/.dotfiles/templates/*; do
   filename="$(basename $f)"
 
-  if [[ -f $filename ]] ; then
+  if [[ -f $filename ]]; then
     backup_and_link_file $f
   fi
 done

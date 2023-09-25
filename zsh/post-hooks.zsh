@@ -5,12 +5,12 @@ if command -v direnv >/dev/null; then
   eval "$(direnv hook zsh)"
 fi
 
-if command -v asdf >/dev/null && command -v brew >/dev/null; then
-  . $(brew --prefix asdf)/libexec/asdf.sh
+if command -v rts >/dev/null; then
+  eval "$(~/bin/rtx activate zsh)"
 fi
 
 eval "$(fasd --init auto)"
-eval "$(ssh-agent -s)" &> /dev/null
-grep -slR "PRIVATE" ~/.ssh | xargs ssh-add &> /dev/null
+eval "$(ssh-agent -s)" &>/dev/null
+grep -slR "PRIVATE" ~/.ssh | xargs ssh-add &>/dev/null
 
 [[ -e ~/.phpbrew/bashrc ]] && source ~/.phpbrew/bashrc
