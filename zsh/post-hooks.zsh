@@ -5,8 +5,8 @@ if command -v direnv >/dev/null; then
   eval "$(direnv hook zsh)"
 fi
 
-if command -v rtx >/dev/null; then
-  eval "$(rtx activate zsh)"
+if command -v mise >/dev/null; then
+  eval "$(mise activate zsh)"
 fi
 
 eval "$(fasd --init auto)"
