@@ -18,4 +18,4 @@ export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
-export PATH="/opt/venv/bin:/opt/homebrew/opt/postgresql@15/bin:/opt/homebrew/opt/python/libexec/bin:/opt/homebrew/opt/openjdk/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:/opt/homebrew/sbin:/opt/homebrew/bin:$PATH"
+export PATH="./bin:/opt/venv/bin:/opt/homebrew/opt/postgresql@15/bin:/opt/homebrew/opt/python/libexec/bin:/opt/homebrew/opt/openjdk/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:/opt/homebrew/sbin:/opt/homebrew/bin:$PATH"
