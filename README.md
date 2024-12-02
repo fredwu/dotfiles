@@ -29,7 +29,7 @@ After the installation you might want to set the default login shell to zsh:
 - [Spaceship ZSH](https://github.com/denysdovhan/spaceship-prompt/)
 - [spf13-vim](https://github.com/spf13/spf13-vim)
 - [direnv](https://github.com/zimbatm/direnv)
-- [fasd](https://github.com/clvv/fasd)
+- [zoxide](https://github.com/ajeetdsouza/zoxide)
 - .ackrc
 - .gemrc
 - .gitconfig

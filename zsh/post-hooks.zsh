@@ -9,6 +9,7 @@ if command -v mise >/dev/null; then
   eval "$(mise activate zsh --shims)"
 fi
 
-eval "$(fasd --init auto)"
+source <(fzf --zsh)
+eval "$(zoxide init zsh)"
 eval "$(ssh-agent -s)" &>/dev/null
 grep -slR "PRIVATE" ~/.ssh | xargs ssh-add &>/dev/null
