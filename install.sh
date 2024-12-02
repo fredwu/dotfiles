@@ -58,7 +58,7 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
 else
   if apt_get_exist; then
     sudo apt-get update
-    sudo apt-get install -y git zsh vim python-software-properties build-essential gnupg-agent
+    sudo apt-get install -y git zsh vim software-properties-common build-essential gnupg-agent
   fi
 
   if ! feature_exist "direnv" ".direnv"; then
@@ -81,7 +81,7 @@ if ! feature_exist "Prezto" ".zprezto"; then
 fi
 
 if ! feature_exist "Prezto" ".zprezto/contrib"; then
-  cd $ZPREZTODIR
+  cd ~/.zprezto
   git clone --recurse-submodules https://github.com/belak/prezto-contrib contrib
 fi
 
