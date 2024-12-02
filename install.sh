@@ -58,16 +58,7 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
 else
   if apt_get_exist; then
     sudo apt-get update
-    sudo apt-get install -y git zsh vim software-properties-common build-essential gnupg-agent
-  fi
-
-  if ! feature_exist "direnv" ".direnv"; then
-    wget https://go.googlecode.com/files/go1.2.linux-386.tar.gz
-    tar -C /usr/local -xzf go1.2.linux-386.tar.gz
-
-    git clone https://github.com/zimbatm/direnv.git ~/.direnv
-    cd ~/.direnv
-    make install
+    sudo apt-get install -y git zsh vim software-properties-common build-essential gnupg-agent direnv
   fi
 
   mkdir -p ~/.local/share/fonts
