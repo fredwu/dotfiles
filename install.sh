@@ -53,7 +53,6 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
   fi
 
   brew install git vim direnv fzf zoxide gpg openssl mise
-  brew tap homebrew/cask-fonts
   brew install font-hack-nerd-font
 else
   if apt_get_exist; then
