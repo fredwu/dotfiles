@@ -57,7 +57,7 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
 else
   if apt_get_exist; then
     sudo apt-get update
-    sudo apt-get install -y git zsh vim software-properties-common build-essential gnupg-agent direnv libz-dev libssl-dev libffi-dev libyaml-dev
+    sudo apt-get install -y git zsh vim software-properties-common build-essential gnupg-agent direnv fzf zoxide libz-dev libssl-dev libffi-dev libyaml-dev
   fi
 
   mkdir -p ~/.local/share/fonts
