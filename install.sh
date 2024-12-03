@@ -52,7 +52,7 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
 
-  brew install git vim direnv fzf zoxide gpg openssl mise
+  brew install git vim direnv fzf zoxide gpg openssl libyaml mise
   brew install font-hack-nerd-font
 else
   if apt_get_exist; then
