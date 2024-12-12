@@ -9,7 +9,19 @@ if command -v mise >/dev/null; then
   eval "$(mise activate zsh --shims)"
 fi
 
-source <(fzf --zsh)
-eval "$(zoxide init zsh)"
-eval "$(ssh-agent -s)" &>/dev/null
-grep -slR "PRIVATE" ~/.ssh | xargs ssh-add &>/dev/null
+if command -v brew >/dev/null; then
+  eval "$(brew shellenv)"
+fi
+
+if command -v fzf >/dev/null; then
+  source <(fzf --zsh)
+fi
+
+if command -v zoxide >/dev/null; then
+  eval "$(zoxide init zsh)"
+fi
+
+if command -v ssh-agent >/dev/null; then
+  eval "$(ssh-agent -s)" &>/dev/null
+  grep -slR "PRIVATE" ~/.ssh | xargs ssh-add &>/dev/null
+fi
