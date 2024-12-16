@@ -1,6 +1,3 @@
-alias rm="rm"
-alias mv="mv"
-
 alias drm='docker rm -f $(docker ps -a -q) && docker rmi $(docker images -q)'
 
 alias x86="arch -x86_64 zsh"
@@ -22,8 +19,6 @@ alias la="ll -a"
 alias time="command time"
 alias pwdd="pwd | pbcopy"
 
-alias aa="atom ."
-alias aaa="atom-beta ."
 alias vs="code ."
 
 alias ms="mix phx.server"
@@ -116,13 +111,9 @@ alias rpp="bundle exec rake parallel:prepare"
 alias rp="bundle exec rake parallel"
 alias rppp="bundle exec rake parallel:prepare parallel"
 
-alias p="padrino"
-
 alias q="bundle exec rake quality"
 
-alias rbp="rails_best_practices"
-
-alias pryr="pry -r ./config/environment -r rails/console/app -r rails/console/helpers"
+alias tt="bin/test"
 
 alias ct="ctags -R -f .tags --exclude='*.min.js' --exclude='*.pack.js'"
 
