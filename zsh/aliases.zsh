@@ -4,6 +4,8 @@ alias x86="arch -x86_64 zsh"
 alias arm="arch -arm64 zsh"
 
 alias ibrew="arch -x86_64 /usr/local/bin/brew"
+alias bo="brew outdated"
+alias bu="brew upgrade"
 
 alias se="vim ~/.zshrc"
 alias sr="source ~/.zshrc && echo '.zshrc reloaded!'"
@@ -34,9 +36,6 @@ alias mdn="mix deps.unlock --all"
 alias mf="mix format"
 
 alias b="bundle"
-alias bb="bundle install --jobs 8"
-alias bo="bundle open"
-alias bu="bundle update"
 
 alias g="git"
 alias ga="git add"
