@@ -21,10 +21,11 @@ alias la="ll -a"
 alias time="command time"
 alias pwdd="pwd | pbcopy"
 
+alias c="claude --dangerously-skip-permissions"
 alias vs="code ."
 
 alias ms="iex --dbg pry -S mix phx.server"
-alias mt="mix test"
+alias mt="mix format && mix test"
 alias mtt="mix test --trace"
 alias mttt="iex -S mix test --trace"
 alias mft="mix full_test"
