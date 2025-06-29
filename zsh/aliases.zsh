@@ -35,6 +35,7 @@ alias md="mix deps.get --all"
 alias mdu="mix deps.update --all"
 alias mdn="mix deps.unlock --all"
 alias mf="mix format"
+alias mr="mix ecto.reset && MIX_ENV=test mix ecto.reset"
 
 alias b="bundle"
 
