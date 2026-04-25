@@ -19,3 +19,11 @@ export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
 export PATH="./bin:/opt/venv/bin:/opt/homebrew/opt/postgresql@17/bin:/opt/homebrew/opt/postgresql@16/bin:/opt/homebrew/opt/postgresql@15/bin:/opt/homebrew/opt/python/libexec/bin:/opt/homebrew/opt/openjdk/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:/usr/local/sbin:/usr/local/bin:$PATH"
+
+# Added by Antigravity
+export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:$HOME/.lmstudio/bin"
+
+. "$HOME/.local/bin/env"
