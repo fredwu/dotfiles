@@ -21,7 +21,8 @@ alias la="ll -a"
 alias time="command time"
 alias pwdd="pwd | pbcopy"
 
-alias c="claude --dangerously-skip-permissions"
+alias c="codex"
+alias cc="claude"
 alias vs="code ."
 
 alias ms="iex --dbg pry -S mix phx.server"
