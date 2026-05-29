@@ -115,6 +115,7 @@ alias rppp="bundle exec rake parallel:prepare parallel"
 
 alias q="bundle exec rake quality"
 
+alias tf="terraform"
 alias tt="bin/test"
 
 alias ct="ctags -R -f .tags --exclude='*.min.js' --exclude='*.pack.js'"
