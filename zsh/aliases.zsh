@@ -25,7 +25,7 @@ alias c="codex"
 alias cc="claude"
 alias vs="code ."
 
-alias ms="iex --dbg pry -S mix phx.server"
+alias ms="iex -S mix phx.server"
 alias mt="mix format && mix test"
 alias mtt="mix test --trace"
 alias mttt="iex -S mix test --trace"
