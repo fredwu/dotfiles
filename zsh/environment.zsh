@@ -8,6 +8,8 @@ export EDITOR=vim
 export BUNDLER_EDITOR=code
 export JULIA_EDITOR=code
 
+export HOMEBREW_NO_ASK=1
+
 export NODE_PATH=/usr/local/lib/node_modules
 
 export KERL_BUILD_DOCS="yes"
