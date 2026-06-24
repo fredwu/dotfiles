@@ -64,6 +64,11 @@ alias gst="git status"
 alias gsu="git stash -u"
 alias gsp="git stash pop"
 alias gsl="git stash list"
+alias gw="git worktree"
+alias gwl="git worktree list"
+alias gwa="git worktree add"
+alias gwr="git worktree remove"
+alias gwrf="git worktree remove -f"
 
 # Clean up deleted remote branches references
 alias gcco="git remote prune origin"
