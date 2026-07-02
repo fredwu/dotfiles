@@ -6,7 +6,3 @@ Host shanghai
   Hostname Shanghai
   User admin
   Port 233
-
-Match host github.com exec "pwd | grep verrency"
-  IdentitiesOnly yes
-  IdentityFile ~/.ssh/id_verrency
