@@ -1,0 +1,124 @@
+{
+  "version": 2,
+  "plugins": {
+    "context7@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/context7/unknown",
+        "version": "unknown",
+        "installedAt": "2025-12-18T03:30:43.160Z",
+        "lastUpdated": "2026-07-15T04:18:49.599Z"
+      }
+    ],
+    "frontend-design@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/frontend-design/unknown",
+        "version": "unknown",
+        "installedAt": "2026-05-10T13:08:31.450Z",
+        "lastUpdated": "2026-07-15T04:18:49.599Z"
+      }
+    ],
+    "code-review@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/code-review/unknown",
+        "version": "unknown",
+        "installedAt": "2026-05-10T13:08:36.116Z",
+        "lastUpdated": "2026-07-15T04:18:49.596Z"
+      }
+    ],
+    "code-simplifier@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/code-simplifier/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-05-10T13:08:41.525Z",
+        "lastUpdated": "2026-05-10T13:08:41.525Z"
+      }
+    ],
+    "skill-creator@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/skill-creator/unknown",
+        "version": "unknown",
+        "installedAt": "2026-05-10T13:08:54.429Z",
+        "lastUpdated": "2026-07-15T04:18:49.599Z"
+      }
+    ],
+    "feature-dev@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/feature-dev/unknown",
+        "version": "unknown",
+        "installedAt": "2026-05-10T13:09:04.592Z",
+        "lastUpdated": "2026-07-15T04:18:49.598Z"
+      }
+    ],
+    "claude-md-management@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/claude-md-management/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-05-10T13:09:11.261Z",
+        "lastUpdated": "2026-05-10T13:09:11.261Z"
+      }
+    ],
+    "ralph-loop@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/ralph-loop/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-05-10T13:09:24.825Z",
+        "lastUpdated": "2026-05-10T13:09:24.825Z"
+      }
+    ],
+    "security-guidance@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/security-guidance/2.0.6",
+        "version": "2.0.6",
+        "installedAt": "2026-05-10T13:09:30.720Z",
+        "lastUpdated": "2026-06-20T05:32:18.069Z"
+      }
+    ],
+    "claude-code-setup@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/claude-code-setup/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-05-10T13:09:41.032Z",
+        "lastUpdated": "2026-05-10T13:09:41.032Z"
+      }
+    ],
+    "elixir-phoenix@oliver-kriska": [
+      {
+        "scope": "user",
+        "installPath": "/Users/fredwu/.claude/plugins/cache/oliver-kriska/elixir-phoenix/2.14.2",
+        "version": "2.14.2",
+        "installedAt": "2026-05-31T14:11:03.564Z",
+        "lastUpdated": "2026-07-14T02:38:44.275Z",
+        "gitCommitSha": "d6b21b52db07d61eb0d3c1049ceeadb537cdd14b"
+      }
+    ],
+    "pr-review-toolkit@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/pr-review-toolkit/unknown",
+        "version": "unknown",
+        "installedAt": "2026-07-06T03:33:41.247Z",
+        "lastUpdated": "2026-07-15T04:18:49.599Z"
+      }
+    ],
+    "claude-code-wakatime@wakatime": [
+      {
+        "scope": "user",
+        "installPath": "/Users/fredwu/.claude/plugins/cache/wakatime/claude-code-wakatime/4.1.0",
+        "version": "4.1.0",
+        "installedAt": "2026-07-06T05:52:45.441Z",
+        "lastUpdated": "2026-07-06T05:52:45.441Z",
+        "gitCommitSha": "3915f4ec19d4fedf2a1a2a644f1138cd72e956da"
+      }
+    ]
+  }
+}

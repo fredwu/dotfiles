@@ -1,0 +1,79 @@
+[hints]
+worktree_tip_dismissed = true
+
+[cli]
+installer = "internal"
+auto_update = true
+
+[mcp_servers.tidewave-4000]
+url = "http://localhost:4000/tidewave/mcp"
+enabled = true
+
+[mcp_servers.tidewave-4001]
+url = "http://localhost:4001/tidewave/mcp"
+enabled = true
+
+[mcp_servers.tidewave-4002]
+url = "http://localhost:4002/tidewave/mcp"
+enabled = true
+
+[mcp_servers.context7]
+command = "npx"
+args = [
+    "-y",
+    "@upstash/context7-mcp",
+]
+enabled = true
+
+[mcp_servers.firefox-devtools]
+command = "npx"
+args = ["@mozilla/firefox-devtools-mcp@latest"]
+enabled = true
+
+[mcp_servers.chrome-devtools]
+command = "npx"
+args = ["chrome-devtools-mcp@latest"]
+enabled = true
+
+[mcp_servers.terraform]
+command = "docker"
+args = [
+    "run",
+    "-i",
+    "--rm",
+    "hashicorp/terraform-mcp-server",
+]
+enabled = true
+
+[models]
+default = "v9-stickynote"
+default_reasoning_effort = "xhigh"
+
+[ui]
+max_thoughts_width = 120
+fork_secondary_model = "grok-build"
+yolo = false
+compact_mode = false
+permission_mode = "always-approve"
+
+[[marketplace.sources]]
+name = "plugin-marketplace"
+git = "https://github.com/xai-org/plugin-marketplace.git"
+
+[plugins]
+enabled = ["user/fa976bd9/github"]
+paths = ["/Users/fredwu/.grok/marketplace-cache/cd48a3fd39046b71/plugins/elixir-phoenix"]
+
+[compat.cursor]
+skills = false
+rules = false
+agents = false
+mcps = false
+hooks = false
+
+[compat.claude]
+skills = true
+rules = false
+agents = false
+mcps = false
+hooks = false
