@@ -14,6 +14,20 @@ if [[ "$OSTYPE" == darwin* ]]; then
 fi
 
 #
+# Codex MCP credentials
+#
+
+if [[ "$OSTYPE" == darwin* ]]; then
+  github_personal_access_token="$(/usr/bin/security find-generic-password -a "$USER" -s codex-github-mcp-token -w 2>/dev/null)"
+
+  if [[ -n "$github_personal_access_token" ]]; then
+    export GITHUB_PERSONAL_ACCESS_TOKEN="$github_personal_access_token"
+  fi
+
+  unset github_personal_access_token
+fi
+
+#
 # Editors
 #
 
