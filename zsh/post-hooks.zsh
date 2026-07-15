@@ -25,3 +25,9 @@ if command -v ssh-agent >/dev/null; then
   eval "$(ssh-agent -s)" &>/dev/null
   grep -slR "PRIVATE" ~/.ssh | xargs ssh-add &>/dev/null
 fi
+
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/fredwu/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
