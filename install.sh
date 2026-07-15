@@ -23,22 +23,21 @@ apt_get_exist() {
 
 backup_and_link_file() {
   local file=$1
-  local filename="$(basename $file)"
+  local filename="$(basename "$file")"
   local target_file=~/.$filename
 
-  if [[ -e $target_file ]]; then
-    if [[ -L $target_file ]] && cmp $target_file $file; then
-      echo ".$filename is identical, ignored."
-    else
-      mv $target_file "$target_file.backup.$(date +%s)"
-      echo ".$filename is backed up."
-    fi
+  if [[ -L $target_file ]] && [[ $target_file -ef $file ]]; then
+    echo ".$filename is linked, ignored."
+    return
   fi
 
-  if [[ ! -e ~/.$filename ]]; then
-    ln -s ~/.dotfiles/templates/$filename ~/.$filename
-    echo ".$filename is linked."
+  if [[ -e $target_file ]] || [[ -L $target_file ]]; then
+    mv "$target_file" "$target_file.backup.$(date +%s)"
+    echo ".$filename is backed up."
   fi
+
+  ln -s "$file" "$target_file"
+  echo ".$filename is linked."
 }
 
 element_in_array() {
@@ -53,6 +52,7 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
   fi
 
   brew install git vim direnv fzf zoxide gpg openssl libyaml mise
+  brew install --cask grok-build codex claude-code
   brew install font-hack-nerd-font
 else
   if apt_get_exist; then
