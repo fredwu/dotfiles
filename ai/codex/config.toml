@@ -14,10 +14,6 @@ last_updated = "2026-07-15T03:01:18Z"
 source_type = "local"
 source = "/Users/fredwu/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
-[features.multi_agent_v2]
-hide_spawn_agent_metadata = false
-tool_namespace = "agents"
-
 [marketplaces.openai-primary-runtime]
 last_updated = "2026-07-10T08:18:15Z"
 source_type = "local"
@@ -86,83 +82,20 @@ enabled = true
 [plugins."browser@openai-bundled"]
 enabled = true
 
-[projects."/Users/fredwu/Code/Wuit/feedbun"]
+[projects."/Users/fredwu/.dotfiles"]
 trust_level = "trusted"
 
 [projects."/Users/fredwu/Code/Wuit/persumi"]
 trust_level = "trusted"
 
-[projects."/Users/fredwu/Code/Clients/_xAI/toy-robot-elixir"]
+[projects."/Users/fredwu/Code/Wuit/rizzfarm"]
 trust_level = "trusted"
 
-[projects."/Users/fredwu/Code/Clients/_xAI/toy-robot-elixir-challenge"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/Code/Clients/_xAI/ex_double_entry"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/Code/Clients/_xAI/crawler"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/Code/Clients/xAI/ex_double_entry"]
+[projects."/Users/fredwu/Code/Wuit/feedbun"]
 trust_level = "trusted"
 
 [projects."/Users/fredwu/Code/Clients/Gamma/gamma"]
 trust_level = "trusted"
-
-[projects."/Users/fredwu/Code/Clients/xAI/crawler"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/Code/Wuit/rizzfarm"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/Code/OSS/tesla"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/Documents/Codex/2026-07-07/polypropylene-vs-polyester-with-spandex-as"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/Documents/Codex/2026-07-07/is-polypropylene-or-polyester-with-spandex"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/Documents/Codex/2026-07-09/l-or-espresso-flavours-ultimo-espresso"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/Documents/Codex/2026-07-09/for"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/Documents/Codex/2026-07-12/in"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/Documents/Codex/2026-07-12/can"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/Documents/Codex/2026-07-12/let"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/Documents/Codex/2026-07-14/hel"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/.grok/skills/codex-review"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/Documents/Codex/2026-07-15/help-me-write-a-new-global"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/.grok/skills/compare-worktree"]
-trust_level = "trusted"
-
-[projects."/Users/fredwu/.dotfiles"]
-trust_level = "trusted"
-
-[mcp_servers.tidewave-4002]
-url = "http://localhost:4002/tidewave/mcp"
-
-[mcp_servers.tidewave-4000]
-url = "http://localhost:4000/tidewave/mcp"
-
-[mcp_servers.tidewave-4001]
-url = "http://localhost:4001/tidewave/mcp"
 
 [mcp_servers.node_repl]
 args = []
@@ -214,8 +147,7 @@ command = "docker"
 args = ["run", "-i", "--rm", "hashicorp/terraform-mcp-server"]
 
 [mcp_servers.appsignal]
-command = "-s"
-args = ["user", "--transport", "http", "https://appsignal.com/api/mcp"]
+url = "https://appsignal.com/api/mcp"
 
 [tui.model_availability_nux]
 "gpt-5.5" = 4
@@ -232,7 +164,6 @@ show-context-window-usage = true
 
 [features]
 hooks = true
-js_repl = false
 default_mode_request_user_input = true
 
 [hooks.state]

@@ -5,18 +5,6 @@ worktree_tip_dismissed = true
 installer = "internal"
 auto_update = true
 
-[mcp_servers.tidewave-4000]
-url = "http://localhost:4000/tidewave/mcp"
-enabled = true
-
-[mcp_servers.tidewave-4001]
-url = "http://localhost:4001/tidewave/mcp"
-enabled = true
-
-[mcp_servers.tidewave-4002]
-url = "http://localhost:4002/tidewave/mcp"
-enabled = true
-
 [mcp_servers.context7]
 command = "npx"
 args = [
@@ -59,10 +47,6 @@ permission_mode = "always-approve"
 [[marketplace.sources]]
 name = "plugin-marketplace"
 git = "https://github.com/xai-org/plugin-marketplace.git"
-
-[plugins]
-enabled = ["user/fa976bd9/github"]
-paths = ["/Users/fredwu/.grok/marketplace-cache/cd48a3fd39046b71/plugins/elixir-phoenix"]
 
 [compat.cursor]
 skills = false
