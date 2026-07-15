@@ -16,7 +16,7 @@ source_type = "local"
 source = "/Users/fredwu/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
 [marketplaces.openai-primary-runtime]
-last_updated = "2026-07-10T08:18:15Z"
+last_updated = "2026-07-15T14:22:31Z"
 source_type = "local"
 source = "/Users/fredwu/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
 

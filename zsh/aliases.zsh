@@ -7,7 +7,7 @@ alias ibrew="arch -x86_64 /usr/local/bin/brew"
 alias bo="brew outdated"
 alias bu="brew upgrade"
 
-alias se="vim ~/.zshrc"
+alias se="nvim ~/.zshrc"
 alias sr="source ~/.zshrc && echo '.zshrc reloaded!'"
 alias zr="cd ~/.zprezto && git pull && git submodule update --init --recursive"
 

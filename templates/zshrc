@@ -25,11 +25,15 @@ autoload bashcompinit
 bashcompinit
 
 . ~/.zsh_pre_custom
-. ~/.dotfiles/zsh/environment.zsh
-. ~/.dotfiles/zsh/zsh-tweaks.zsh
-. ~/.dotfiles/zsh/mix_autocomplete.zsh
-. ~/.dotfiles/zsh/git.zsh
-. ~/.dotfiles/zsh/aliases.zsh
-. ~/.dotfiles/zsh/post-hooks.zsh
-. ~/.dotfiles/zsh/spaceship.zsh
+
+dotfiles_root="${${(%):-%N}:A:h:h}"
+. "$dotfiles_root/zsh/environment.zsh"
+. "$dotfiles_root/zsh/zsh-tweaks.zsh"
+. "$dotfiles_root/zsh/mix_autocomplete.zsh"
+. "$dotfiles_root/zsh/git.zsh"
+. "$dotfiles_root/zsh/aliases.zsh"
+. "$dotfiles_root/zsh/post-hooks.zsh"
+. "$dotfiles_root/zsh/spaceship.zsh"
+unset dotfiles_root
+
 . ~/.zsh_custom

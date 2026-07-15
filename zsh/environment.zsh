@@ -4,7 +4,8 @@ SAVEHIST=HISTSIZE
 
 export GPG_TTY=$(tty)
 
-export EDITOR=vim
+export EDITOR=nvim
+export VISUAL=nvim
 export BUNDLER_EDITOR=code
 export JULIA_EDITOR=code
 
@@ -20,7 +21,7 @@ export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
-export PATH="./bin:/opt/venv/bin:/opt/homebrew/opt/postgresql@17/bin:/opt/homebrew/opt/postgresql@16/bin:/opt/homebrew/opt/postgresql@15/bin:/opt/homebrew/opt/python/libexec/bin:/opt/homebrew/opt/openjdk/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:/usr/local/sbin:/usr/local/bin:$PATH"
+export PATH="./bin:/opt/venv/bin:/opt/homebrew/opt/postgresql@17/bin:/opt/homebrew/opt/postgresql@16/bin:/opt/homebrew/opt/postgresql@15/bin:/opt/homebrew/opt/python/libexec/bin:/opt/homebrew/opt/openjdk/bin:$HOME/.local/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:/usr/local/sbin:/usr/local/bin:$PATH"
 
 # Added by Antigravity
 export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
@@ -31,4 +32,6 @@ export PATH="$HOME/.antigravity-ide/antigravity-ide/bin:$PATH"
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:$HOME/.lmstudio/bin"
 
-. "$HOME/.local/bin/env"
+if [[ -f "$HOME/.local/bin/env" ]]; then
+  . "$HOME/.local/bin/env"
+fi

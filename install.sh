@@ -1,110 +1,66 @@
 #!/bin/bash
 
-feature_exist() {
-  local label=$1
-  local feature=$2
+set -euo pipefail
 
-  if [[ -e ~/$feature ]]; then
-    echo "$label exists, ignored."
-    true
-  else
-    echo "Installing $label ..."
-    false
-  fi
-}
+DOTFILES_ROOT="$(
+  CDPATH=''
+  cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
+  pwd -P
+)"
+export DOTFILES_ROOT
 
-homebrew_exist() {
-  which brew &>/dev/null
-}
-
-apt_get_exist() {
-  which apt-get &>/dev/null
-}
-
-backup_and_link_file() {
-  local file=$1
-  local filename="$(basename "$file")"
-  local target_file=~/.$filename
-
-  if [[ -L $target_file ]] && [[ $target_file -ef $file ]]; then
-    echo ".$filename is linked, ignored."
-    return
-  fi
-
-  if [[ -e $target_file ]] || [[ -L $target_file ]]; then
-    mv "$target_file" "$target_file.backup.$(date +%s)"
-    echo ".$filename is backed up."
-  fi
-
-  ln -s "$file" "$target_file"
-  echo ".$filename is linked."
-}
-
-element_in_array() {
-  local e
-  for e in "${@:2}"; do [[ "$e" = "$1" ]] && return 0; done
-  return 1
-}
-
-if [[ "$(uname -s)" == "Darwin" ]]; then
-  if ! homebrew_exist; then
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  fi
-
-  brew install git vim direnv fzf zoxide gpg openssl libyaml mise
-  brew install --cask grok-build codex claude-code
-  brew install font-hack-nerd-font
-else
-  if apt_get_exist; then
-    sudo apt-get update
-    sudo apt-get install -y git zsh vim software-properties-common build-essential gnupg-agent direnv fzf zoxide libz-dev libssl-dev libffi-dev libyaml-dev
-  fi
-
-  mkdir -p ~/.local/share/fonts
-  cd ~/.local/share/fonts && curl -fLo "Droid Sans Mono for Powerline Nerd Font Complete.otf" https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/DroidSansMono/complete/Droid%20Sans%20Mono%20Nerd%20Font%20Complete.otf
-
-  cd ~
-fi
-
-if ! feature_exist "Prezto" ".zprezto"; then
-  git clone --recursive https://github.com/sorin-ionescu/prezto.git ~/.zprezto
-fi
-
-if ! feature_exist "Prezto" ".zprezto/contrib"; then
-  cd ~/.zprezto
-  git clone --recurse-submodules https://github.com/belak/prezto-contrib contrib
-fi
-
-if ! feature_exist "spf13-vim" ".spf13-vim-3"; then
-  curl http://j.mp/spf13-vim3 -L -o - | bash
-fi
-
-if ! feature_exist "Custom ZSH variables" ".zsh_custom"; then
-  cp ~/.dotfiles/zsh/custom.example ~/.zsh_custom
-fi
-
-if ! feature_exist "SSH config" ".ssh/config"; then
-  ln -s ~/.dotfiles/templates/ssh/config ~/.ssh/config
-fi
-
-if feature_exist "PGP Agent" ".gnupg/gpg.conf"; then
-  sed -i -e 's/^# use-agent/use-agent/g' ~/.gnupg/gpg.conf
-fi
-
-touch ~/.zsh_pre_custom
-
-cd ~/.dotfiles/templates
-
-for f in ~/.dotfiles/templates/*; do
-  filename="$(basename $f)"
-
-  if [[ -f $filename ]]; then
-    backup_and_link_file $f
-  fi
+for module in common platform packages cleanup prezto links neovim login_shell; do
+  # shellcheck source=/dev/null
+  source "$DOTFILES_ROOT/install/lib/$module.sh"
 done
 
-cd ~/.dotfiles
+usage() {
+  cat <<'EOF'
+Usage: ./install.sh [--cleanup] [--help]
 
-/bin/zsh
-source ~/.zshrc
-chsh -s /bin/zsh
+Install packages and reconcile this dotfiles setup. Re-running the installer is
+safe. Use --cleanup once to archive or remove recognised legacy Vim/spf13 files
+before performing the normal installation.
+EOF
+}
+
+main() {
+  local cleanup=false
+
+  while (( $# > 0 )); do
+    case "$1" in
+      --cleanup) cleanup=true ;;
+      --help|-h)
+        usage
+        return 0
+        ;;
+      *)
+        usage >&2
+        die "unknown option: $1"
+        ;;
+    esac
+    shift
+  done
+
+  if (( EUID == 0 )); then
+    die "run this installer as your regular user, without sudo"
+  fi
+
+  detect_platform
+  log "Installing dotfiles on $PLATFORM${PACKAGE_MANAGER:+ ($PACKAGE_MANAGER)}"
+
+  if [[ "$cleanup" == true ]]; then
+    cleanup_legacy_v1
+  fi
+
+  install_packages
+  install_hack_nerd_font
+  install_prezto
+  install_dotfiles
+  sync_neovim_plugins
+  ensure_zsh_login_shell
+
+  log "Installation complete. Open a new terminal to use the updated environment."
+}
+
+main "$@"
