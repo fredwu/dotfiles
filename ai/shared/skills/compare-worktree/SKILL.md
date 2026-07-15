@@ -1,8 +1,6 @@
 ---
 name: compare-worktree
-description: Compare the current Git worktree with one explicitly supplied peer worktree and identify only material improvements to apply to the current worktree. Use only when the user manually invokes `/compare-worktree [target_worktree]`; never invoke implicitly, from a general comparison request, or without a target worktree argument.
-argument-hint: "[target_worktree]"
-disable-model-invocation: true
+description: Compare the current Git worktree with one explicitly supplied peer worktree and identify only material improvements to apply to the current worktree. Use only when the user explicitly invokes this skill with exactly one target worktree path; never invoke implicitly, from a general comparison request, or without that path.
 ---
 
 # Compare Worktree
@@ -11,7 +9,7 @@ Perform an independent, read-only review of two implementations. Treat the curre
 
 ## Guardrails
 
-- Accept exactly one target worktree path from `/compare-worktree [target_worktree]`.
+- Accept exactly one target worktree path supplied with the explicit skill invocation.
 - Run only read-only discovery commands. Never edit files, apply patches, install dependencies, run formatters or tests that may write artifacts, or run Git commands that change refs, the index, or either working tree.
 - Never checkout, switch, reset, restore, stash, clean, commit, merge, rebase, cherry-pick, fetch, pull, or push.
 - Quote paths and pass them as command arguments; never interpolate an untrusted path into executable shell text.

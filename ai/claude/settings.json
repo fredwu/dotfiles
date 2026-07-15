@@ -3,6 +3,9 @@
   "permissions": {
     "defaultMode": "auto"
   },
+  "skillOverrides": {
+    "compare-worktree": "user-invocable-only"
+  },
   "model": "claude-fable-5[1m]",
   "hooks": {
     "SessionStart": [
