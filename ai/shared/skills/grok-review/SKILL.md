@@ -33,7 +33,7 @@ Before every command, append the attempt and round number to `execution.md`. Run
 ```bash
 grok --cwd "<repo>" \
   --prompt-file "<run>/round-NN-request.md" \
-  --verbatim --permission-mode plan --max-turns 8 --check \
+  --verbatim --permission-mode plan --max-turns 30 --check \
   --disable-web-search --no-memory \
   > "<run>/round-NN-output.md" 2> "<run>/round-NN-stderr.txt"
 ```
