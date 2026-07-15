@@ -5,9 +5,10 @@ personality = "pragmatic"
 model_verbosity = "low"
 model_reasoning_summary = "concise"
 
-notify = ["/Users/fredwu/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
 service_tier = "default"
 sandbox_mode = "workspace-write"
+
+notify = ["/Users/fredwu/.dotfiles/ai/codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
 
 [marketplaces.openai-bundled]
 last_updated = "2026-07-15T03:01:18Z"
@@ -77,9 +78,6 @@ enabled = true
 enabled = true
 
 [plugins."chrome@openai-bundled"]
-enabled = true
-
-[plugins."browser@openai-bundled"]
 enabled = true
 
 [projects."/Users/fredwu/.dotfiles"]
@@ -165,6 +163,7 @@ show-context-window-usage = true
 [features]
 hooks = true
 default_mode_request_user_input = true
+js_repl = false
 
 [hooks.state]
 
