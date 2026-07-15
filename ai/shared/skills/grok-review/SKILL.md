@@ -34,11 +34,11 @@ Before every command, append the attempt and round number to `execution.md`. Run
 grok --cwd "<repo>" \
   --prompt-file "<run>/round-NN-request.md" \
   --verbatim --permission-mode plan --max-turns 8 --check \
-  --disable-web-search --no-memory --no-subagents \
+  --disable-web-search --no-memory \
   > "<run>/round-NN-output.md" 2> "<run>/round-NN-stderr.txt"
 ```
 
-Record the outcome in `execution.md`. Count every invocation, including failures and timeouts. Never use memory, resume, subagents, web search, approval bypasses, or more permissive modes.
+Record the outcome in `execution.md`. Count each top-level CLI call as one invocation, including failures and timeouts; Grok subagents used by `--check` remain within that invocation. Never use memory, resume, web search, approval bypasses, or more permissive modes.
 
 ## Verify and bound the rounds
 
