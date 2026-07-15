@@ -1,5 +1,6 @@
 .DS_Store
 .vscode
+.local
 
 # Claude Code: credentials, conversations, and generated runtime state
 /ai/claude/.credentials.json
