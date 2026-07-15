@@ -5,7 +5,7 @@
       "repo": "anthropics/claude-plugins-official"
     },
     "installLocation": "/Users/fredwu/.claude/plugins/marketplaces/claude-plugins-official",
-    "lastUpdated": "2026-07-14T04:19:40.570Z"
+    "lastUpdated": "2026-07-15T15:09:45.144Z"
   },
   "oliver-kriska": {
     "source": {
@@ -13,7 +13,7 @@
       "repo": "oliver-kriska/claude-elixir-phoenix"
     },
     "installLocation": "/Users/fredwu/.claude/plugins/marketplaces/oliver-kriska",
-    "lastUpdated": "2026-07-15T06:13:56.653Z",
+    "lastUpdated": "2026-07-15T15:09:44.491Z",
     "autoUpdate": true
   },
   "gamma-internal-plugins": {
