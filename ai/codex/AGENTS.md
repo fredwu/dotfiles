@@ -1,4 +1,4 @@
-@/Users/fredwu/.codex/RTK.md
+@RTK.md
 
 ## Agent routing
 
