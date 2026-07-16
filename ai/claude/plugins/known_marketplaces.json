@@ -5,7 +5,7 @@
       "repo": "anthropics/claude-plugins-official"
     },
     "installLocation": "/Users/fredwu/.claude/plugins/marketplaces/claude-plugins-official",
-    "lastUpdated": "2026-07-15T15:09:45.144Z"
+    "lastUpdated": "2026-07-16T04:28:40.963Z"
   },
   "oliver-kriska": {
     "source": {
@@ -13,7 +13,7 @@
       "repo": "oliver-kriska/claude-elixir-phoenix"
     },
     "installLocation": "/Users/fredwu/.claude/plugins/marketplaces/oliver-kriska",
-    "lastUpdated": "2026-07-15T15:09:44.491Z",
+    "lastUpdated": "2026-07-16T04:41:54.753Z",
     "autoUpdate": true
   },
   "gamma-internal-plugins": {
@@ -30,7 +30,7 @@
       "url": "https://github.com/wakatime/claude-code-wakatime.git"
     },
     "installLocation": "/Users/fredwu/.claude/plugins/marketplaces/wakatime",
-    "lastUpdated": "2026-07-15T06:13:57.200Z",
+    "lastUpdated": "2026-07-16T04:41:55.269Z",
     "autoUpdate": true
   }
 }

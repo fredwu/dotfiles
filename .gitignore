@@ -42,6 +42,7 @@
 /ai/codex/cache/
 /ai/codex/chrome-native-hosts*.json
 /ai/codex/computer-use/*.app/
+/ai/codex/generated_images/
 /ai/codex/history.jsonl
 /ai/codex/installation_id
 /ai/codex/log/

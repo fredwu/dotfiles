@@ -10,13 +10,16 @@ sandbox_mode = "workspace-write"
 
 notify = ["/Users/fredwu/.dotfiles/ai/codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
 
+[agents]
+max_threads = 16
+
 [marketplaces.openai-bundled]
 last_updated = "2026-07-15T03:01:18Z"
 source_type = "local"
 source = "/Users/fredwu/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
 [marketplaces.openai-primary-runtime]
-last_updated = "2026-07-15T14:22:31Z"
+last_updated = "2026-07-16T08:17:59Z"
 source_type = "local"
 source = "/Users/fredwu/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
 
@@ -95,6 +98,9 @@ trust_level = "trusted"
 [projects."/Users/fredwu/Code/Clients/Gamma/gamma"]
 trust_level = "trusted"
 
+[projects."/Users/fredwu/Documents/Codex/2026-07-16/i-2"]
+trust_level = "trusted"
+
 [mcp_servers.node_repl]
 args = []
 command = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
@@ -106,13 +112,13 @@ NODE_REPL_NODE_MODULE_DIRS = "/Applications/ChatGPT.app/Contents/Resources/cua_n
 NODE_REPL_NODE_PATH = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node"
 NODE_REPL_TRUSTED_CODE_PATHS = "/Users/fredwu/.codex"
 CODEX_HOME = "/Users/fredwu/.codex"
-NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "6d25aa7656feac858f3a3bdaea5bcbab0dbfd426c9de8e6931ce90c399ee8e4f,cf732b4a285497bfd7e75a2ac14879bce9ae644eb4e1babeb17bb6a840dfc9bd"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "6d25aa7656feac858f3a3bdaea5bcbab0dbfd426c9de8e6931ce90c399ee8e4f,7abc8b22abade944bcd80135500416c7aee60c0e94290c7d644b54428a0013ab"
 BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
 NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
 NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
 NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE = "Control desktop apps on macOS through Computer Use."
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.707.72221"
+BROWSER_USE_CODEX_APP_VERSION = "26.707.91948"
 SKY_CUA_SERVICE_PATH = "/Users/fredwu/.codex/plugins/cache/openai-bundled/computer-use/1.0.1000387/Codex Computer Use.app"
 CODEX_CLI_PATH = "/Applications/ChatGPT.app/Contents/Resources/codex"
 
