@@ -98,9 +98,6 @@ trust_level = "trusted"
 [projects."/Users/fredwu/Code/Clients/Gamma/gamma"]
 trust_level = "trusted"
 
-[projects."/Users/fredwu/Documents/Codex/2026-07-16/i-2"]
-trust_level = "trusted"
-
 [mcp_servers.node_repl]
 args = []
 command = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"

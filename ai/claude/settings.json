@@ -4,6 +4,7 @@
     "defaultMode": "auto"
   },
   "skillOverrides": {
+    "compare-reports": "user-invocable-only",
     "compare-worktree": "user-invocable-only"
   },
   "model": "claude-fable-5[1m]",

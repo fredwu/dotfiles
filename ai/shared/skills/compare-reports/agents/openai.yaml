@@ -1,0 +1,6 @@
+interface:
+  display_name: "Compare Reports"
+  short_description: "Compare another report for useful improvements"
+  default_prompt: "Use $compare-reports with exactly one target report file and return only actionable improvements for my current report."
+policy:
+  allow_implicit_invocation: false
