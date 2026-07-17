@@ -5,7 +5,7 @@ alias arm="arch -arm64 zsh"
 
 alias ibrew="arch -x86_64 /usr/local/bin/brew"
 alias bo="brew outdated"
-alias bu="brew upgrade"
+alias bu="brew update && brew upgrade"
 
 alias se="nvim ~/.zshrc"
 alias sr="source ~/.zshrc && echo '.zshrc reloaded!'"
