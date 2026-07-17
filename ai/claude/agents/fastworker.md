@@ -1,5 +1,5 @@
 ---
-name: fast-worker
+name: fastworker
 description: Fast execution agent for simple, quick, straightforward, low-risk tasks with clear requirements, including search, documentation, and test tasks.
 model: fable
 effort: medium
