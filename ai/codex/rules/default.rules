@@ -35,3 +35,4 @@ prefix_rule(pattern=["aws", "elbv2", "describe-target-health"], decision="allow"
 prefix_rule(pattern=["aws", "ec2", "describe-security-groups"], decision="allow")
 prefix_rule(pattern=["rtk", "grok", "--cwd", "/Users/fredwu/Documents/Codex/2026-07-16/i/work/grok-review-verification", "--prompt-file", "/Users/fredwu/Documents/Codex/2026-07-16/i/work/grok-review-verification/.local/reviews/grok-review.compat/round-02-request.md", "--verbatim", "--permission-mode", "plan", "--max-turns", "8", "--check", "--disable-web-search", "--no-memory"], decision="allow")
 prefix_rule(pattern=["rm", "-rf", "/private/tmp/grok-review-validate-codex-20260716"], decision="allow")
+prefix_rule(pattern=["ps", "-p"], decision="allow")

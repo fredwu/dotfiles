@@ -13,7 +13,7 @@
       "repo": "oliver-kriska/claude-elixir-phoenix"
     },
     "installLocation": "/Users/fredwu/.claude/plugins/marketplaces/oliver-kriska",
-    "lastUpdated": "2026-07-17T03:33:25.185Z",
+    "lastUpdated": "2026-07-17T11:42:55.224Z",
     "autoUpdate": true
   },
   "gamma-internal-plugins": {
@@ -30,7 +30,7 @@
       "url": "https://github.com/wakatime/claude-code-wakatime.git"
     },
     "installLocation": "/Users/fredwu/.claude/plugins/marketplaces/wakatime",
-    "lastUpdated": "2026-07-17T03:33:25.696Z",
+    "lastUpdated": "2026-07-17T11:42:55.737Z",
     "autoUpdate": true
   }
 }
