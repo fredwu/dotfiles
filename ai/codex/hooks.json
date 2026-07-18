@@ -1,12 +1,12 @@
 {
-  "hooks": {
-    "SessionStart": [
+  "hooks" : {
+    "SessionStart" : [
       {
-        "hooks": [
+        "hooks" : [
           {
-            "command": "bash '/Users/fredwu/.codex/herdr-agent-state.sh' session",
-            "timeout": 10,
-            "type": "command"
+            "command" : "bash '\/Users\/fredwu\/.codex\/herdr-agent-state.sh' session",
+            "timeout" : 10,
+            "type" : "command"
           }
         ]
       }

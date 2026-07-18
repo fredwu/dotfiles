@@ -109,13 +109,14 @@ NODE_REPL_NODE_MODULE_DIRS = "/Applications/ChatGPT.app/Contents/Resources/cua_n
 NODE_REPL_NODE_PATH = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node"
 NODE_REPL_TRUSTED_CODE_PATHS = "/Users/fredwu/.codex"
 CODEX_HOME = "/Users/fredwu/.codex"
-NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "5b74180ac40ca4cf726cad15c5ff886f159224f1c0306ea364ad9eea6a7e7ac2,6d25aa7656feac858f3a3bdaea5bcbab0dbfd426c9de8e6931ce90c399ee8e4f"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "461c4ba94b821ec805da79c8e8138fe510b1b3358609fc93da47387a2cf3fbf3,6d25aa7656feac858f3a3bdaea5bcbab0dbfd426c9de8e6931ce90c399ee8e4f"
 BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
 NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
 NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
 NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE = "Control desktop apps on macOS through Computer Use."
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.715.21425"
+BROWSER_USE_CODEX_APP_VERSION = "26.715.31925"
+SKY_CUA_SERVICE_PATH = "/Users/fredwu/.codex/plugins/cache/openai-bundled/computer-use/1.0.1000451/Codex Computer Use.app"
 CODEX_CLI_PATH = "/Applications/ChatGPT.app/Contents/Resources/codex"
 
 [mcp_servers.petal]
@@ -253,6 +254,24 @@ trusted_hash = "sha256:84094d8aa7937a8545ef4d87ef03a0309f77bd2670fbc74560c922f3f
 [hooks.state."/Users/fredwu/.codex/hooks.json:session_start:0:0"]
 trusted_hash = "sha256:58dce7b6f7c45facf9a466edc4c358f57d994bac3662ed9f81e6fa8b45793ae0"
 
+[hooks.state."/Users/fredwu/.codex/hooks.json:user_prompt_submit:0:0"]
+trusted_hash = "sha256:e9f8da964e5c533d88824c94e7955492a85cc9a7f9578292698defa12be6f16e"
+
+[hooks.state."/Users/fredwu/.codex/hooks.json:subagent_stop:0:0"]
+trusted_hash = "sha256:1fa4d2c64c7cbce9005c0e26ba83875b4ac2a0f04006ef0cf3ad2857a9890836"
+
+[hooks.state."/Users/fredwu/.codex/hooks.json:session_start:1:0"]
+trusted_hash = "sha256:20232598452278eecbc282e116bb38f42f45c50d4c35a545ea1501277d12f761"
+
+[hooks.state."/Users/fredwu/.codex/hooks.json:post_tool_use:0:0"]
+trusted_hash = "sha256:a2b9112f35d9f9db48dc18f80f5534c18f21ba3c53a39af70f6666d12b4af8d9"
+
+[hooks.state."/Users/fredwu/.codex/hooks.json:permission_request:0:0"]
+trusted_hash = "sha256:4eba6e842d3f20a988043a580ca518100c4d7d767102dec343cffe4a56a2cddd"
+
+[hooks.state."/Users/fredwu/.codex/hooks.json:stop:0:0"]
+trusted_hash = "sha256:5f60e37b657cea840628018bf59e2cd297c28926486324d403adbf4855a6ef50"
+
 [apps.connector_20205bf7d4e99a89d7154bb849718324]
 enabled = false
 
@@ -261,5 +280,8 @@ network_access = true
 
 [shell_environment_policy.set]
 BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
-NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "5b74180ac40ca4cf726cad15c5ff886f159224f1c0306ea364ad9eea6a7e7ac2,6d25aa7656feac858f3a3bdaea5bcbab0dbfd426c9de8e6931ce90c399ee8e4f"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "461c4ba94b821ec805da79c8e8138fe510b1b3358609fc93da47387a2cf3fbf3,6d25aa7656feac858f3a3bdaea5bcbab0dbfd426c9de8e6931ce90c399ee8e4f"
 NODE_REPL_TRUSTED_CODE_PATHS = "/Users/fredwu/.codex"
+
+[tui]
+terminal_title = []

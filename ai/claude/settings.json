@@ -1,42 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "permissions": {
-    "defaultMode": "auto"
-  },
-  "skillOverrides": {
-    "compare-reports": "user-invocable-only",
-    "compare-worktree": "user-invocable-only"
-  },
-  "model": "claude-fable-5[1m]",
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash '/Users/fredwu/.claude/hooks/herdr-agent-state.sh' session",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "rtk hook claude"
-          }
-        ]
-      }
-    ]
-  },
-  "statusLine": {
-    "type": "command",
-    "command": "input=$(cat); printf \"\\033[36m%s\\033[0m [\\033[35m%s\\033[0m] %s\" \"$(basename \"$(echo \"$input\" | jq -r '.workspace.current_dir')\")\" \"$(echo \"$input\" | jq -r '.model.display_name')\" \"$(date +%H:%M:%S)\""
-  },
+  "alwaysThinkingEnabled": true,
+  "effortLevel": "xhigh",
   "enabledPlugins": {
     "claude-code-setup@claude-plugins-official": false,
     "claude-code-wakatime@wakatime": true,
@@ -54,25 +19,60 @@
   },
   "extraKnownMarketplaces": {
     "oliver-kriska": {
+      "autoUpdate": true,
       "source": {
-        "source": "github",
-        "repo": "oliver-kriska/claude-elixir-phoenix"
-      },
-      "autoUpdate": true
+        "repo": "oliver-kriska/claude-elixir-phoenix",
+        "source": "github"
+      }
     },
     "wakatime": {
+      "autoUpdate": true,
       "source": {
         "source": "git",
         "url": "https://github.com/wakatime/claude-code-wakatime.git"
-      },
-      "autoUpdate": true
+      }
     }
   },
-  "alwaysThinkingEnabled": true,
-  "effortLevel": "xhigh",
-  "skipDangerousModePermissionPrompt": true,
-  "skipAutoPermissionPrompt": true,
   "feedbackSurveyState": {
     "lastShownTime": 1754019422590
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "rtk hook claude",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "bash '/Users/fredwu/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ],
+        "matcher": "*"
+      }
+    ]
+  },
+  "model": "claude-fable-5[1m]",
+  "permissions": {
+    "defaultMode": "auto"
+  },
+  "skillOverrides": {
+    "compare-reports": "user-invocable-only",
+    "compare-worktree": "user-invocable-only"
+  },
+  "skipAutoPermissionPrompt": true,
+  "skipDangerousModePermissionPrompt": true,
+  "statusLine": {
+    "command": "input=$(cat); printf \"\\033[36m%s\\033[0m [\\033[35m%s\\033[0m] %s\" \"$(basename \"$(echo \"$input\" | jq -r '.workspace.current_dir')\")\" \"$(echo \"$input\" | jq -r '.model.display_name')\" \"$(date +%H:%M:%S)\"",
+    "type": "command"
   }
 }
