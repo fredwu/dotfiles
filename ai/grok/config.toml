@@ -34,7 +34,7 @@ args = [
 enabled = true
 
 [models]
-default = "v9-stickynote"
+default = "Grok 4.5"
 default_reasoning_effort = "xhigh"
 
 [ui]
