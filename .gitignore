@@ -2,6 +2,8 @@
 .vscode
 .local
 
+/ai/**/*.backup*
+
 # Claude Code: credentials, conversations, and generated runtime state
 /ai/claude/.credentials.json
 /ai/claude/.last-cleanup
