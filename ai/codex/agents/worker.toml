@@ -2,7 +2,7 @@ name = "worker"
 description = "Primary execution agent for complex or general coding, implementation, debugging, bug fixes, and verification. Use when task complexity is uncertain or correctness benefits from deeper reasoning."
 
 model = "gpt-5.6-sol"
-model_reasoning_effort = "high"
+model_reasoning_effort = "medium"
 
 developer_instructions = """
 Execute the bounded task assigned by the parent agent.

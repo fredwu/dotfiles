@@ -1,5 +1,5 @@
 model = "gpt-5.6-sol"
-model_reasoning_effort = "xhigh"
+model_reasoning_effort = "high"
 
 personality = "pragmatic"
 model_verbosity = "low"
@@ -11,7 +11,7 @@ sandbox_mode = "workspace-write"
 notify = ["/Users/fredwu/.dotfiles/ai/codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
 
 [agents]
-max_threads = 16
+max_threads = 12
 
 [marketplaces.openai-bundled]
 last_updated = "2026-07-15T03:01:18Z"
