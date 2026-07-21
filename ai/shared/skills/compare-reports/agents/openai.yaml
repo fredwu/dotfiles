@@ -1,6 +1,6 @@
 interface:
   display_name: "Compare Reports"
   short_description: "Compare reports and resolve key differences"
-  default_prompt: "Use $compare-reports with exactly one target report file and give me a concise decision brief covering conflicts, improvements, and choices where my guidance is needed."
+  default_prompt: "Use $compare-reports with exactly one target report file and give me a concise numbered decision table covering conflicts, improvements, and choices where my guidance is needed."
 policy:
   allow_implicit_invocation: false

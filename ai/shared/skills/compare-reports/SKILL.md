@@ -1,6 +1,6 @@
 ---
 name: compare-reports
-description: Compare the current agent's prior user-visible analysis report with one explicitly supplied report file and produce a concise decision brief covering material conflicts, useful improvements, and questions needing user judgment. Independently recommend how to resolve conflicts. Use only when the user explicitly invokes this skill with exactly one target report file; never invoke implicitly, from a general comparison request, or without that file.
+description: Compare the current agent's prior user-visible analysis report with one explicitly supplied report file and produce a concise numbered decision table covering material conflicts, useful improvements, and questions needing user judgment. Independently recommend how to resolve conflicts. Use only when the user explicitly invokes this skill with exactly one target report file; never invoke implicitly, from a general comparison request, or without that file.
 ---
 
 # Compare Reports
@@ -83,24 +83,31 @@ Treat materially equivalent coverage as yielding no useful finding. The current 
 
 ### 7. Produce a concise decision brief
 
-Output one prioritized list under `## Findings`. Include only information that can improve the current report or help the user give informed opinion and guidance. Classify every item as one of:
+Output one prioritized Markdown table under `## Findings`. Include only information that can improve the current report or help the user give informed opinion and guidance. Classify every row as one of:
 
 - **Conflict**: the reports materially disagree on a finding, factual claim, priority, risk, or recommendation. State both positions with section or line provenance, then give an independent recommendation and concise basis.
 - **Improvement**: a verified omission, correction, stronger piece of evidence, useful qualification, alternative, risk, or clearer decision-oriented framing worth incorporating into the current report. State the proposed revision and why it matters.
 - **Decision point**: the best choice genuinely depends on the user's goals, risk tolerance, preferences, inaccessible evidence, or an unresolved ambiguity. State what turns on the choice, the options and tradeoffs, the specific input needed, and the best default when one can be supported.
 
-Use this compact form:
+Use this exact column structure:
 
 ```markdown
 ## Findings
-- **Conflict — <topic>**: Current: <position and location>. Target: <position and location>. Independent recommendation: <resolution>. Basis: <evidence and uncertainty>.
-- **Improvement — <topic>**: <what to revise and why>. Evidence: <relevant locations>.
-- **Decision point — <topic>**: <choice and material tradeoffs>. Input needed: <specific user guidance or evidence>. Default: <supported default, or "none until clarified">.
+
+| # | Finding | Our choice / position | Their choice / position | Independent recommendation | Basis |
+|---:|---|---|---|---|---|
+| 1 | Conflict — <topic> | <position and location> | <position and location> | <keep ours, adopt theirs, combine, conditional choice, neither, or gather evidence> | <concise evidence and uncertainty> |
+| 2 | Improvement — <topic> | <current coverage or "Not covered"> | <useful addition and location> | <specific revision> | <why it matters and supporting evidence> |
+| 3 | Decision point — <topic> | <position or "Not addressed"> | <position or "Not addressed"> | <input needed and supported default, or "No default until clarified"> | <material options and tradeoffs> |
+
+Refer to any finding by its `#`.
 ```
 
-Include every material conflict, even when the independent recommendation is to keep the current report and no revision follows. Include decision points only when user guidance could materially change the conclusion; do not turn routine editorial choices into questions. Distinguish direct adoption from an improvement merely inspired by the target when that affects the recommendation. Keep all findings consistent with the independent conflict resolutions and avoid duplicate rationale.
+Number rows consecutively from `1` in priority order. Give each independently discussable issue its own row so the user can refer to it unambiguously; merge only tightly coupled points that must be decided together. Keep cells concise, escape literal `|` characters, and use `<br>` only when a short in-cell line break materially improves readability.
 
-Do not include process narration, general summaries of either report, scorecards, praise, criticism, hidden reasoning, or recommendations for editing the target file. Do not rewrite or modify the current report unless the user asks afterward. Prefer five or fewer findings; exceed that only when additional items are independently material.
+Include every material conflict, even when the independent recommendation is to keep the current report and no revision follows. Include decision points only when user guidance could materially change the conclusion; do not turn routine editorial choices into questions. Distinguish direct adoption from an improvement merely inspired by the target when that affects the recommendation. Keep all findings consistent with the independent conflict resolutions and avoid duplicate rationale. After the table, include the single sentence `Refer to any finding by its #.` and nothing else.
+
+Do not include process narration, general summaries of either report, scorecards, praise, criticism, hidden reasoning, or recommendations for editing the target file. Do not rewrite or modify the current report unless the user asks afterward. Prefer five or fewer rows; exceed that only when additional items are independently material.
 
 If there are no material conflicts, improvements, or decision points, output exactly:
 
