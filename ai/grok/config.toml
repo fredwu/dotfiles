@@ -44,6 +44,9 @@ yolo = false
 compact_mode = false
 permission_mode = "always-approve"
 
+[marketplace]
+default_skills_installs_purged = true
+
 [[marketplace.sources]]
 name = "plugin-marketplace"
 git = "https://github.com/xai-org/plugin-marketplace.git"

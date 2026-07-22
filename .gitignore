@@ -37,6 +37,7 @@
 /ai/codex/.app-server-state-reconciled-*
 /ai/codex/.codex-global-state.json*
 /ai/codex/.personality_migration
+/ai/codex/.sandbox_migration
 /ai/codex/.tmp/
 /ai/codex/archived_sessions/
 /ai/codex/attachments/
@@ -75,6 +76,7 @@
 /ai/codex/*.sqlite-*
 
 # Grok: credentials, conversations, installed runtime, and generated state
+/ai/grok/.config-init.lock
 /ai/grok/.metadata_version
 /ai/grok/CHANGELOG.json
 /ai/grok/CHANGELOG.md
@@ -89,6 +91,7 @@
 /ai/grok/completions/
 /ai/grok/docs/
 /ai/grok/downloads/
+/ai/grok/last-copy.txt
 /ai/grok/logs/
 /ai/grok/managed_config.lock
 /ai/grok/managed_config_cache.json

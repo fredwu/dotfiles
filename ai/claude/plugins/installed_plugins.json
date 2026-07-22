@@ -7,7 +7,7 @@
         "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/context7/unknown",
         "version": "unknown",
         "installedAt": "2025-12-18T03:30:43.160Z",
-        "lastUpdated": "2026-07-18T10:44:40.863Z"
+        "lastUpdated": "2026-07-22T06:47:04.288Z"
       }
     ],
     "frontend-design@claude-plugins-official": [
@@ -16,7 +16,7 @@
         "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/frontend-design/unknown",
         "version": "unknown",
         "installedAt": "2026-05-10T13:08:31.450Z",
-        "lastUpdated": "2026-07-18T10:44:40.864Z"
+        "lastUpdated": "2026-07-22T06:47:04.287Z"
       }
     ],
     "code-review@claude-plugins-official": [
@@ -25,7 +25,7 @@
         "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/code-review/unknown",
         "version": "unknown",
         "installedAt": "2026-05-10T13:08:36.116Z",
-        "lastUpdated": "2026-07-18T10:44:40.860Z"
+        "lastUpdated": "2026-07-22T06:47:04.285Z"
       }
     ],
     "code-simplifier@claude-plugins-official": [
@@ -43,7 +43,7 @@
         "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/skill-creator/unknown",
         "version": "unknown",
         "installedAt": "2026-05-10T13:08:54.429Z",
-        "lastUpdated": "2026-07-18T10:44:40.863Z"
+        "lastUpdated": "2026-07-22T06:47:04.288Z"
       }
     ],
     "feature-dev@claude-plugins-official": [
@@ -52,7 +52,7 @@
         "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/feature-dev/unknown",
         "version": "unknown",
         "installedAt": "2026-05-10T13:09:04.592Z",
-        "lastUpdated": "2026-07-18T10:44:40.861Z"
+        "lastUpdated": "2026-07-22T06:47:04.286Z"
       }
     ],
     "claude-md-management@claude-plugins-official": [
@@ -94,11 +94,11 @@
     "elixir-phoenix@oliver-kriska": [
       {
         "scope": "user",
-        "installPath": "/Users/fredwu/.claude/plugins/cache/oliver-kriska/elixir-phoenix/2.14.2",
-        "version": "2.14.2",
+        "installPath": "/Users/fredwu/.claude/plugins/cache/oliver-kriska/elixir-phoenix/2.14.3",
+        "version": "2.14.3",
         "installedAt": "2026-05-31T14:11:03.564Z",
-        "lastUpdated": "2026-07-14T02:38:44.275Z",
-        "gitCommitSha": "d6b21b52db07d61eb0d3c1049ceeadb537cdd14b"
+        "lastUpdated": "2026-07-20T06:26:16.320Z",
+        "gitCommitSha": "968c4aed006f8b39ffda37e9ad4a633c044931cd"
       }
     ],
     "pr-review-toolkit@claude-plugins-official": [
@@ -107,7 +107,7 @@
         "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/pr-review-toolkit/unknown",
         "version": "unknown",
         "installedAt": "2026-07-06T03:33:41.247Z",
-        "lastUpdated": "2026-07-18T10:44:40.863Z"
+        "lastUpdated": "2026-07-22T06:47:04.288Z"
       }
     ],
     "claude-code-wakatime@wakatime": [
