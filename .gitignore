@@ -98,6 +98,7 @@
 /ai/grok/marketplace-cache/
 /ai/grok/memtrace/
 /ai/grok/models_cache.json
+/ai/grok/relocations/
 /ai/grok/sandbox-events.jsonl
 /ai/grok/sessions/
 /ai/grok/slash-mru.json

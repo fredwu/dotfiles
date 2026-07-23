@@ -7,7 +7,7 @@
         "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/context7/unknown",
         "version": "unknown",
         "installedAt": "2025-12-18T03:30:43.160Z",
-        "lastUpdated": "2026-07-22T06:47:04.288Z"
+        "lastUpdated": "2026-07-23T08:29:40.582Z"
       }
     ],
     "frontend-design@claude-plugins-official": [
@@ -16,7 +16,7 @@
         "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/frontend-design/unknown",
         "version": "unknown",
         "installedAt": "2026-05-10T13:08:31.450Z",
-        "lastUpdated": "2026-07-22T06:47:04.287Z"
+        "lastUpdated": "2026-07-23T08:29:40.582Z"
       }
     ],
     "code-review@claude-plugins-official": [
@@ -25,7 +25,7 @@
         "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/code-review/unknown",
         "version": "unknown",
         "installedAt": "2026-05-10T13:08:36.116Z",
-        "lastUpdated": "2026-07-22T06:47:04.285Z"
+        "lastUpdated": "2026-07-23T08:29:40.584Z"
       }
     ],
     "code-simplifier@claude-plugins-official": [
@@ -43,7 +43,7 @@
         "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/skill-creator/unknown",
         "version": "unknown",
         "installedAt": "2026-05-10T13:08:54.429Z",
-        "lastUpdated": "2026-07-22T06:47:04.288Z"
+        "lastUpdated": "2026-07-23T08:29:40.582Z"
       }
     ],
     "feature-dev@claude-plugins-official": [
@@ -52,7 +52,7 @@
         "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/feature-dev/unknown",
         "version": "unknown",
         "installedAt": "2026-05-10T13:09:04.592Z",
-        "lastUpdated": "2026-07-22T06:47:04.286Z"
+        "lastUpdated": "2026-07-23T08:29:40.585Z"
       }
     ],
     "claude-md-management@claude-plugins-official": [
@@ -107,7 +107,7 @@
         "installPath": "/Users/fredwu/.claude/plugins/cache/claude-plugins-official/pr-review-toolkit/unknown",
         "version": "unknown",
         "installedAt": "2026-07-06T03:33:41.247Z",
-        "lastUpdated": "2026-07-22T06:47:04.288Z"
+        "lastUpdated": "2026-07-23T08:29:40.581Z"
       }
     ],
     "claude-code-wakatime@wakatime": [
