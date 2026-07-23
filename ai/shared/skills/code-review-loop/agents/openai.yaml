@@ -1,0 +1,6 @@
+interface:
+  display_name: "Code Review Loop"
+  short_description: "Iterate through evidence-driven code review"
+  default_prompt: "Use $code-review-loop to review and safely remediate this change until it is clean or bounded."
+policy:
+  allow_implicit_invocation: false
