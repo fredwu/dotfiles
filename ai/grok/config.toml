@@ -64,3 +64,10 @@ rules = false
 agents = false
 mcps = false
 hooks = false
+
+[plugins]
+disabled = []
+enabled = [
+    "user/5244ce76/elixir-phoenix",
+    "user/9df1af51/code-review",
+]
