@@ -63,27 +63,27 @@ If subagents are unavailable, perform a clearly separated fresh review pass your
 
 Treat a reviewer pass as failed when it mutates the tree, does not demonstrate inspection of the resolved target, returns malformed or incomplete output, or neither supplies ledger-ready findings nor states `No findings.` with a brief inspection summary. Do not invoke a second reviewer for the same round. Complete the scheduled lens yourself as the same round's clearly separated fallback when that remains safe; otherwise stop. Allow at most one reviewer invocation and one fallback pass per round, and count the round even when its reviewer fails.
 
-Use broad but complementary lenses for the first three rounds:
+Use up to three broad review rounds. Every round used in this phase must inspect all qualifying review categories across the complete target; the numbered lenses below are emphases, not exclusive scopes:
 
 1. **Requirements and whole diff:** check repository instructions, acceptance criteria, exclusions, and the entire target for missing or contradictory behavior.
 2. **Behavior and boundaries:** check correctness, error and boundary cases, call sites, tests, security, and performance. Confirm real execution paths rather than isolated snippets.
 3. **Context and challenge:** inspect relevant history, blame, comments, local conventions, and maintainability; challenge earlier candidates for false positives, pre-existing behavior, or disproportionate remediation.
 
-After each of rounds 1-3, independently verify every candidate before accepting it. Inspect the cited code and call path, reproduce when practical, and reject unsupported or out-of-scope claims. Apply only verified fixes that fit the original authorization, then run proportionate focused checks and update the ledger.
+After each broad round, independently verify every candidate before accepting it. Inspect the cited code and call path, reproduce when practical, and reject unsupported or out-of-scope claims. Apply only verified fixes that fit the original authorization, then run proportionate focused checks and update the ledger.
 
-Complete all three complementary broad lenses unless the user stops the run, the target is empty or unavailable, authorization is lost, or a same-round fallback cannot be performed safely. A clean result from one lens does not establish that the other lenses are clean. After round 3, end the broad phase and do not repeat it mechanically. Enter rounds 4-9 only when the blocker predicate below is satisfied; otherwise finish and report any unresolved `P2` or `P3` findings.
+Rounds 1-3 are a maximum budget, not mandatory passes. Stop the broad phase as soon as a completed broad round leaves no qualifying finding unresolved. Otherwise, use another broad round when it can provide evidence-backed progress, changing the emphasis without narrowing the review categories. After round 3, end the broad phase and do not repeat it mechanically. Enter rounds 4-9 only when the blocker predicate below is satisfied; otherwise finish and report any unresolved non-blocking findings.
 
 ## Escalate only true blockers
 
-Use rounds 4-9 only while at least one verified unresolved `P0`, `P1`, or core acceptance blocker remains. Narrow each round exclusively to those ledger IDs, their remediation, and regression risk. Exclude `P2`, `P3`, general cleanup, and new lower-priority findings.
+Use rounds 4-9 only while at least one verified unresolved system-breaking or core blocker remains. Possible blockers include build or startup failure, data loss or corruption, exploitable authorization or security failure, severe availability failure, or inability to satisfy a core requirement. A priority label alone is insufficient: ordinary bugs, test gaps, maintainability concerns, and other non-system-breaking `P1` findings do not qualify. Narrow each round exclusively to qualifying ledger IDs, their remediation, and regression risk. Exclude all non-blocking findings, general cleanup, and new lower-priority findings.
 
-Continue to verify candidates independently, remediate only within authorization, and run proportionate checks after each fix. Stop immediately on repeated findings without new evidence, scope drift, insufficient evidence, no measurable progress, unavailable authority, or a blocker that requires user input.
+Continue to verify candidates independently, remediate only within authorization, and run proportionate checks after each fix. Across all phases, stop early on no evidence-backed progress, repeated findings without new evidence, scope drift, malformed or inadequate review output that the same-round fallback cannot cure, unavailable authority, or a blocker that requires user input.
 
 Never exceed 10 review rounds. Count a round when its scheduled review cycle begins; a failed reviewer and its same-round fallback do not create extra rounds.
 
 ## Finish with an audit
 
-Use round 10 only as a read-only final synthesis and audit. Ask the reviewer to summarize accepted, fixed, rejected, and deferred findings; verification; and residual risks or blockers. If that reviewer fails, perform the synthesis yourself within the same round. Make no remediation after round 10.
+Use round 10 only as a read-only final consultation, synthesis, and audit. Ask the reviewer to summarize accepted, fixed, rejected, and deferred findings; verification; and residual risks or blockers. Do not ask it to discover remediable work. If that reviewer fails, perform the synthesis yourself within the same round. Make no remediation during or after round 10.
 
 If stopping before round 10, produce the same synthesis yourself without invoking an extra reviewer. Once either synthesis begins, make no further remediation; use the final inspection only to confirm and report residual issues. In every finish path, perform a final independent inspection of the resulting diff and worktree, confirm unrelated dirty work remains intact, and report exactly which checks ran and which did not.
 
