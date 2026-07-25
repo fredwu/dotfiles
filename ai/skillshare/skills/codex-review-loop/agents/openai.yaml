@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Review Loop"
+  short_description: "Iterate with external Codex review"
+  default_prompt: "Use $codex-review-loop to review and remediate my changes until clean or safely bounded."
