@@ -112,4 +112,4 @@ alias updatedb="sudo /usr/libexec/locate.updatedb"
 
 alias vs="code ."
 
-alias zr="cd ~/.zprezto && git pull && git submodule update --init --recursive"
+alias zr="(cd ~/.zprezto && git pull && git submodule update --init --recursive)"
