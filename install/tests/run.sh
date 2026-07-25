@@ -201,9 +201,18 @@ test_dotfile_install() {
   assert_true "SSH config should be linked" test -L "$HOME/.ssh/config"
   assert_true "GPG agent config should be linked" test -L "$HOME/.gnupg/gpg-agent.conf"
   assert_true "Neovim config should be linked" test -L "$XDG_CONFIG_HOME/nvim"
-  assert_true "Claude config should be linked" test -L "$HOME/.claude"
-  assert_true "Codex config should be linked" test -L "$HOME/.codex"
-  assert_true "Grok config should be linked" test -L "$HOME/.grok"
+  assert_true "Claude config should be a directory" test -d "$HOME/.claude"
+  assert_false "Claude config should not be linked" test -L "$HOME/.claude"
+  assert_true "Codex config should be a directory" test -d "$HOME/.codex"
+  assert_false "Codex config should not be linked" test -L "$HOME/.codex"
+  assert_true "Grok config should be a directory" test -d "$HOME/.grok"
+  assert_false "Grok config should not be linked" test -L "$HOME/.grok"
+  assert_eq "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$(readlink "$HOME/.claude/CLAUDE.md")" \
+    "Claude instructions should link to shared instructions"
+  assert_eq "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$(readlink "$HOME/.codex/AGENTS.md")" \
+    "Codex instructions should link to shared instructions"
+  assert_eq "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$(readlink "$HOME/.grok/AGENTS.md")" \
+    "Grok instructions should link to shared instructions"
   assert_eq 700 "$(stat -f '%Lp' "$HOME/.ssh" 2>/dev/null || stat -c '%a' "$HOME/.ssh")" \
     "SSH directory should have mode 700"
   assert_eq 0 "$(find "$DOTFILES_BACKUP_ROOT" -type f 2>/dev/null | awk 'END { print NR + 0 }')" \
@@ -220,7 +229,9 @@ test_repository_path_with_spaces() {
 
   mkdir -p "$DOTFILES_ROOT/templates/ssh" "$DOTFILES_ROOT/templates/gnupg" \
     "$DOTFILES_ROOT/config/nvim" "$DOTFILES_ROOT/zsh" \
-    "$DOTFILES_ROOT/ai/claude" "$DOTFILES_ROOT/ai/codex" "$DOTFILES_ROOT/ai/grok"
+    "$DOTFILES_ROOT/ai/shared/skills/example"
+  printf 'shared skill\n' > "$DOTFILES_ROOT/ai/shared/skills/example/SKILL.md"
+  printf 'instructions\n' > "$DOTFILES_ROOT/ai/shared/AGENTS.md"
   for name in ackrc gemrc gitconfig gitignore_global railsrc zlogin zpreztorc zprofile zshenv zshrc; do
     cp "$source_root/templates/$name" "$DOTFILES_ROOT/templates/$name"
   done
@@ -233,35 +244,54 @@ test_repository_path_with_spaces() {
     "repository paths containing spaces should be preserved"
   assert_eq "$DOTFILES_ROOT/config/nvim" "$(readlink "$XDG_CONFIG_HOME/nvim")" \
     "XDG paths containing spaces should be preserved"
-  assert_eq "$DOTFILES_ROOT/ai/codex" "$(readlink "$HOME/.codex")" \
-    "AI config links should preserve repository paths containing spaces"
+  assert_eq "$DOTFILES_ROOT/ai/shared/skills/example" "$(readlink "$HOME/.codex/skills/example")" \
+    "shared skill links should preserve repository paths containing spaces"
   finish_test "repository and HOME paths containing spaces"
 }
 
-test_ai_config_directories_are_archived() {
+test_ai_config_directories_preserve_provider_data() {
   local DOTFILES_ROOT=$TEST_ROOT
-  local backup_count
   local name
   export DOTFILES_ROOT
 
   for name in claude codex grok; do
-    mkdir -p "$HOME/.$name"
+    mkdir -p "$HOME/.$name/skills/provider-owned"
     printf '%s config\n' "$name" > "$HOME/.$name/preserved"
+    printf '%s skill\n' "$name" > "$HOME/.$name/skills/provider-owned/SKILL.md"
   done
 
   install_dotfiles
   for name in claude codex grok; do
-    assert_eq "$DOTFILES_ROOT/ai/$name" "$(readlink "$HOME/.$name")" \
-      "$name config should link to the repository"
-    assert_true "$name config directory should be archived" \
-      test -f "$DOTFILES_BACKUP_ROOT"/*/.$name/preserved
+    assert_false "$name config should remain a real directory" test -L "$HOME/.$name"
+    assert_true "$name config should be preserved" test -f "$HOME/.$name/preserved"
+    assert_true "$name provider skill should be preserved" \
+      test -f "$HOME/.$name/skills/provider-owned/SKILL.md"
+    assert_eq "$DOTFILES_ROOT/ai/shared/skills/deps-upgrade" \
+      "$(readlink "$HOME/.$name/skills/deps-upgrade")" "$name shared skill should be linked"
   done
-
-  backup_count=$(find "$DOTFILES_BACKUP_ROOT" -name preserved -type f | awk 'END { print NR + 0 }')
   install_dotfiles
-  assert_eq "$backup_count" "$(find "$DOTFILES_BACKUP_ROOT" -name preserved -type f | awk 'END { print NR + 0 }')" \
-    "repeat install should not archive AI config links again"
-  finish_test "AI config directories are archived before linking"
+  assert_false "repeat install should create no backup" test -e "$DOTFILES_BACKUP_ROOT"
+  finish_test "AI config directories and provider skills are preserved"
+}
+
+test_legacy_ai_symlink_is_reversed() {
+  local DOTFILES_ROOT="$HOME/repository"
+  export DOTFILES_ROOT
+
+  mkdir -p "$DOTFILES_ROOT/ai/claude/skills/provider-owned"
+  printf 'preserved\n' > "$DOTFILES_ROOT/ai/claude/settings.json"
+  printf 'provider skill\n' > "$DOTFILES_ROOT/ai/claude/skills/provider-owned/SKILL.md"
+  ln -s "$DOTFILES_ROOT/ai/claude" "$HOME/.claude"
+
+  ensure_ai_directory claude
+
+  assert_true "legacy Claude config should become a real directory" test -d "$HOME/.claude"
+  assert_false "legacy Claude config symlink should be removed" test -L "$HOME/.claude"
+  assert_true "legacy provider data should be preserved" test -f "$HOME/.claude/settings.json"
+  assert_true "legacy provider skills should be preserved" \
+    test -f "$HOME/.claude/skills/provider-owned/SKILL.md"
+  assert_false "legacy repository directory should be moved" test -e "$DOTFILES_ROOT/ai/claude"
+  finish_test "legacy AI config symlink is reversed without losing provider data"
 }
 
 test_private_directories_replace_files_safely() {
@@ -444,7 +474,8 @@ new_home; test_idempotent_links
 new_home; test_dangling_link
 new_home; test_dotfile_install
 new_home; test_repository_path_with_spaces
-new_home; test_ai_config_directories_are_archived
+new_home; test_ai_config_directories_preserve_provider_data
+new_home; test_legacy_ai_symlink_is_reversed
 new_home; test_private_directories_replace_files_safely
 new_home; test_existing_git_checkout_is_idempotent
 new_home; test_cleanup_known_legacy_state

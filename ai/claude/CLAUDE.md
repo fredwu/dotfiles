@@ -1,1 +1,0 @@
-../shared/AGENTS.md

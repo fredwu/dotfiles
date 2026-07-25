@@ -33,10 +33,10 @@ moved to a timestamped directory under `~/.dotfiles-backups` before links are
 created. Correct links, existing package installations, fonts, and Git
 checkouts are left alone.
 
-Claude Code, Codex, and Grok configuration directories are linked from
-`~/.claude`, `~/.codex`, and `~/.grok` to their corresponding directories under
-`ai/` in this repository. Existing real directories are archived before the
-links are created.
+Claude Code, Codex, and Grok keep real configuration directories at
+`~/.claude`, `~/.codex`, and `~/.grok`, allowing tool-managed configuration to
+remain outside this repository. Their instruction files and shared skill
+entries are linked from `ai/shared`; provider-owned skills remain untouched.
 
 The installer changes the account's login shell to Zsh when necessary. Open a
 new terminal after it completes.
@@ -63,7 +63,7 @@ repeatable and then performs the normal install.
 - Hack Nerd Font
 - Git, GnuPG, direnv, fzf, zoxide, ripgrep, fd, mise, and related build tools
 - Grok, Codex, and Claude Code CLI casks on macOS
-- Repository-managed Claude Code, Codex, and Grok configuration
+- Shared instructions and skills for Claude Code, Codex, and Grok
 
 On Linux, official pinned Neovim, mise, and Tree-sitter builds are installed
 under `~/.local/opt` as needed. The pinned Neovim is used when the distribution
