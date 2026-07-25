@@ -1,44 +1,13 @@
-alias drm='docker rm -f $(docker ps -a -q) && docker rmi $(docker images -q)'
+alias b="bundle"
+alias be="bundle exec"
 
-alias x86="arch -x86_64 zsh"
-alias arm="arch -arm64 zsh"
-
-alias ibrew="arch -x86_64 /usr/local/bin/brew"
 alias bo="brew outdated"
 alias bu="brew update && brew upgrade"
 
-alias se="nvim ~/.zshrc"
-alias sr="source ~/.zshrc && echo '.zshrc reloaded!'"
-alias zr="cd ~/.zprezto && git pull && git submodule update --init --recursive"
-
-alias updatedb="sudo /usr/libexec/locate.updatedb"
-
-alias now="date +%FT%T%z"
-alias nowu="date -u +%FT%TZz"
-
-alias l="ll"
-alias la="ll -a"
-alias time="command time"
-alias pwdd="pwd | pbcopy"
-
 alias c="codex"
 alias cc="claude"
-alias vs="code ."
 
-alias ms="iex -S mix phx.server"
-alias mt="mix format && mix test"
-alias mtt="mix test --trace"
-alias mttt="iex -S mix test --trace"
-alias mft="mix full_test"
-alias mc="mix compile"
-alias mcf="mix compile --force"
-alias md="mix deps.get --all"
-alias mdu="mix deps.update --all"
-alias mdn="mix deps.unlock --all"
-alias mf="mix format"
-alias mr="mix ecto.reset && MIX_ENV=test mix ecto.reset"
-
-alias b="bundle"
+alias drm='docker rm -f $(docker ps -a -q) && docker rmi $(docker images -q)'
 
 alias g="git"
 alias ga="git add"
@@ -79,16 +48,30 @@ alias gccm="git fetch && git remote prune origin && git branch -r --merged maste
 # Remove all remote branches
 alias gccc="git fetch && git remote prune origin && git branch -r | sed 's/ *origin\///' | grep -v 'master$' | grep -v 'production$' | xargs -I% git push origin :%"
 
-alias st="subl"
-alias stt="subl ."
+alias l="ll"
+alias la="ll -a"
 
-alias be="bundle exec"
+alias ms="iex -S mix phx.server"
+alias mt="mix format && mix test"
+alias mtt="mix test --trace"
+alias mttt="iex -S mix test --trace"
+alias mft="mix full_test"
+alias mc="mix compile"
+alias mcf="mix compile --force"
+alias md="mix deps.get --all"
+alias mdu="mix deps.update --all"
+alias mdn="mix deps.unlock --all"
+alias mf="mix format"
+alias mr="mix ecto.reset && MIX_ENV=test mix ecto.reset"
+
+alias now="date +%FT%T%z"
+alias nowu="date -u +%FT%TZz"
+
+alias q="bundle exec rake quality"
 
 alias rr="NO_COV=1 bundle exec rspec"
 alias rrf="NO_COV=1 bundle exec rspec --fail-fast"
 alias rrr="bundle exec rubocop -A"
-alias crr="COV=1 bundle exec rspec"
-alias ccc="bundle exec cucumber"
 
 alias r="bundle exec rails"
 alias rc="r c"
@@ -118,12 +101,15 @@ alias rpp="bundle exec rake parallel:prepare"
 alias rp="bundle exec rake parallel"
 alias rppp="bundle exec rake parallel:prepare parallel"
 
-alias q="bundle exec rake quality"
+alias sr="source ~/.zshrc && echo '.zshrc reloaded!'"
+alias ss="skillshare"
 
 alias tf="terraform"
 alias tt="bin/test"
+alias time="command time"
 
-alias ct="ctags -R -f .tags --exclude='*.min.js' --exclude='*.pack.js'"
+alias updatedb="sudo /usr/libexec/locate.updatedb"
 
-alias "awsls"="aws ec2 describe-instances --query 'Reservations[].Instances[].[ [Tags[?Key==\`Name\`].Value][0][0],PrivateIpAddress,State.Name]' --output table"
-alias "awslsp"="aws ec2 describe-instances --query 'Reservations[].Instances[].[ [Tags[?Key==\`Name\`].Value][0][0],PublicIpAddress,State.Name]' --output table"
+alias vs="code ."
+
+alias zr="cd ~/.zprezto && git pull && git submodule update --init --recursive"
