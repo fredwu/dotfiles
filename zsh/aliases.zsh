@@ -23,12 +23,12 @@ alias glll='git log --pretty="format:%C(yellow)%H%C(green)%d %C(white)%s %C(cyan
 alias gllla="glll --all"
 alias glog='git log --pretty="format:%C(yellow)%h%C(green)%d %C(white)%s %C(cyan)%an, %ar %Creset"'
 alias glr="git pull --rebase"
-alias gmm="git merge master --ff-only"
+alias gmm="git merge main --ff-only"
 alias gpn="git_push_set_upstream"
 alias gra="git rebase --abort"
 alias grc="git rebase --continue"
 alias gri="git rebase -i"
-alias grm="git rebase master"
+alias grm="git rebase main"
 alias gsl="git stash list"
 alias gsp="git stash pop"
 alias gst="git status"
@@ -42,11 +42,11 @@ alias gwrf="git worktree remove -f"
 # Clean up deleted remote branches references
 alias gcco="git remote prune origin"
 # Remove local fully merged branches
-alias gccl="git branch --merged master | grep -v 'master$' | grep -v 'production$' | xargs git branch -d"
+alias gccl="git branch --merged main | grep -v 'main$' | grep -v 'production$' | xargs git branch -d"
 # Remove remote fully merged branches
-alias gccm="git fetch && git remote prune origin && git branch -r --merged master | sed 's/ *origin\///' | grep -v 'master$' | grep -v 'production$' |xargs -I% git push origin :%"
+alias gccm="git fetch && git remote prune origin && git branch -r --merged main | sed 's/ *origin\///' | grep -v 'main$' | grep -v 'production$' |xargs -I% git push origin :%"
 # Remove all remote branches
-alias gccc="git fetch && git remote prune origin && git branch -r | sed 's/ *origin\///' | grep -v 'master$' | grep -v 'production$' | xargs -I% git push origin :%"
+alias gccc="git fetch && git remote prune origin && git branch -r | sed 's/ *origin\///' | grep -v 'main$' | grep -v 'production$' | xargs -I% git push origin :%"
 
 alias l="ll"
 alias la="ll -a"
