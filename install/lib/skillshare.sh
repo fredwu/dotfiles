@@ -1,5 +1,25 @@
 #!/bin/bash
 
+ensure_skillshare_extension() {
+  local source=$1
+  local target=$2
+  local source_file
+
+  [[ -d "$source" ]] || die "cannot install missing Skillshare extension: $source"
+
+  # Skillshare's extension picker enumerates only real directories. Keep the
+  # directory itself local while linking each implementation file to the repo.
+  if [[ -L "$target" || ( -e "$target" && ! -d "$target" ) ]]; then
+    archive_path "$target"
+  fi
+  mkdir -p "$target"
+
+  for source_file in "$source"/*; do
+    [[ -e "$source_file" || -L "$source_file" ]] || continue
+    ensure_symlink "$source_file" "$target/${source_file##*/}"
+  done
+}
+
 configure_skillshare() {
   local config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
   local skillshare_home="$config_home/skillshare"
@@ -15,7 +35,7 @@ configure_skillshare() {
   require_command node
   ensure_symlink "$DOTFILES_ROOT/ai/skillshare/skills" "$skills_source"
   ensure_symlink "$DOTFILES_ROOT/ai/skillshare/agents" "$agents_source"
-  ensure_symlink \
+  ensure_skillshare_extension \
     "$DOTFILES_ROOT/ai/skillshare/extensions/codex-agents" \
     "$codex_agents_extension"
 

@@ -41,7 +41,9 @@ directories in whole-directory symlink mode, using the Git-tracked
 `ai/skillshare/skills` directory as its canonical source. Shared agents live in
 `ai/skillshare/agents`. Claude receives those Markdown agents as native
 symlinks. Codex receives generated TOML agents through Skillshare's official
-`codex-agents` extension format.
+`codex-agents` extension format. Its installed extension path is a real
+directory so Skillshare can enumerate it, while the implementation files
+inside remain symlinked to this repository.
 
 Provider-specific agent models and reasoning levels are declared in
 `ai/skillshare/agent-models.json`. Each Markdown agent must have a matching

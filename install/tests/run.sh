@@ -283,6 +283,10 @@ test_skillshare_configuration() {
   cp "$source_root/install/lib/configure-skillshare-extra.js" "$DOTFILES_ROOT/install/lib/"
   cp "$source_root/ai/skillshare/agents/"*.md "$DOTFILES_ROOT/ai/skillshare/agents/"
 
+  mkdir -p "$XDG_CONFIG_HOME/skillshare/extensions"
+  ln -s "$DOTFILES_ROOT/ai/skillshare/extensions/codex-agents" \
+    "$XDG_CONFIG_HOME/skillshare/extensions/codex-agents"
+
   skillshare() {
     printf '%s\n' "$*" >> "$invocation_log"
     if [[ "$1" == init ]]; then
@@ -300,9 +304,19 @@ test_skillshare_configuration() {
   assert_eq "$DOTFILES_ROOT/ai/skillshare/agents" \
     "$(readlink "$XDG_CONFIG_HOME/skillshare/agents")" \
     "Skillshare agents source should link to the repository"
-  assert_eq "$DOTFILES_ROOT/ai/skillshare/extensions/codex-agents" \
-    "$(readlink "$XDG_CONFIG_HOME/skillshare/extensions/codex-agents")" \
-    "Skillshare Codex extension should link to the repository"
+  assert_true "Skillshare Codex extension should be a discoverable real directory" \
+    test -d "$XDG_CONFIG_HOME/skillshare/extensions/codex-agents"
+  assert_false "Skillshare Codex extension directory should not itself be linked" \
+    test -L "$XDG_CONFIG_HOME/skillshare/extensions/codex-agents"
+  assert_eq "$DOTFILES_ROOT/ai/skillshare/extensions/codex-agents/extension.yaml" \
+    "$(readlink "$XDG_CONFIG_HOME/skillshare/extensions/codex-agents/extension.yaml")" \
+    "Skillshare extension files should link to the repository"
+  assert_eq \
+    "$(find "$DOTFILES_ROOT/ai/skillshare/extensions/codex-agents" -type f | awk 'END { print NR + 0 }')" \
+    "$(find "$XDG_CONFIG_HOME/skillshare/extensions/codex-agents" -type l | awk 'END { print NR + 0 }')" \
+    "every Skillshare extension file should be repository-backed"
+  assert_true "the old whole-directory extension link should be archived during migration" \
+    test -L "$DOTFILES_BACKUP_ROOT"/*/xdg\ config/skillshare/extensions/codex-agents
   assert_eq 1 "$(grep -c '^init ' "$invocation_log")" \
     "Skillshare should initialize only when config is absent"
   assert_eq \
