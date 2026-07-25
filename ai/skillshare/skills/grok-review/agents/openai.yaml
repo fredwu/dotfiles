@@ -1,0 +1,6 @@
+interface:
+  display_name: "Grok Review"
+  short_description: "Bounded independent review for complex code changes"
+  default_prompt: "Use $grok-review to independently review this complex code change with the local Grok CLI."
+policy:
+  allow_implicit_invocation: true

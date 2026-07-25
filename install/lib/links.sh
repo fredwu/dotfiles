@@ -28,7 +28,7 @@ ensure_ai_directory() {
     archive_path "$target"
   fi
 
-  mkdir -p "$target/skills"
+  mkdir -p "$target"
 }
 
 install_ai_links() {

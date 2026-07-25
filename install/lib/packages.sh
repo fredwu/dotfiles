@@ -4,6 +4,7 @@ NEOVIM_MIN_VERSION=0.12.0
 NEOVIM_FALLBACK_VERSION=0.12.4
 MISE_VERSION=2026.7.6
 TREE_SITTER_VERSION=0.26.11
+SKILLSHARE_VERSION=0.20.22
 
 ensure_homebrew() {
   local brew_binary
@@ -35,7 +36,7 @@ install_macos_packages() {
   ensure_homebrew
   formulae=(
     direnv fd fzf git gnupg lazygit libyaml mise neovim openssl@3
-    ripgrep tree-sitter-cli zoxide
+    ripgrep skillshare tree-sitter-cli zoxide
   )
   casks=(claude-code codex font-hack-nerd-font grok-build)
 
@@ -175,6 +176,58 @@ install_linux_binary() {
   ensure_symlink "$install_dir/$name" "$HOME/.local/bin/$name"
 }
 
+install_linux_flat_tarball() {
+  local name=$1
+  local version=$2
+  local asset=$3
+  local checksum=$4
+  local url=$5
+  local executable=$6
+  local archive
+  local install_dir="$HOME/.local/opt/$name/$version"
+  local install_parent="$HOME/.local/opt/$name"
+  local staging
+
+  if [[ ! -x "$install_dir/$executable" ]]; then
+    archive=$(mktemp "${TMPDIR:-/tmp}/$name.XXXXXX")
+    download_checked "$url" "$checksum" "$archive"
+    mkdir -p "$install_parent"
+    staging=$(mktemp -d "$install_parent/.${version}.XXXXXX")
+    tar -xzf "$archive" -C "$staging"
+    rm -f "$archive"
+    [[ -x "$staging/$executable" ]] || die "$asset did not contain $executable"
+    if [[ -e "$install_dir" || -L "$install_dir" ]]; then
+      archive_path "$install_dir"
+    fi
+    mv "$staging" "$install_dir"
+    log "Installed $name $version ($asset)"
+  fi
+
+  ensure_symlink "$install_dir/$executable" "$HOME/.local/bin/$name"
+}
+
+ensure_skillshare_on_linux() {
+  local arch
+  local asset
+  local checksum
+
+  arch=$(linux_architecture)
+  case "$arch" in
+    x86_64)
+      asset="skillshare_${SKILLSHARE_VERSION}_linux_amd64.tar.gz"
+      checksum=f4f5a56f911490eca89b6e6cc1365aac389182e44a56b3b6aa6c12f279dd936e
+      ;;
+    arm64)
+      asset="skillshare_${SKILLSHARE_VERSION}_linux_arm64.tar.gz"
+      checksum=09eff8b20d01b6d3e40ca1eeccf597087bafe7236af7e8bfd82371225880ab9d
+      ;;
+  esac
+
+  install_linux_flat_tarball skillshare "$SKILLSHARE_VERSION" "$asset" "$checksum" \
+    "https://github.com/runkids/skillshare/releases/download/v$SKILLSHARE_VERSION/$asset" \
+    skillshare
+}
+
 ensure_tree_sitter_on_linux() {
   local arch
   local asset
@@ -256,6 +309,7 @@ install_linux_packages() {
   export PATH="$HOME/.local/bin:$PATH"
   ensure_mise_on_linux
   ensure_neovim_on_linux
+  ensure_skillshare_on_linux
   ensure_tree_sitter_on_linux
 }
 

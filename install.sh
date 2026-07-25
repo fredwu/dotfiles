@@ -9,7 +9,7 @@ DOTFILES_ROOT="$(
 )"
 export DOTFILES_ROOT
 
-for module in common platform packages cleanup prezto links neovim login_shell; do
+for module in common platform packages cleanup prezto links skillshare neovim login_shell; do
   # shellcheck source=/dev/null
   source "$DOTFILES_ROOT/install/lib/$module.sh"
 done
@@ -57,6 +57,7 @@ main() {
   install_hack_nerd_font
   install_prezto
   install_dotfiles
+  configure_skillshare
   sync_neovim_plugins
   ensure_zsh_login_shell
 

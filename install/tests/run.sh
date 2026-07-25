@@ -21,6 +21,8 @@ source "$TEST_ROOT/install/lib/packages.sh"
 source "$TEST_ROOT/install/lib/cleanup.sh"
 # shellcheck source=../lib/links.sh
 source "$TEST_ROOT/install/lib/links.sh"
+# shellcheck source=../lib/skillshare.sh
+source "$TEST_ROOT/install/lib/skillshare.sh"
 # shellcheck source=../lib/prezto.sh
 source "$TEST_ROOT/install/lib/prezto.sh"
 # shellcheck source=../lib/login_shell.sh
@@ -98,6 +100,7 @@ test_package_dispatch_without_package_manager() {
     install_apt_packages() { printf 'apt\n' > "$marker"; }
     ensure_mise_on_linux() { :; }
     ensure_neovim_on_linux() { :; }
+    ensure_skillshare_on_linux() { :; }
     ensure_tree_sitter_on_linux() { :; }
     PLATFORM=linux
     PACKAGE_MANAGER=apt
@@ -143,6 +146,48 @@ test_linux_tarball_install() {
     "tarball executable should be linked from the local bin directory"
   assert_false "repeat tarball install should create no backup" test -e "$DOTFILES_BACKUP_ROOT"
   finish_test "pinned Linux tarballs install idempotently"
+}
+
+test_skillshare_release_selection() {
+  local marker="$HOME/skillshare-release"
+
+  (
+    linux_architecture() { printf 'arm64\n'; }
+    install_linux_flat_tarball() { printf '%s\n' "$*" > "$marker"; }
+    ensure_skillshare_on_linux
+  )
+
+  assert_eq \
+    "skillshare $SKILLSHARE_VERSION skillshare_${SKILLSHARE_VERSION}_linux_arm64.tar.gz 09eff8b20d01b6d3e40ca1eeccf597087bafe7236af7e8bfd82371225880ab9d https://github.com/runkids/skillshare/releases/download/v$SKILLSHARE_VERSION/skillshare_${SKILLSHARE_VERSION}_linux_arm64.tar.gz skillshare" \
+    "$(cat "$marker")" "Skillshare should select the pinned ARM64 release"
+  finish_test "Skillshare release selection is pinned and architecture-aware"
+}
+
+test_linux_flat_tarball_install() {
+  local fixture="$HOME/fixture"
+  local fixture_archive="$HOME/fixture.tar.gz"
+
+  mkdir -p "$fixture"
+  printf '#!/bin/sh\nprintf "fixture\\n"\n' > "$fixture/skillshare"
+  chmod +x "$fixture/skillshare"
+  tar -czf "$fixture_archive" -C "$fixture" skillshare
+
+  (
+    download_checked() { cp "$fixture_archive" "$3"; }
+    install_linux_flat_tarball \
+      skillshare 1.2.3 fixture.tar.gz unused https://example.invalid/fixture skillshare
+    install_linux_flat_tarball \
+      skillshare 1.2.3 fixture.tar.gz unused https://example.invalid/fixture skillshare
+  )
+
+  assert_eq fixture "$("$HOME/.local/bin/skillshare")" \
+    "installed flat-tarball executable should run"
+  assert_eq "$HOME/.local/opt/skillshare/1.2.3/skillshare" \
+    "$(readlink "$HOME/.local/bin/skillshare")" \
+    "flat-tarball executable should be linked from the local bin directory"
+  assert_false "repeat flat-tarball install should create no backup" \
+    test -e "$DOTFILES_BACKUP_ROOT"
+  finish_test "pinned Linux flat tarballs install idempotently"
 }
 
 test_apt_missing_required_package_fails() {
@@ -220,6 +265,82 @@ test_dotfile_install() {
   finish_test "dotfiles install twice without touching real HOME"
 }
 
+test_skillshare_configuration() {
+  local DOTFILES_ROOT="$HOME/repository"
+  local XDG_CONFIG_HOME="$HOME/xdg config"
+  local invocation_log="$HOME/skillshare.log"
+  export DOTFILES_ROOT XDG_CONFIG_HOME
+
+  mkdir -p "$DOTFILES_ROOT/ai/skillshare/skills/example" \
+    "$DOTFILES_ROOT/ai/skillshare/agents"
+  printf 'fixture skill\n' > "$DOTFILES_ROOT/ai/skillshare/skills/example/SKILL.md"
+
+  skillshare() {
+    printf '%s\n' "$*" >> "$invocation_log"
+    if [[ "$1" == init ]]; then
+      mkdir -p "$XDG_CONFIG_HOME/skillshare"
+      printf 'preserved-config\n' > "$XDG_CONFIG_HOME/skillshare/config.yaml"
+    fi
+  }
+
+  configure_skillshare
+  configure_skillshare
+
+  assert_eq "$DOTFILES_ROOT/ai/skillshare/skills" \
+    "$(readlink "$XDG_CONFIG_HOME/skillshare/skills")" \
+    "Skillshare skills source should link to the repository"
+  assert_eq "$DOTFILES_ROOT/ai/skillshare/agents" \
+    "$(readlink "$XDG_CONFIG_HOME/skillshare/agents")" \
+    "Skillshare agents source should link to the repository"
+  assert_eq 1 "$(grep -c '^init ' "$invocation_log")" \
+    "Skillshare should initialize only when config is absent"
+  assert_eq \
+    "init --source $XDG_CONFIG_HOME/skillshare/skills --no-copy --targets claude,codex,grok --mode symlink --no-git --no-skill" \
+    "$(grep '^init ' "$invocation_log")" \
+    "Skillshare init should use deterministic noninteractive flags"
+  assert_eq 2 "$(grep -c '^sync -g$' "$invocation_log")" \
+    "Skillshare should globally sync on every run"
+  assert_eq preserved-config "$(cat "$XDG_CONFIG_HOME/skillshare/config.yaml")" \
+    "repeat setup should preserve existing config"
+  assert_false "Skillshare setup should not create nested Git metadata" \
+    test -e "$DOTFILES_ROOT/ai/skillshare/skills/.git"
+  finish_test "Skillshare sources, init, and global sync are idempotent"
+}
+
+test_skillshare_existing_config_is_preserved() {
+  local DOTFILES_ROOT="$HOME/repository"
+  local XDG_CONFIG_HOME="$HOME/xdg config"
+  local invocation_log="$HOME/skillshare.log"
+  local skillshare_home="$XDG_CONFIG_HOME/skillshare"
+  export DOTFILES_ROOT XDG_CONFIG_HOME
+
+  mkdir -p "$DOTFILES_ROOT/ai/skillshare/skills" \
+    "$DOTFILES_ROOT/ai/skillshare/agents" \
+    "$skillshare_home/skills/local-only" \
+    "$skillshare_home/agents"
+  printf 'existing-config\n' > "$skillshare_home/config.yaml"
+  printf 'local skill\n' > "$skillshare_home/skills/local-only/SKILL.md"
+  printf 'local agent\n' > "$skillshare_home/agents/local.md"
+
+  skillshare() { printf '%s\n' "$*" >> "$invocation_log"; }
+
+  configure_skillshare
+
+  assert_eq existing-config "$(cat "$skillshare_home/config.yaml")" \
+    "existing Skillshare config should remain unchanged"
+  assert_eq "sync -g" "$(cat "$invocation_log")" \
+    "existing Skillshare config should skip init and sync globally"
+  assert_eq "$DOTFILES_ROOT/ai/skillshare/skills" "$(readlink "$skillshare_home/skills")" \
+    "existing skills source should be replaced by the repository link"
+  assert_eq "$DOTFILES_ROOT/ai/skillshare/agents" "$(readlink "$skillshare_home/agents")" \
+    "existing agents source should be replaced by the repository link"
+  assert_true "pre-existing skills should be archived before relinking" \
+    test -f "$DOTFILES_BACKUP_ROOT"/*/xdg\ config/skillshare/skills/local-only/SKILL.md
+  assert_true "pre-existing agents should be archived before relinking" \
+    test -f "$DOTFILES_BACKUP_ROOT"/*/xdg\ config/skillshare/agents/local.md
+  finish_test "existing Skillshare config and source data are preserved"
+}
+
 test_repository_path_with_spaces() {
   local source_root=$TEST_ROOT
   local DOTFILES_ROOT="$HOME/repository with spaces"
@@ -229,8 +350,10 @@ test_repository_path_with_spaces() {
 
   mkdir -p "$DOTFILES_ROOT/templates/ssh" "$DOTFILES_ROOT/templates/gnupg" \
     "$DOTFILES_ROOT/config/nvim" "$DOTFILES_ROOT/zsh" \
-    "$DOTFILES_ROOT/ai/shared/skills/example"
-  printf 'repository skill\n' > "$DOTFILES_ROOT/ai/shared/skills/example/SKILL.md"
+    "$DOTFILES_ROOT/ai/shared" \
+    "$DOTFILES_ROOT/ai/skillshare/skills/example" \
+    "$DOTFILES_ROOT/ai/skillshare/agents"
+  printf 'repository skill\n' > "$DOTFILES_ROOT/ai/skillshare/skills/example/SKILL.md"
   printf 'instructions\n' > "$DOTFILES_ROOT/ai/shared/AGENTS.md"
   for name in ackrc gemrc gitconfig gitignore_global railsrc zlogin zpreztorc zprofile zshenv zshrc; do
     cp "$source_root/templates/$name" "$DOTFILES_ROOT/templates/$name"
@@ -469,10 +592,14 @@ new_home; test_platform_detection
 new_home; test_package_dispatch_without_package_manager
 new_home; test_mise_release_selection
 new_home; test_linux_tarball_install
+new_home; test_skillshare_release_selection
+new_home; test_linux_flat_tarball_install
 new_home; test_apt_missing_required_package_fails
 new_home; test_idempotent_links
 new_home; test_dangling_link
 new_home; test_dotfile_install
+new_home; test_skillshare_configuration
+new_home; test_skillshare_existing_config_is_preserved
 new_home; test_repository_path_with_spaces
 new_home; test_ai_config_directories_preserve_provider_data
 new_home; test_legacy_ai_symlink_is_reversed

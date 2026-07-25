@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dependency Upgrade"
+  short_description: "Upgrade Mix, npm, and Tailwind dependencies"
+  default_prompt: "Use $deps-upgrade to upgrade all Mix, npm, and Tailwind dependencies and fix any resulting breakage."
