@@ -266,14 +266,22 @@ test_dotfile_install() {
 }
 
 test_skillshare_configuration() {
+  local source_root=$TEST_ROOT
   local DOTFILES_ROOT="$HOME/repository"
   local XDG_CONFIG_HOME="$HOME/xdg config"
   local invocation_log="$HOME/skillshare.log"
   export DOTFILES_ROOT XDG_CONFIG_HOME
 
   mkdir -p "$DOTFILES_ROOT/ai/skillshare/skills/example" \
-    "$DOTFILES_ROOT/ai/skillshare/agents"
+    "$DOTFILES_ROOT/ai/skillshare/agents" \
+    "$DOTFILES_ROOT/ai/skillshare/extensions" \
+    "$DOTFILES_ROOT/install/lib"
   printf 'fixture skill\n' > "$DOTFILES_ROOT/ai/skillshare/skills/example/SKILL.md"
+  cp "$source_root/ai/skillshare/agent-models.json" "$DOTFILES_ROOT/ai/skillshare/"
+  cp -R "$source_root/ai/skillshare/extensions/codex-agents" \
+    "$DOTFILES_ROOT/ai/skillshare/extensions/"
+  cp "$source_root/install/lib/configure-skillshare-extra.js" "$DOTFILES_ROOT/install/lib/"
+  cp "$source_root/ai/skillshare/agents/"*.md "$DOTFILES_ROOT/ai/skillshare/agents/"
 
   skillshare() {
     printf '%s\n' "$*" >> "$invocation_log"
@@ -292,22 +300,31 @@ test_skillshare_configuration() {
   assert_eq "$DOTFILES_ROOT/ai/skillshare/agents" \
     "$(readlink "$XDG_CONFIG_HOME/skillshare/agents")" \
     "Skillshare agents source should link to the repository"
+  assert_eq "$DOTFILES_ROOT/ai/skillshare/extensions/codex-agents" \
+    "$(readlink "$XDG_CONFIG_HOME/skillshare/extensions/codex-agents")" \
+    "Skillshare Codex extension should link to the repository"
   assert_eq 1 "$(grep -c '^init ' "$invocation_log")" \
     "Skillshare should initialize only when config is absent"
   assert_eq \
     "init --source $XDG_CONFIG_HOME/skillshare/skills --no-copy --targets claude,codex,grok --mode symlink --no-git --no-skill" \
     "$(grep '^init ' "$invocation_log")" \
     "Skillshare init should use deterministic noninteractive flags"
-  assert_eq 2 "$(grep -c '^sync -g$' "$invocation_log")" \
+  assert_eq 2 "$(grep -c '^sync --all -g$' "$invocation_log")" \
     "Skillshare should globally sync on every run"
-  assert_eq preserved-config "$(cat "$XDG_CONFIG_HOME/skillshare/config.yaml")" \
-    "repeat setup should preserve existing config"
+  assert_eq 1 "$(grep -c '^  - name: codex-agents$' "$XDG_CONFIG_HOME/skillshare/config.yaml")" \
+    "repeat setup should configure one Codex agents extra"
+  assert_true "Codex agent sync should use the repository-backed agent source" \
+    grep -Fq "source: \"$DOTFILES_ROOT/ai/skillshare/agents\"" \
+    "$XDG_CONFIG_HOME/skillshare/config.yaml"
+  assert_true "Codex agent sync should use the official extension contract" \
+    grep -Fq "extension: codex-agents" "$XDG_CONFIG_HOME/skillshare/config.yaml"
   assert_false "Skillshare setup should not create nested Git metadata" \
     test -e "$DOTFILES_ROOT/ai/skillshare/skills/.git"
   finish_test "Skillshare sources, init, and global sync are idempotent"
 }
 
 test_skillshare_existing_config_is_preserved() {
+  local source_root=$TEST_ROOT
   local DOTFILES_ROOT="$HOME/repository"
   local XDG_CONFIG_HOME="$HOME/xdg config"
   local invocation_log="$HOME/skillshare.log"
@@ -316,20 +333,32 @@ test_skillshare_existing_config_is_preserved() {
 
   mkdir -p "$DOTFILES_ROOT/ai/skillshare/skills" \
     "$DOTFILES_ROOT/ai/skillshare/agents" \
+    "$DOTFILES_ROOT/ai/skillshare/extensions" \
+    "$DOTFILES_ROOT/install/lib" \
     "$skillshare_home/skills/local-only" \
     "$skillshare_home/agents"
   printf 'existing-config\n' > "$skillshare_home/config.yaml"
   printf 'local skill\n' > "$skillshare_home/skills/local-only/SKILL.md"
   printf 'local agent\n' > "$skillshare_home/agents/local.md"
+  cp "$source_root/ai/skillshare/agent-models.json" "$DOTFILES_ROOT/ai/skillshare/"
+  cp -R "$source_root/ai/skillshare/extensions/codex-agents" \
+    "$DOTFILES_ROOT/ai/skillshare/extensions/"
+  cp "$source_root/install/lib/configure-skillshare-extra.js" "$DOTFILES_ROOT/install/lib/"
+  cp "$source_root/ai/skillshare/agents/"*.md "$DOTFILES_ROOT/ai/skillshare/agents/"
+  mkdir -p "$HOME/.codex/agents"
+  printf 'stale generated agent\n' > "$HOME/.codex/agents/fastworker.toml"
+  printf 'unrelated local agent\n' > "$HOME/.codex/agents/local-only.toml"
 
   skillshare() { printf '%s\n' "$*" >> "$invocation_log"; }
 
   configure_skillshare
 
-  assert_eq existing-config "$(cat "$skillshare_home/config.yaml")" \
-    "existing Skillshare config should remain unchanged"
-  assert_eq "sync -g" "$(cat "$invocation_log")" \
+  assert_eq existing-config "$(head -1 "$skillshare_home/config.yaml")" \
+    "existing Skillshare config content should remain intact"
+  assert_eq "sync --all -g" "$(cat "$invocation_log")" \
     "existing Skillshare config should skip init and sync globally"
+  assert_true "existing config should gain only the managed Codex extra" \
+    grep -Fq "extension: codex-agents" "$skillshare_home/config.yaml"
   assert_eq "$DOTFILES_ROOT/ai/skillshare/skills" "$(readlink "$skillshare_home/skills")" \
     "existing skills source should be replaced by the repository link"
   assert_eq "$DOTFILES_ROOT/ai/skillshare/agents" "$(readlink "$skillshare_home/agents")" \
@@ -338,7 +367,46 @@ test_skillshare_existing_config_is_preserved() {
     test -f "$DOTFILES_BACKUP_ROOT"/*/xdg\ config/skillshare/skills/local-only/SKILL.md
   assert_true "pre-existing agents should be archived before relinking" \
     test -f "$DOTFILES_BACKUP_ROOT"/*/xdg\ config/skillshare/agents/local.md
+  assert_true "overlapping Codex agents should be archived for first migration" \
+    test -f "$DOTFILES_BACKUP_ROOT"/*/.codex/agents/fastworker.toml
+  assert_false "overlapping Codex agent should be clear for Skillshare generation" \
+    test -e "$HOME/.codex/agents/fastworker.toml"
+  assert_true "unrelated Codex agents should not be touched" \
+    test -f "$HOME/.codex/agents/local-only.toml"
   finish_test "existing Skillshare config and source data are preserved"
+}
+
+test_codex_agent_model_mapping() {
+  local extension="$TEST_ROOT/ai/skillshare/extensions/codex-agents"
+  local generated="$HOME/fastworker.toml"
+  local error_log="$HOME/missing-mapping.log"
+
+  SS_REL_PATH=fastworker.md env -u NODE_OPTIONS node "$extension/convert.js" \
+    < "$TEST_ROOT/ai/skillshare/agents/fastworker.md" > "$generated"
+
+  assert_true "Codex conversion should map the model" \
+    grep -Fq 'model = "gpt-5.6-sol"' "$generated"
+  assert_true "Codex conversion should map provider-specific reasoning effort" \
+    grep -Fq 'model_reasoning_effort = "low"' "$generated"
+
+  if printf '%s\n' \
+    '---' \
+    'name: unmapped' \
+    'description: Must fail' \
+    'model: opus' \
+    'effort: medium' \
+    '---' \
+    'Instructions.' | \
+    SS_REL_PATH=unmapped.md env -u NODE_OPTIONS node "$extension/convert.js" \
+      > /dev/null 2> "$error_log"; then
+    fail "Codex conversion should reject agents without a model mapping"
+  fi
+  assert_true "missing mapping failure should identify the agent" \
+    grep -Fq "missing 'unmapped'" "$error_log"
+
+  env -u NODE_OPTIONS node "$extension/validate.js" \
+    "$TEST_ROOT/ai/skillshare/agents"
+  finish_test "Codex agent conversion uses strict provider model mappings"
 }
 
 test_repository_path_with_spaces() {
@@ -600,6 +668,7 @@ new_home; test_dangling_link
 new_home; test_dotfile_install
 new_home; test_skillshare_configuration
 new_home; test_skillshare_existing_config_is_preserved
+new_home; test_codex_agent_model_mapping
 new_home; test_repository_path_with_spaces
 new_home; test_ai_config_directories_preserve_provider_data
 new_home; test_legacy_ai_symlink_is_reversed

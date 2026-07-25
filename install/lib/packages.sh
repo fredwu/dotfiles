@@ -36,7 +36,7 @@ install_macos_packages() {
   ensure_homebrew
   formulae=(
     direnv fd fzf git gnupg lazygit libyaml mise neovim openssl@3
-    ripgrep skillshare tree-sitter-cli zoxide
+    node ripgrep skillshare tree-sitter-cli zoxide
   )
   casks=(claude-code codex font-hack-nerd-font grok-build)
 
@@ -58,7 +58,7 @@ install_apt_packages() {
   packages=()
   candidates=(
     build-essential ca-certificates curl direnv fd-find fontconfig fzf git gnupg
-    gzip libffi-dev libssl-dev libyaml-dev neovim ripgrep tar unzip xz-utils
+    gzip libffi-dev libssl-dev libyaml-dev neovim nodejs ripgrep tar unzip xz-utils
     zlib1g-dev zoxide zsh
   )
 
@@ -82,14 +82,14 @@ install_apt_packages() {
 install_dnf_packages() {
   as_root dnf install -y \
     ca-certificates curl direnv fd-find fontconfig fzf gcc gcc-c++ git gnupg2 \
-    gzip libffi-devel libyaml-devel make neovim openssl-devel ripgrep tar unzip \
+    gzip libffi-devel libyaml-devel make neovim nodejs openssl-devel ripgrep tar unzip \
     xz zlib-devel zoxide zsh
 }
 
 install_pacman_packages() {
   as_root pacman -S --needed --noconfirm \
     base-devel ca-certificates curl direnv fd fontconfig fzf git gnupg gzip \
-    libffi libyaml neovim openssl ripgrep tar unzip xz zlib zoxide zsh
+    libffi libyaml neovim nodejs openssl ripgrep tar unzip xz zlib zoxide zsh
 }
 
 ensure_mise_on_linux() {

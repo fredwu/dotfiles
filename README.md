@@ -39,11 +39,25 @@ remain outside this repository. Their instruction files are linked from
 `ai/shared`. [Skillshare](https://skillshare.runkids.cc/) manages their skill
 directories in whole-directory symlink mode, using the Git-tracked
 `ai/skillshare/skills` directory as its canonical source. Shared agents live in
-`ai/skillshare/agents`.
+`ai/skillshare/agents`. Claude receives those Markdown agents as native
+symlinks. Codex receives generated TOML agents through Skillshare's official
+`codex-agents` extension format.
+
+Provider-specific agent models and reasoning levels are declared in
+`ai/skillshare/agent-models.json`. Each Markdown agent must have a matching
+entry, and its Claude `model` and `effort` frontmatter must agree with that
+entry. The installer fails before syncing if an agent or mapping is missing, so
+adding an agent means adding both its Markdown file and its model-map entry.
+Codex TOML files are generated copies because their format and model names
+differ from Claude's source Markdown. When this managed extra is first added or
+its paths change, only conflicting Codex TOML files with names matching the
+source agents are archived under `~/.dotfiles-backups`; unrelated Codex agents
+and other Skillshare resources are left untouched.
 
 The installer preserves an existing Skillshare configuration. On a fresh
 machine it initializes global targets for Claude Code, Codex, and Grok without
-creating a nested Git repository, then runs a global sync. Skillshare commands
+creating a nested Git repository, registers the Codex agent transformer, then
+runs a global skills-and-extras sync. Skillshare commands
 such as `install`, `update`, and `uninstall` therefore modify files in this
 repository; commit those changes with the rest of the dotfiles.
 
@@ -70,7 +84,7 @@ repeatable and then performs the normal install.
 - [Prezto](https://github.com/sorin-ionescu/prezto) with prezto-contrib
 - [Neovim](https://neovim.io/) and [LazyVim](https://www.lazyvim.org/)
 - Hack Nerd Font
-- Git, GnuPG, direnv, fzf, zoxide, ripgrep, fd, mise, and related build tools
+- Git, GnuPG, direnv, fzf, zoxide, ripgrep, fd, Node.js, mise, and related build tools
 - Grok, Codex, and Claude Code CLI casks on macOS
 - Skillshare, with shared skills and agents stored in this repository
 - Shared instructions for Claude Code, Codex, and Grok

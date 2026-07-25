@@ -1,0 +1,22 @@
+{
+  "fastworker": {
+    "claude": {
+      "model": "opus",
+      "effort": "medium"
+    },
+    "codex": {
+      "model": "gpt-5.6-sol",
+      "model_reasoning_effort": "low"
+    }
+  },
+  "worker": {
+    "claude": {
+      "model": "opus",
+      "effort": "high"
+    },
+    "codex": {
+      "model": "gpt-5.6-sol",
+      "model_reasoning_effort": "medium"
+    }
+  }
+}
