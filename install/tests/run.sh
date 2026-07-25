@@ -230,7 +230,7 @@ test_repository_path_with_spaces() {
   mkdir -p "$DOTFILES_ROOT/templates/ssh" "$DOTFILES_ROOT/templates/gnupg" \
     "$DOTFILES_ROOT/config/nvim" "$DOTFILES_ROOT/zsh" \
     "$DOTFILES_ROOT/ai/shared/skills/example"
-  printf 'shared skill\n' > "$DOTFILES_ROOT/ai/shared/skills/example/SKILL.md"
+  printf 'repository skill\n' > "$DOTFILES_ROOT/ai/shared/skills/example/SKILL.md"
   printf 'instructions\n' > "$DOTFILES_ROOT/ai/shared/AGENTS.md"
   for name in ackrc gemrc gitconfig gitignore_global railsrc zlogin zpreztorc zprofile zshenv zshrc; do
     cp "$source_root/templates/$name" "$DOTFILES_ROOT/templates/$name"
@@ -244,8 +244,10 @@ test_repository_path_with_spaces() {
     "repository paths containing spaces should be preserved"
   assert_eq "$DOTFILES_ROOT/config/nvim" "$(readlink "$XDG_CONFIG_HOME/nvim")" \
     "XDG paths containing spaces should be preserved"
-  assert_eq "$DOTFILES_ROOT/ai/shared/skills/example" "$(readlink "$HOME/.codex/skills/example")" \
-    "shared skill links should preserve repository paths containing spaces"
+  assert_eq "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$(readlink "$HOME/.codex/AGENTS.md")" \
+    "shared instruction links should preserve repository paths containing spaces"
+  assert_false "repository skills should not be installed" \
+    test -e "$HOME/.codex/skills/example"
   finish_test "repository and HOME paths containing spaces"
 }
 
@@ -266,12 +268,10 @@ test_ai_config_directories_preserve_provider_data() {
     assert_true "$name config should be preserved" test -f "$HOME/.$name/preserved"
     assert_true "$name provider skill should be preserved" \
       test -f "$HOME/.$name/skills/provider-owned/SKILL.md"
-    assert_eq "$DOTFILES_ROOT/ai/shared/skills/deps-upgrade" \
-      "$(readlink "$HOME/.$name/skills/deps-upgrade")" "$name shared skill should be linked"
   done
   install_dotfiles
   assert_false "repeat install should create no backup" test -e "$DOTFILES_BACKUP_ROOT"
-  finish_test "AI config directories and provider skills are preserved"
+  finish_test "AI config directories and provider-local skills are preserved"
 }
 
 test_legacy_ai_symlink_is_reversed() {

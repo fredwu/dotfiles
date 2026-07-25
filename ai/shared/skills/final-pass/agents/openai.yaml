@@ -1,4 +1,0 @@
-interface:
-  display_name: "Final Pass"
-  short_description: "Final coherence check across completed changes"
-  default_prompt: "Use $final-pass to make one deliberate final pass over all completed changes and catch material omissions or inconsistencies."

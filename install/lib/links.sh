@@ -34,7 +34,6 @@ ensure_ai_directory() {
 install_ai_links() {
   local name
   local instructions
-  local skill
 
   for name in claude codex grok; do
     ensure_ai_directory "$name"
@@ -44,9 +43,6 @@ install_ai_links() {
       instructions=AGENTS.md
     fi
     ensure_symlink "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$HOME/.$name/$instructions"
-    for skill in "$DOTFILES_ROOT"/ai/shared/skills/*; do
-      ensure_symlink "$skill" "$HOME/.$name/skills/$(basename -- "$skill")"
-    done
   done
 }
 

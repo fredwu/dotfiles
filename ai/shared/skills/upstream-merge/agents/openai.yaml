@@ -1,4 +1,0 @@
-interface:
-  display_name: "Upstream Merge"
-  short_description: "Merge upstream into main with careful conflicts"
-  default_prompt: "Use $upstream-merge to carefully merge `upstream` into `main`, favoring ours in project-customized code and otherwise preserving upstream changes."
