@@ -1,0 +1,4 @@
+interface:
+  display_name: "Execute Plan"
+  short_description: "Execute a verified plan through completion"
+  default_prompt: "Use $execute-plan [plan text or path] to execute the supplied plan, or infer it from the current context, through verified completion."
