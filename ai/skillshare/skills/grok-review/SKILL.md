@@ -1,11 +1,13 @@
 ---
 name: grok-review
-description: Run a bounded, evidence-driven second-opinion code review with the local Grok CLI while the primary agent remains responsible for implementation and verification. Use whenever the user explicitly says "Grok review" or "Grok review skill". Use implicitly only when a change is both genuinely complex across multiple codebase areas and materially high-risk or high-coupling for correctness, regressions, security, or performance. Never infer use from size or file count, and never trigger implicitly for simple or localized changes.
+description: Run a bounded, evidence-driven second-opinion code review with the local Grok CLI while the primary agent remains responsible for implementation and verification. Use whenever the user explicitly says "Grok review" or "Grok review skill", invokes `$grok-review`, or asks to invoke, use, or run grok-review, including within a larger request. Use implicitly only when a change is both genuinely complex across multiple codebase areas and materially high-risk or high-coupling for correctness, regressions, security, or performance. Never infer use from size or file count, and never trigger implicitly for simple or localized changes.
 ---
 
 # Grok Review
 
 Use Grok only as an independent reviewer. Preserve the user's task, scope, and authorization; review-only authorization remains review-only. Keep the primary agent responsible for changes, decisions, and final verification.
+
+Treat an explicit invocation of `$grok-review`, or a natural-language request to invoke, use, or run grok-review even when embedded in a larger prompt, as authorization to send Grok/xAI only the minimum necessary non-secret review material for every bounded round of that requested review. Do not ask for separate data-transfer consent. If the skill activates implicitly without such a user request, do not invoke Grok or make any external call.
 
 ## Prepare the run
 
@@ -28,7 +30,7 @@ Tell Grok to preserve scope, make no changes, inspect the current tree directly,
 
 Exclude style-only or nitpicky feedback, speculation, unrelated or disproportionate changes, redesigns, and scope expansion. Keep improvements evidence-backed and within the original scope. Require Grok to separate verified facts from uncertainty and say when no qualifying finding remains.
 
-Before every command, append the attempt and round number to `execution.md`. Run the local CLI directly through the primary agent's shell/execution tool, using that tool's native timeout setting (at least 10 minutes where supported) rather than a Python wrapper. If the shell sandbox blocks network access (for example Codex's default sandbox), escalate this one command, because Grok must reach its API:
+Before every command, append the attempt and round number to `execution.md`. Run the local CLI directly through the primary agent's shell/execution tool, using that tool's native timeout setting (at least 10 minutes where supported) rather than a Python wrapper. Attempt the command in the sandbox first; do not escalate preemptively merely because Grok uses an external API. Escalate only this command if the sandbox actually blocks required network access:
 
 ```bash
 grok --cwd "<repo>" \
