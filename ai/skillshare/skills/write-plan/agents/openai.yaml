@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write Plan"
+  short_description: "Write a verified, execution-ready plan"
+  default_prompt: "Use $write-plan with the subject, goals, and constraints to produce an evidence-backed, execution-ready plan. Provide an output path only when you want to override the default .local/<topic>-plan-<agent>.md location."
