@@ -7,6 +7,8 @@ description: Execute an existing implementation, cleanup, migration, or remediat
 
 Execute the plan comprehensively. Treat it as a hypothesis to verify, not an unquestionable script.
 
+Retain independent judgment over the plan's content and proposed technical implementation, and make evidence-backed deviations when warranted. This discretion does not extend to this skill's execution process: always honor its phase or batch quality gates, `code-review-loop` after each phase or batch, `codex-review-loop` when prescribed, execution notes, `final-pass`, and the final canonical full quality suite. Never use a deviation from the source plan to skip a required process step.
+
 ## Resolve the plan
 
 1. Treat text following the skill invocation as the optional argument, containing either plan text or a plan-document path. If it names a readable file, resolve it from the current repository context and read the complete file; otherwise treat it as plan text. If it clearly looks like an intended but missing or unreadable path, report that instead of guessing its contents.
