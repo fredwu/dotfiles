@@ -1,0 +1,6 @@
+interface:
+  display_name: "Grok Review Loop"
+  short_description: "Iterate with bounded external Grok reviews"
+  default_prompt: "Use $grok-review-loop to review and remediate the current change through bounded Grok rounds."
+policy:
+  allow_implicit_invocation: false

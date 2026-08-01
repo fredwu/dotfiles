@@ -1,4 +1,6 @@
 interface:
   display_name: "Code Review"
-  short_description: "Review code changes with parallel confidence checks"
-  default_prompt: "Use $code-review to review the current change and report only high-confidence findings."
+  short_description: "Run one read-only internal code review"
+  default_prompt: "Use $code-review to review the current change once without modifying it."
+policy:
+  allow_implicit_invocation: true

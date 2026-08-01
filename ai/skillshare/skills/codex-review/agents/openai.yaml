@@ -1,0 +1,6 @@
+interface:
+  display_name: "Codex Review"
+  short_description: "Run one external Codex review"
+  default_prompt: "Use $codex-review to run one read-only external Codex review of the current change."
+policy:
+  allow_implicit_invocation: false

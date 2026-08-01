@@ -1,26 +1,42 @@
 ---
 name: codex-review-loop
-description: Run the canonical bounded review-remediate loop with every scheduled review supplied by the external Codex CLI through codex-review. Use for iterative external Codex review and authorized remediation of a sufficiently identified change target.
+description: >-
+  Run the canonical bounded review-remediation workflow using one read-only
+  external Codex CLI invocation per scheduled round, with broad rounds 1-3,
+  blocker-focused rounds 4-9, and final read-only round 10. Use only when
+  explicitly invoked as $codex-review-loop or explicitly requested by name,
+  including from another skill; never invoke implicitly.
 ---
 
 # Codex Review Loop
 
-Use `../code-review-loop/SKILL.md` as the normative loop mechanism. Before acting, completely read the user request, applicable repository instructions, that file, and `../codex-review/SKILL.md`.
+Read `../code-review-loop/SKILL.md`, `../code-review/SKILL.md`, and `../codex-review/SKILL.md`. Follow the canonical loop completely, with the substitutions and constraints below. The primary agent owns all assessment, remediation, verification, and completion.
 
-Apply every non-reviewer mechanism from the normative loop without restating or replacing it, including its contract, surface resolution and refresh, ledger, assessment and dispositions, authorization-bounded remediation, checks, round bounds, stopping rules, final inspection, transcript handling, and audit report. Make only the exhaustive reviewer substitutions below.
+Explicit invocation authorizes the bounded Codex calls and minimum non-secret data transfer required by the scheduled rounds. It does not authorize unrelated data, remote writes, or expanded remediation.
 
-## Substitute external Codex for code-review
+## Use Codex as the scheduled reviewer
 
-For every scheduled round, invoke exactly one external Codex CLI review according to `../codex-review/SKILL.md`. Never invoke `code-review`, a generic review subagent, or any other scheduled reviewer.
+Replace each scheduled internal `code-review` invocation with exactly one fresh external Codex CLI invocation using `codex-review`'s ephemeral read-only mechanism and shared logical contract. Never use bypass flags. One top-level CLI call is one round even if it fails; do not retry within a round or silently substitute another reviewer.
 
-The original user request must identify the target well enough for Codex to discover it from the repository root or parent of named paths. If it does not, ask the user to clarify. Do not compensate by sending a typed descriptor, private change inventory, diff, or invented scope to Codex.
+Use one private temporary run directory for the loop. Keep the frozen scope once, and write one compact per-round request and one exact result. Each request contains only the canonical review packet:
 
-Send Codex only the original user task, plus an optional one-line focus only when it came from the user's trigger. Never send the typed descriptor, inventory, diff, ledger, logs, tool traces, prior review, remediation summary, prior conclusions, or an internally selected round emphasis. Do not pass a model unless requested. A custom prompt must not be combined with `--base`, `--uncommitted`, or `--commit`.
+- original requirements and acceptance criteria;
+- frozen typed target, current task-attributable surface, and exclusions;
+- round number, phase, and allowed focus.
 
-Run one fresh ephemeral invocation, snapshot the worktree and relevant diff before and after it, and make no git mutation while it runs. Follow `codex-review`'s timeout, polling, diagnostics, cleanup, and no-process-killing rules exactly. A non-empty output file is success. Preserve the complete Codex output verbatim, then independently assess it.
+For broad rounds 1-3, tell Codex to inspect the complete surface itself and apply that round's broad focus. Do not pass prior outputs, the ledger, remediation summaries, or conclusions. For focused rounds 4-9, pass only the one independently verified blocker, its current relevant surface, and immediate regression boundary; exclude lower-priority exploration. Round 10 receives the complete current surface, broad final-audit focus, and no prior conclusions.
 
-Treat mutation or unusable output as a failed, counted round. Do not schedule a replacement reviewer. When safe, use the normative loop's one clearly separated same-round self-review fallback; otherwise stop. A fallback is never Codex output or an independent reviewer. Reverse mutation only when the exact reviewer-created delta is safely isolatable; otherwise stop and ask the user.
+Use the canonical shared schema for every result to avoid transcript parsing,
+but preserve the exact result and completion state for independent assessment.
+Snapshot the worktree before and after every call. Treat mutation, incomplete
+inspection, empty or schema-invalid output, timeout, or CLI failure as an
+incomplete round; do not invent findings. Stop when the canonical progress
+rules require it.
 
-Round 10 is an external Codex consultation only. Codex receives the same restricted input; the invoking agent synthesizes the audit and performs no later remediation.
+After rounds 1-9, independently assess the result, fix every accepted authorized item, resolve residual tasks, run proportionate checks, and update the ledger. Deferral is allowed only for a stated authority, input, or external-state blocker. During and after round 10, make no remediation.
 
-For every used round, label the unedited transcript `Codex review`, followed by `Assessment`. Apply all remaining reporting requirements from the normative loop unchanged.
+## Return and clean up
+
+Use the canonical loop's compact agent handoff and human summary. Include rounds and phases used, Codex completion failures, accepted/partial/declined counts, fixes, checks, unresolved findings, blockers, and residual risk. Do not dump raw transcripts unless requested.
+
+Delete only the validated current temporary run directory. If cleanup cannot be verified, preserve it and report its exact path. Never commit, push, publish comments, or make other remote writes unless separately authorized.

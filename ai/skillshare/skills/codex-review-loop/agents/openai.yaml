@@ -1,4 +1,6 @@
 interface:
   display_name: "Codex Review Loop"
-  short_description: "Iterate with external Codex review"
-  default_prompt: "Use $codex-review-loop to review and remediate my changes until clean or safely bounded."
+  short_description: "Iterate with bounded external Codex reviews"
+  default_prompt: "Use $codex-review-loop to review and remediate the current change through bounded Codex rounds."
+policy:
+  allow_implicit_invocation: false
