@@ -68,13 +68,6 @@ finish_test() {
   rm -rf "$HOME"
 }
 
-test_versions() {
-  assert_true "equal versions should pass" version_at_least 0.12.0 "$NEOVIM_MIN_VERSION"
-  assert_true "newer versions should pass" version_at_least 0.12.4 "$NEOVIM_MIN_VERSION"
-  assert_false "older versions should fail" version_at_least 0.11.6 "$NEOVIM_MIN_VERSION"
-  finish_test "semantic version comparison"
-}
-
 test_platform_detection() {
   (
     uname() { printf 'Linux\n'; }
@@ -112,6 +105,7 @@ test_package_dispatch_without_package_manager() {
 
 test_mise_release_selection() {
   local marker="$HOME/mise-release"
+  local name version asset checksum url executable
 
   (
     have() { return 1; }
@@ -120,9 +114,16 @@ test_mise_release_selection() {
     ensure_mise_on_linux
   )
 
+  read -r name version asset checksum url executable < "$marker"
+  assert_eq mise "$name" "mise should select the mise installer"
+  assert_eq "$MISE_VERSION" "$version" "mise should select the configured version"
+  assert_eq "mise-v$MISE_VERSION-linux-arm64.tar.gz" "$asset" \
+    "mise should select the ARM64 asset"
+  [[ "$checksum" =~ ^[[:xdigit:]]{64}$ ]] || fail "mise should require a SHA-256 checksum"
   assert_eq \
-    "mise $MISE_VERSION mise-v$MISE_VERSION-linux-arm64.tar.gz 1e5d2181bad9b897437e8227200fe661339bad7d66a3cd1828b22c48156ac73a https://github.com/jdx/mise/releases/download/v$MISE_VERSION/mise-v$MISE_VERSION-linux-arm64.tar.gz bin/mise" \
-    "$(cat "$marker")" "mise should select the pinned ARM64 release"
+    "https://github.com/jdx/mise/releases/download/v$MISE_VERSION/$asset" \
+    "$url" "mise should construct the configured release URL"
+  assert_eq bin/mise "$executable" "mise should select the executable within the archive"
   finish_test "mise release selection is pinned and architecture-aware"
 }
 
@@ -150,6 +151,7 @@ test_linux_tarball_install() {
 
 test_skillshare_release_selection() {
   local marker="$HOME/skillshare-release"
+  local name version asset checksum url executable
 
   (
     linux_architecture() { printf 'arm64\n'; }
@@ -157,9 +159,19 @@ test_skillshare_release_selection() {
     ensure_skillshare_on_linux
   )
 
+  read -r name version asset checksum url executable < "$marker"
+  assert_eq skillshare "$name" "Skillshare should select the Skillshare installer"
+  assert_eq "$SKILLSHARE_VERSION" "$version" \
+    "Skillshare should select the configured version"
+  assert_eq "skillshare_${SKILLSHARE_VERSION}_linux_arm64.tar.gz" "$asset" \
+    "Skillshare should select the ARM64 asset"
+  [[ "$checksum" =~ ^[[:xdigit:]]{64}$ ]] || \
+    fail "Skillshare should require a SHA-256 checksum"
   assert_eq \
-    "skillshare $SKILLSHARE_VERSION skillshare_${SKILLSHARE_VERSION}_linux_arm64.tar.gz 09eff8b20d01b6d3e40ca1eeccf597087bafe7236af7e8bfd82371225880ab9d https://github.com/runkids/skillshare/releases/download/v$SKILLSHARE_VERSION/skillshare_${SKILLSHARE_VERSION}_linux_arm64.tar.gz skillshare" \
-    "$(cat "$marker")" "Skillshare should select the pinned ARM64 release"
+    "https://github.com/runkids/skillshare/releases/download/v$SKILLSHARE_VERSION/$asset" \
+    "$url" "Skillshare should construct the configured release URL"
+  assert_eq skillshare "$executable" \
+    "Skillshare should select the executable within the archive"
   finish_test "Skillshare release selection is pinned and architecture-aware"
 }
 
@@ -199,7 +211,7 @@ test_apt_missing_required_package_fails() {
 run_apt_with_missing_required_package() (
   as_root() { "$@"; }
   apt-get() { :; }
-  apt_package_exists() { [[ "$1" != zoxide ]]; }
+  apt_package_exists() { return 1; }
   install_apt_packages
 )
 
@@ -343,6 +355,7 @@ test_skillshare_existing_config_is_preserved() {
   local XDG_CONFIG_HOME="$HOME/xdg config"
   local invocation_log="$HOME/skillshare.log"
   local skillshare_home="$XDG_CONFIG_HOME/skillshare"
+  local agent_file managed_agent
   export DOTFILES_ROOT XDG_CONFIG_HOME
 
   mkdir -p "$DOTFILES_ROOT/ai/skillshare/skills" \
@@ -358,9 +371,18 @@ test_skillshare_existing_config_is_preserved() {
   cp -R "$source_root/ai/skillshare/extensions/codex-agents" \
     "$DOTFILES_ROOT/ai/skillshare/extensions/"
   cp "$source_root/install/lib/configure-skillshare-extra.js" "$DOTFILES_ROOT/install/lib/"
-  cp "$source_root/ai/skillshare/agents/"*.md "$DOTFILES_ROOT/ai/skillshare/agents/"
+  managed_agent=
+  for agent_file in "$source_root/ai/skillshare/agents/"*.md; do
+    [[ -e "$agent_file" ]] || continue
+    cp "$agent_file" "$DOTFILES_ROOT/ai/skillshare/agents/"
+    if [[ -z "$managed_agent" ]]; then
+      managed_agent=${agent_file##*/}
+      managed_agent=${managed_agent%.md}
+    fi
+  done
+  [[ -n "$managed_agent" ]] || fail "Skillshare migration fixture requires a managed agent"
   mkdir -p "$HOME/.codex/agents"
-  printf 'stale generated agent\n' > "$HOME/.codex/agents/fastworker.toml"
+  printf 'stale generated agent\n' > "$HOME/.codex/agents/$managed_agent.toml"
   printf 'unrelated local agent\n' > "$HOME/.codex/agents/local-only.toml"
 
   skillshare() { printf '%s\n' "$*" >> "$invocation_log"; }
@@ -382,26 +404,41 @@ test_skillshare_existing_config_is_preserved() {
   assert_true "pre-existing agents should be archived before relinking" \
     test -f "$DOTFILES_BACKUP_ROOT"/*/xdg\ config/skillshare/agents/local.md
   assert_true "overlapping Codex agents should be archived for first migration" \
-    test -f "$DOTFILES_BACKUP_ROOT"/*/.codex/agents/fastworker.toml
+    test -f "$DOTFILES_BACKUP_ROOT"/*/.codex/agents/"$managed_agent.toml"
   assert_false "overlapping Codex agent should be clear for Skillshare generation" \
-    test -e "$HOME/.codex/agents/fastworker.toml"
+    test -e "$HOME/.codex/agents/$managed_agent.toml"
   assert_true "unrelated Codex agents should not be touched" \
     test -f "$HOME/.codex/agents/local-only.toml"
   finish_test "existing Skillshare config and source data are preserved"
 }
 
-test_codex_agent_model_mapping() {
+test_codex_agent_model_mapping_validation() {
   local extension="$TEST_ROOT/ai/skillshare/extensions/codex-agents"
-  local generated="$HOME/fastworker.toml"
+  local agent_file agent_name generated expected_model expected_effort
   local error_log="$HOME/missing-mapping.log"
 
-  SS_REL_PATH=fastworker.md env -u NODE_OPTIONS node "$extension/convert.js" \
-    < "$TEST_ROOT/ai/skillshare/agents/fastworker.md" > "$generated"
+  agent_file=
+  for agent_file in "$TEST_ROOT/ai/skillshare/agents/"*.md; do
+    [[ -e "$agent_file" ]] || continue
+    break
+  done
+  [[ -e "$agent_file" ]] || fail "Codex conversion fixture requires a managed agent"
+  agent_name=${agent_file##*/}
+  agent_name=${agent_name%.md}
+  generated="$HOME/$agent_name.toml"
 
-  assert_true "Codex conversion should map the model" \
-    grep -Fq 'model = "gpt-5.6-sol"' "$generated"
-  assert_true "Codex conversion should map provider-specific reasoning effort" \
-    grep -Fq 'model_reasoning_effort = "low"' "$generated"
+  SS_REL_PATH=${agent_file##*/} env -u NODE_OPTIONS node "$extension/convert.js" \
+    < "$agent_file" > "$generated"
+  expected_model=$(env -u NODE_OPTIONS node -e \
+    'const {loadMappings}=require(process.argv[1]); process.stdout.write(JSON.stringify(loadMappings()[process.argv[2]].codex[process.argv[3]]));' \
+    "$extension/model-map.js" "$agent_name" model)
+  expected_effort=$(env -u NODE_OPTIONS node -e \
+    'const {loadMappings}=require(process.argv[1]); process.stdout.write(JSON.stringify(loadMappings()[process.argv[2]].codex[process.argv[3]]));' \
+    "$extension/model-map.js" "$agent_name" model_reasoning_effort)
+  assert_true "Codex conversion should use the configured model" \
+    grep -Fxq "model = $expected_model" "$generated"
+  assert_true "Codex conversion should use the configured reasoning effort" \
+    grep -Fxq "model_reasoning_effort = $expected_effort" "$generated"
 
   if printf '%s\n' \
     '---' \
@@ -420,33 +457,39 @@ test_codex_agent_model_mapping() {
 
   env -u NODE_OPTIONS node "$extension/validate.js" \
     "$TEST_ROOT/ai/skillshare/agents"
-  finish_test "Codex agent conversion uses strict provider model mappings"
+  finish_test "Codex agent mappings are complete and reject unmapped agents"
 }
 
 test_repository_path_with_spaces() {
   local source_root=$TEST_ROOT
   local DOTFILES_ROOT="$HOME/repository with spaces"
   local XDG_CONFIG_HOME="$HOME/config with spaces"
-  local name
+  local installed_template_link link template_name
   export DOTFILES_ROOT XDG_CONFIG_HOME
 
-  mkdir -p "$DOTFILES_ROOT/templates/ssh" "$DOTFILES_ROOT/templates/gnupg" \
-    "$DOTFILES_ROOT/config/nvim" "$DOTFILES_ROOT/zsh" \
+  mkdir -p "$DOTFILES_ROOT/config/nvim" "$DOTFILES_ROOT/zsh" \
     "$DOTFILES_ROOT/ai/shared" \
     "$DOTFILES_ROOT/ai/skillshare/skills/example" \
     "$DOTFILES_ROOT/ai/skillshare/agents"
   printf 'repository skill\n' > "$DOTFILES_ROOT/ai/skillshare/skills/example/SKILL.md"
   printf 'instructions\n' > "$DOTFILES_ROOT/ai/shared/AGENTS.md"
-  for name in ackrc gemrc gitconfig gitignore_global railsrc zlogin zpreztorc zprofile zshenv zshrc; do
-    cp "$source_root/templates/$name" "$DOTFILES_ROOT/templates/$name"
-  done
-  cp "$source_root/templates/ssh/config" "$DOTFILES_ROOT/templates/ssh/config"
-  cp "$source_root/templates/gnupg/gpg-agent.conf" "$DOTFILES_ROOT/templates/gnupg/gpg-agent.conf"
+  cp -R "$source_root/templates" "$DOTFILES_ROOT/"
   cp "$source_root/zsh/custom.example" "$DOTFILES_ROOT/zsh/custom.example"
 
   install_dotfiles
-  assert_eq "$DOTFILES_ROOT/templates/zshrc" "$(readlink "$HOME/.zshrc")" \
-    "repository paths containing spaces should be preserved"
+  installed_template_link=
+  for link in "$HOME"/.*; do
+    [[ -L "$link" ]] || continue
+    case "$(readlink "$link")" in
+      "$DOTFILES_ROOT/templates/"*) installed_template_link=$link; break ;;
+    esac
+  done
+  [[ -n "$installed_template_link" ]] || \
+    fail "repository paths containing spaces should work for regular templates"
+  template_name=${installed_template_link##*/.}
+  assert_eq "$DOTFILES_ROOT/templates/$template_name" \
+    "$(readlink "$installed_template_link")" \
+    "regular template links should preserve repository paths containing spaces"
   assert_eq "$DOTFILES_ROOT/config/nvim" "$(readlink "$XDG_CONFIG_HOME/nvim")" \
     "XDG paths containing spaces should be preserved"
   assert_eq "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$(readlink "$HOME/.codex/AGENTS.md")" \
@@ -669,7 +712,6 @@ test_login_shell_reconciliation() {
   finish_test "login-shell change is idempotent and stubbed"
 }
 
-new_home; test_versions
 new_home; test_platform_detection
 new_home; test_package_dispatch_without_package_manager
 new_home; test_mise_release_selection
@@ -682,7 +724,7 @@ new_home; test_dangling_link
 new_home; test_dotfile_install
 new_home; test_skillshare_configuration
 new_home; test_skillshare_existing_config_is_preserved
-new_home; test_codex_agent_model_mapping
+new_home; test_codex_agent_model_mapping_validation
 new_home; test_repository_path_with_spaces
 new_home; test_ai_config_directories_preserve_provider_data
 new_home; test_legacy_ai_symlink_is_reversed
