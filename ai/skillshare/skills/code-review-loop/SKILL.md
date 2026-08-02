@@ -27,12 +27,15 @@ complete every authorized, in-scope residual task before finishing. Mark work
 blocked only when it needs unavailable authority, user input, or an
 external-state change, and say exactly what is needed.
 
+Apply `code-review`'s clean-slate and durable-architecture lens during assessment and remediation. For an accepted finding under that lens, remove the superseded, compatibility, or transition machinery and implement the proportional durable target state; do not preserve the old path or layer another workaround unless the effective requirements explicitly require it.
+
 ## Run scheduled rounds
 
 For each scheduled round, run exactly one fresh invocation of `code-review` in embedded mode. Give it a compact review packet containing only:
 
 - the original requirements and acceptance criteria;
 - the frozen typed target, current task-attributable surface, and exclusions;
+- the shared review lenses from `code-review`;
 - the round number, phase, and allowed focus below.
 
 Do not pass the ledger, remediation narrative, earlier reviewer output, or prior conclusions, except the single verified blocker allowed in rounds 4-9. Preserve the exact `REVIEW_RESULT` long enough to assess and ledger it; do not dump raw transcripts into the final response.

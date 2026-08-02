@@ -22,6 +22,7 @@ Use one private temporary run directory for the loop. Keep the frozen scope once
 
 - original requirements and acceptance criteria;
 - frozen typed target, current task-attributable surface, and exclusions;
+- `grok-review`'s shared default review lens;
 - round number, phase, and allowed focus.
 
 Set `--cwd` to the frozen repository root for every round so Grok inspects the

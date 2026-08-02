@@ -22,6 +22,7 @@ Use one private temporary run directory for the loop. Keep the frozen scope once
 
 - original requirements and acceptance criteria;
 - frozen typed target, current task-attributable surface, and exclusions;
+- `codex-review`'s shared default review lens;
 - round number, phase, and allowed focus.
 
 For broad rounds 1-3, tell Codex to inspect the complete surface itself and apply that round's broad focus. Do not pass prior outputs, the ledger, remediation summaries, or conclusions. For focused rounds 4-9, pass only the one independently verified blocker, its current relevant surface, and immediate regression boundary; exclude lower-priority exploration. Round 10 receives the complete current surface, broad final-audit focus, and no prior conclusions.

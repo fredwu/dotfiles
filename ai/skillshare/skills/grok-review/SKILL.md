@@ -24,13 +24,17 @@ stderr. Write one request containing:
 - frozen root, type, selector and object identities;
 - included worktree classes, explicit relevant-untracked paths, and exclusions;
 - `phase: single` and any user-supplied focus;
+- the shared default lens: unless the effective requirements explicitly call for them, flag target-attributable legacy preservation, backward compatibility, deprecation paths or shims, dual reads/writes, migration or transition machinery, superseded paths, and tactical short-term architecture;
 - the shared finding fields and a requirement to return `clean` only after inspecting the complete surface.
 
 Tell Grok to omit `assessment` and `assessment_rationale`; the calling agent
 adds them after verification. Tell it to inspect the frozen repository
 directly, preserve scope, make no changes, avoid style nits and speculation,
 cite repository-relative `path:line` evidence, and expose unfinished required
-work. Do not paste diffs or logs that Grok can read itself.
+work. Tell it that existing behavior alone does not establish a compatibility
+requirement and to recommend removing superseded or transitional machinery and
+implementing the proportional durable target state rather than layering another
+workaround. Do not paste diffs or logs that Grok can read itself.
 
 Snapshot relevant status and diffs immediately before invocation. Run Grok
 with `--cwd` set to the frozen repository root, `dontAsk` permissions, the

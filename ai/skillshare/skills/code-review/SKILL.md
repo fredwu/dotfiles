@@ -34,7 +34,10 @@ Inspect the complete surface through these lenses within the same review:
 2. correctness, boundaries, call sites, regressions, and tests;
 3. security, privacy, performance, and availability;
 4. history, blame, prior discussion, comments, and local conventions when available;
-5. maintainability and residual required work directly attributable to the target.
+5. a clean-slate target state and proportional, durable long-term architecture;
+6. maintainability and residual required work directly attributable to the target.
+
+Unless the effective requirements explicitly call for them, report target-attributable legacy preservation, backward compatibility, deprecation paths or shims, dual reads/writes, migration or transition machinery, superseded paths, and tactical short-term architecture. Existing behavior alone does not establish a compatibility requirement. For these findings, recommend removing superseded or transitional machinery and implementing the durable target state rather than layering another workaround.
 
 Use capable internal agents in parallel when useful, but treat their work as lenses of this single invocation, not additional review rounds. Deduplicate before returning. Independently verify each candidate against the code and requirements during this same review.
 
