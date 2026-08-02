@@ -23,8 +23,7 @@ convert(({ body, frontmatter, stem }) => {
   return {
     name,
     description,
-    model: codex.model,
-    model_reasoning_effort: codex.model_reasoning_effort,
+    ...codex,
     developer_instructions: block(developerInstructions),
   };
 });
