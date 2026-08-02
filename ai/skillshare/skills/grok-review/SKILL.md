@@ -14,9 +14,11 @@ authorizes sending Grok only the minimum non-secret material needed for this
 review. Never send credentials, unrelated user data, the whole conversation,
 prior reviews, or hidden conclusions.
 
-## Prepare a compact packet
+## Prepare one direct review
 
-Freeze the target exactly as `code-review` requires. Create a private temporary run directory outside the repository. Write one request containing:
+Freeze the target exactly as `code-review` requires. Create one private
+temporary run directory outside the repository for the request, stdout, and
+stderr. Write one request containing:
 
 - original requirements and acceptance criteria;
 - frozen root, type, selector and object identities;
@@ -25,30 +27,50 @@ Freeze the target exactly as `code-review` requires. Create a private temporary 
 - the shared finding fields and a requirement to return `clean` only after inspecting the complete surface.
 
 Tell Grok to omit `assessment` and `assessment_rationale`; the calling agent
-adds them after verification. Tell it to inspect the repository directly,
-preserve scope, make no changes, avoid style nits and speculation, cite
-repository-relative `path:line` evidence, and expose unfinished required work.
-Do not paste diffs or logs that Grok can read itself.
+adds them after verification. Tell it to inspect the frozen repository
+directly, preserve scope, make no changes, avoid style nits and speculation,
+cite repository-relative `path:line` evidence, and expose unfinished required
+work. Do not paste diffs or logs that Grok can read itself.
 
-Snapshot relevant status and diffs before invocation. Run Grok with plan
-permissions, bounded turns and timeout, no memory, and web search disabled
-unless the frozen target explicitly requires external verification. Never use
-`--always-approve` or another bypass flag. Pass the canonical schema content to
-`--json-schema` and capture the complete JSON envelope. A representative shape
-is:
+Snapshot relevant status and diffs immediately before invocation. Run Grok
+with `--cwd` set to the frozen repository root, `dontAsk` permissions, the
+read-only sandbox, bounded turns and execution timeout, and no memory, subagents,
+MCP, web access, or update check. Allow only `read_file`, `grep`, `list_dir`,
+and `run_terminal_cmd`. Use the shell tool only for the installed CLI's
+documented auto-approved read-only inspection commands relevant to the frozen
+target, including read-only Git status, diff, history, search, and view
+commands. In `dontAsk` mode, commands that require approval are denied rather
+than prompting. Do not add broad Bash allow rules or run mutating commands.
+Never use `--always-approve` or another bypass flag. Give the outer execution
+call a timeout of at least 10 minutes; this is a caller setting, not an
+additional Grok CLI flag.
+
+Pass the canonical schema's JSON content directly as one `--json-schema`
+argument; do not pass a schema path or build a Python, jq, or other validator.
+Capture stdout as the complete JSON envelope and stderr separately. A
+representative shape is:
 
 ```text
-grok --cwd <root> --prompt-file <request-file> --verbatim \
-  --permission-mode plan --max-turns 8 --no-memory --disable-web-search \
-  --json-schema <schema>
+grok --cwd <frozen-root> --prompt-file <run-directory>/request.md --verbatim \
+  --permission-mode dontAsk \
+  --tools "read_file,grep,list_dir,run_terminal_cmd" \
+  --disallowed-tools Agent --deny MCPTool --sandbox read-only \
+  --max-turns 30 --no-memory --no-auto-update --disable-web-search \
+  --output-format json --json-schema <schema-content> \
+  > <run-directory>/stdout.json 2> <run-directory>/stderr.log
 ```
 
-Use the installed CLI's help to place supported flags correctly. Keep untrusted
-request text in the prompt file, not interpolated shell syntax. Require the
-outer result's `stopReason` to be `EndTurn`, require non-empty `text`, and parse
-that text against the canonical schema. An exit code alone is insufficient.
+Use the installed CLI's help and documentation to confirm current flag and
+envelope names. Keep untrusted request text in the prompt file, not
+interpolated shell syntax. Success requires a successful exit, exactly one JSON
+object on stdout, the installed CLI's documented normal end-of-turn marker
+(`stopReason: end_turn` is the current example), and an object-valued
+`structuredOutput` produced under the canonical schema. Inspect stderr and
+perform only direct top-level-field and verdict/findings coherence checks; the
+CLI's schema-constrained result is the review payload. An exit code or freeform
+`text` alone is insufficient.
 
-Snapshot the tree again afterward. If Grok mutated it, report the invocation failed and isolate only Grok's exact delta; reverse it only when safe and never blanket-restore a dirty tree. On timeout, malformed output, missing CLI/login, or incomplete inspection, do not retry or invent findings—return `verdict: incomplete` with the failure as residual risk.
+Snapshot the tree again afterward. If Grok mutated it, report the invocation failed and isolate only Grok's exact delta; reverse it only when safe and never blanket-restore a dirty tree. On timeout, malformed output, missing CLI/login, sandbox failure, or incomplete inspection, do not retry or invent findings—return `verdict: incomplete` with the failure as residual risk.
 
 ## Assess and return
 

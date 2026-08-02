@@ -16,23 +16,32 @@ Explicit invocation authorizes the bounded Grok calls and minimum non-secret dat
 
 ## Use Grok as the scheduled reviewer
 
-Replace each scheduled internal `code-review` invocation with exactly one fresh external Grok CLI invocation using `grok-review`'s plan-permission, bounded-turn, no-memory mechanism and shared logical contract. Keep web search disabled unless the frozen target explicitly requires external verification. Never use `--always-approve` or another bypass flag. One top-level CLI call is one round even if it fails; do not retry within a round or silently substitute another reviewer.
+Replace each scheduled internal `code-review` invocation with exactly one fresh external Grok CLI invocation using `grok-review`'s direct-repository, `dontAsk`, read-only-sandbox, bounded-turn, no-memory mechanism and shared logical contract. Keep web search disabled. Never use bypass flags. One top-level CLI call is one round even if it fails; do not retry within a round or silently substitute another reviewer.
 
-Use one private temporary run directory for the loop. Keep the frozen scope once, and write one compact per-round request and one exact result. Each request contains only the canonical review packet:
+Use one private temporary run directory for the loop. Keep the frozen scope once, and write one compact per-round request and one exact result. Each request contains only:
 
 - original requirements and acceptance criteria;
 - frozen typed target, current task-attributable surface, and exclusions;
 - round number, phase, and allowed focus.
 
-For broad rounds 1-3, tell Grok to inspect the complete surface itself and apply that round's broad focus. Do not pass prior outputs, the ledger, remediation summaries, or conclusions. For focused rounds 4-9, pass only the one independently verified blocker, its current relevant surface, and immediate regression boundary; exclude lower-priority exploration. Round 10 receives the complete current surface, broad final-audit focus, and no prior conclusions.
+Set `--cwd` to the frozen repository root for every round so Grok inspects the
+current repository directly. Keep request and output files in the temporary run
+directory outside it. For broad rounds 1-3, tell Grok to inspect the complete
+surface itself and apply that round's broad focus. Do not pass prior outputs,
+the ledger, remediation summaries, or conclusions. For focused rounds 4-9,
+pass only the one independently verified blocker, its current relevant surface,
+and immediate regression boundary; exclude lower-priority exploration. Round
+10 receives the complete current surface, broad final-audit focus, and no prior
+conclusions.
 
-Use the canonical shared schema for every result to avoid transcript parsing,
-but preserve the exact result and completion state for independent assessment.
-Require `stopReason: EndTurn`, non-empty `text`, and schema-valid text.
-Snapshot the worktree before and after every call. Treat mutation, incomplete
-inspection, empty or schema-invalid output, timeout, or CLI failure as an
-incomplete round; do not invent findings. Stop when the canonical progress
-rules require it.
+Use the canonical shared schema content directly for every result to avoid
+transcript parsing; do not add a Python, jq, or other validator. Preserve the
+exact stdout envelope, stderr, and completion state for independent assessment.
+Apply `grok-review`'s tool, permission, sandbox, output, and envelope rules to
+every call. Snapshot the worktree before and after every call. Treat mutation,
+incomplete inspection, missing or incoherent structured output, timeout,
+sandbox failure, or CLI failure as an incomplete round; do not invent findings.
+Stop when the canonical progress rules require it.
 
 After rounds 1-9, independently assess the result, fix every accepted authorized item, resolve residual tasks, run proportionate checks, and update the ledger. Deferral is allowed only for a stated authority, input, or external-state blocker. During and after round 10, make no remediation.
 
