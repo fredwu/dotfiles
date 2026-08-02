@@ -36,7 +36,8 @@ Preserve useful existing notes, but validate their provenance record before chan
 - Independently trace relevant code, tests, configuration, documentation, data flows, and runtime behavior before editing. Do not blindly trust the plan or docs.
 - Confirm each reported problem still exists and fix its root cause. Update or reject stale plan steps with evidence.
 - Convert the verified scope into ordered, reviewable phases or batches. Map each plan item to the effective requirement, and track it to completion, justified deviation, or honest blocker. Reject or adapt plan steps that drift from the requirement.
-- Keep improvements proportional to the requested outcome. Avoid unrelated refactors, speculative features, and unnecessary complexity.
+- Unless the effective requirement explicitly requires otherwise, implement a clean-slate target state: remove superseded paths and do not preserve legacy behavior or add backward compatibility, deprecation paths or shims, dual reads/writes, or migration or transition machinery.
+- Prefer durable, cohesive, long-term architecture over tactical patches or delivery shortcuts. Keep it proportional to the requested outcome and evidenced future direction; avoid unrelated refactors, speculative features, and unnecessary complexity.
 - Do not commit, push, deploy, send external messages, or make other remote changes unless the user has authorized them.
 - Use available subagents for bounded research, implementation, or independent validation when parallel work improves confidence. Reconcile their evidence; do not substitute delegation for your own final verification.
 - For Elixir/Phoenix work, use the available lifecycle, planning, execution, investigation, review, testing, and verification skills (for example `phx-full`, `phx-plan`, `phx-work`, and `phx-review`) when relevant. Skill names may be namespaced differently across hosts; select by capability rather than assuming an exact identifier.
