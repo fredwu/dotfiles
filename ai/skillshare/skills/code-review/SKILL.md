@@ -50,7 +50,9 @@ Use priority independently from confidence: `P0` critical/systemic, `P1` core bl
 Return an agent-detailed `REVIEW_RESULT` JSON object first. Use
 `references/review-result.schema.json` as the canonical machine contract. Set
 `assessment` to `confirmed` and include a concise `assessment_rationale` for
-every retained internal finding.
+every retained internal finding. External reviewers instead produce the strict
+unassessed shape in `references/external-review-result.schema.json`; the calling
+agent adds its assessment while normalizing into this canonical contract.
 
 ```json
 {

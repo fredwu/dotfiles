@@ -3,7 +3,7 @@ name: codex-review-loop
 description: >-
   Run the canonical bounded review-remediation workflow using one read-only
   external Codex CLI invocation per scheduled round, with broad rounds 1-3,
-  blocker-focused rounds 4-9, and final read-only round 10. Use only when
+  blocker-focused rounds 4-9, and an optional final read-only round 10. Use only when
   explicitly invoked as $codex-review-loop or explicitly requested by name,
   including from another skill; never invoke implicitly.
 ---
@@ -18,7 +18,7 @@ Explicit invocation authorizes the bounded Codex calls and minimum non-secret da
 
 Replace each scheduled internal `code-review` invocation with exactly one fresh external Codex CLI invocation using `codex-review`'s ephemeral read-only mechanism and shared logical contract. Never use bypass flags. One top-level CLI call is one round even if it fails; do not retry within a round or silently substitute another reviewer.
 
-Use one private temporary run directory for the loop. Keep the frozen scope once, and write one compact per-round request and one exact result. Each request contains only the canonical review packet:
+Use one private temporary run directory for the loop. Keep the frozen scope once, and write one compact per-round request and one exact result. Each request contains only:
 
 - original requirements and acceptance criteria;
 - frozen typed target, current task-attributable surface, and exclusions;
@@ -27,12 +27,25 @@ Use one private temporary run directory for the loop. Keep the frozen scope once
 
 For broad rounds 1-3, tell Codex to inspect the complete surface itself and apply that round's broad focus. Do not pass prior outputs, the ledger, remediation summaries, or conclusions. For focused rounds 4-9, pass only the one independently verified blocker, its current relevant surface, and immediate regression boundary; exclude lower-priority exploration. Round 10 receives the complete current surface, broad final-audit focus, and no prior conclusions.
 
-Use the canonical shared schema for every result to avoid transcript parsing,
-but preserve the exact result and completion state for independent assessment.
-Snapshot the worktree before and after every call. Treat mutation, incomplete
-inspection, empty or schema-invalid output, timeout, or CLI failure as an
-incomplete round; do not invent findings. Stop when the canonical progress
-rules require it.
+Before every scheduled invocation, apply `codex-review`'s outer-runtime
+preflight and obtain any narrow process authority before starting Codex. Keep
+the inner reviewer sandbox read-only. If authority is unavailable, record the
+round as incomplete and stop without invoking; never launch and retry, alter
+`CODEX_HOME`, copy or symlink credentials, use a bypass flag, or weaken the
+sandbox.
+
+Use the strict shared external schema for every Codex result, then normalize
+assessed findings into the final canonical schema. Apply `codex-review`'s
+prompt-bearing `review -`, `--ignore-user-config`, ephemeral read-only execution,
+output, and direct-inspection rules to every call. Give each outer execution
+call a timeout/deadline of at least 30 minutes. If it yields a running session
+or process handle, poll that same handle until exit or the real deadline; never
+treat yield or silence as timeout, cancel it, or start a replacement. Preserve
+the exact result and completion state for independent assessment. Snapshot the
+worktree before and after every call. Treat mutation, incomplete inspection,
+empty or schema-invalid output, a real timeout, or CLI failure as an incomplete
+round; do not invent findings. Stop when the canonical progress rules require
+it.
 
 After rounds 1-9, independently assess the result, fix every accepted authorized item, resolve residual tasks, run proportionate checks, and update the ledger. Deferral is allowed only for a stated authority, input, or external-state blocker. During and after round 10, make no remediation.
 

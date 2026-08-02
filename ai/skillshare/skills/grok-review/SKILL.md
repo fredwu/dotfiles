@@ -8,11 +8,12 @@ description: Perform exactly one read-only external review with the local Grok C
 Perform exactly one external Grok invocation. Do not remediate, edit files, publish comments, retry, ask Grok a follow-up, or run a second review. The calling agent remains responsible for scope and assessment.
 
 Read `../code-review/SKILL.md` and reuse its typed target, evidence threshold,
-priorities, human-summary format, and canonical
-`../code-review/references/review-result.schema.json`. Explicit invocation
-authorizes sending Grok only the minimum non-secret material needed for this
-review. Never send credentials, unrelated user data, the whole conversation,
-prior reviews, or hidden conclusions.
+priorities, human-summary format, strict external schema at
+`../code-review/references/external-review-result.schema.json`, and final
+canonical schema at `../code-review/references/review-result.schema.json`.
+Explicit invocation authorizes sending Grok only the minimum non-secret
+material needed for this review. Never send credentials, unrelated user data,
+the whole conversation, prior reviews, or hidden conclusions.
 
 ## Prepare one direct review
 
@@ -46,10 +47,14 @@ target, including read-only Git status, diff, history, search, and view
 commands. In `dontAsk` mode, commands that require approval are denied rather
 than prompting. Do not add broad Bash allow rules or run mutating commands.
 Never use `--always-approve` or another bypass flag. Give the outer execution
-call a timeout of at least 10 minutes; this is a caller setting, not an
-additional Grok CLI flag.
+call a timeout/deadline of at least 30 minutes; this is a caller setting, not an
+additional Grok CLI flag. If the call yields a running session or process
+handle, poll that same handle until the process exits or the real deadline
+expires. A yield, silence, or empty poll is not a timeout. Never cancel a
+healthy yielded process or start a replacement; this skill permits exactly one
+Grok invocation.
 
-Pass the canonical schema's JSON content directly as one `--json-schema`
+Pass the strict external schema's JSON content directly as one `--json-schema`
 argument; do not pass a schema path or build a Python, jq, or other validator.
 Capture stdout as the complete JSON envelope and stderr separately. A
 representative shape is:
@@ -69,7 +74,7 @@ envelope names. Keep untrusted request text in the prompt file, not
 interpolated shell syntax. Success requires a successful exit, exactly one JSON
 object on stdout, the installed CLI's documented normal end-of-turn marker
 (`stopReason: end_turn` is the current example), and an object-valued
-`structuredOutput` produced under the canonical schema. Inspect stderr and
+`structuredOutput` produced under the strict external schema. Inspect stderr and
 perform only direct top-level-field and verdict/findings coherence checks; the
 CLI's schema-constrained result is the review payload. An exit code or freeform
 `text` alone is insufficient.
@@ -81,8 +86,9 @@ Snapshot the tree again afterward. If Grok mutated it, report the invocation fai
 Independently check each supplied finding against the frozen surface and label
 it `accept`, `partial`, or `decline`, with one evidence-based sentence. This
 assessment is not another review round. Normalize valid reviewer content into
-the shared `REVIEW_RESULT` fields without hiding or embellishing it, and add
-`assessment` plus `assessment_rationale` to each finding. Note material
+the final canonical `REVIEW_RESULT` fields without hiding or embellishing it,
+and add `assessment` plus `assessment_rationale` to each finding. Ensure the
+normalized object conforms to the final canonical schema. Note material
 omissions only when directly established during assessment.
 
 Then provide the concise shared human summary: accepted/partial findings first, declined count, inspected surface, and one-line residual risk. Do not dump tool logs or the raw transcript unless requested.

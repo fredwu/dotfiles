@@ -31,7 +31,7 @@ Apply `code-review`'s clean-slate and durable-architecture lens during assessmen
 
 ## Run scheduled rounds
 
-For each scheduled round, run exactly one fresh invocation of `code-review` in embedded mode. Give it a compact review packet containing only:
+For each scheduled round, run exactly one fresh invocation of `code-review` in embedded mode. Give it one compact direct request containing only:
 
 - the original requirements and acceptance criteria;
 - the frozen typed target, current task-attributable surface, and exclusions;

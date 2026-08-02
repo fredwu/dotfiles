@@ -3,7 +3,7 @@ name: grok-review-loop
 description: >-
   Run the canonical bounded review-remediation workflow using one read-only
   external Grok CLI invocation per scheduled round, with broad rounds 1-3,
-  blocker-focused rounds 4-9, and final read-only round 10. Use only when
+  blocker-focused rounds 4-9, and an optional final read-only round 10. Use only when
   explicitly invoked as $grok-review-loop or explicitly requested by name,
   including from another skill; never invoke implicitly.
 ---
@@ -35,14 +35,19 @@ and immediate regression boundary; exclude lower-priority exploration. Round
 10 receives the complete current surface, broad final-audit focus, and no prior
 conclusions.
 
-Use the canonical shared schema content directly for every result to avoid
-transcript parsing; do not add a Python, jq, or other validator. Preserve the
-exact stdout envelope, stderr, and completion state for independent assessment.
-Apply `grok-review`'s tool, permission, sandbox, output, and envelope rules to
-every call. Snapshot the worktree before and after every call. Treat mutation,
-incomplete inspection, missing or incoherent structured output, timeout,
-sandbox failure, or CLI failure as an incomplete round; do not invent findings.
-Stop when the canonical progress rules require it.
+Use the strict shared external schema content directly for every result, then
+normalize assessed findings into the final canonical schema; do not add a
+Python, jq, or other validator. Preserve the exact stdout envelope, stderr, and
+completion state for independent assessment.
+Apply `grok-review`'s tool, permission, sandbox, output, envelope, and at-least-
+30-minute outer deadline rules to every call. If a call yields a running
+session or process handle, poll that same handle until the process exits or the
+real deadline expires. A yield, silence, or empty poll is not a timeout; never
+cancel a healthy yielded process or start a replacement. Snapshot the worktree
+before and after every call. Treat mutation, incomplete inspection, missing or
+incoherent structured output, timeout, sandbox failure, or CLI failure as an
+incomplete round; do not invent findings. Stop when the canonical progress
+rules require it.
 
 After rounds 1-9, independently assess the result, fix every accepted authorized item, resolve residual tasks, run proportionate checks, and update the ledger. Deferral is allowed only for a stated authority, input, or external-state blocker. During and after round 10, make no remediation.
 

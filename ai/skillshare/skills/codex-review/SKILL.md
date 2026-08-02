@@ -1,6 +1,6 @@
 ---
 name: codex-review
-description: Perform exactly one read-only external review with the local Codex CLI, then return its evidence-backed findings in the shared agent contract plus a concise human assessment. Use only when explicitly invoked as $codex-review or explicitly requested by name, including from another skill; never invoke implicitly.
+description: Perform exactly one read-only external review with the local Codex CLI, then return its evidence-backed findings in the shared agent contract plus a concise human assessment. Use only when explicitly invoked as $codex-review or explicitly requested by name, including from another skill; never invoke implicitly. Use codex-review-loop for iterative remediation.
 ---
 
 # Codex Review
@@ -8,13 +8,14 @@ description: Perform exactly one read-only external review with the local Codex 
 Perform exactly one external Codex invocation. Do not remediate, edit files, publish comments, retry, ask Codex a follow-up, or run a second review. The calling agent remains responsible for scope and assessment.
 
 Read `../code-review/SKILL.md` and reuse its typed target, evidence threshold,
-priorities, human-summary format, and canonical
-`../code-review/references/review-result.schema.json`. Explicit invocation
-authorizes sending Codex only the minimum non-secret material needed for this
-review. Never send credentials, unrelated user data, the whole conversation,
-prior reviews, or hidden conclusions.
+priorities, human-summary format, strict external schema at
+`../code-review/references/external-review-result.schema.json`, and final
+canonical schema at `../code-review/references/review-result.schema.json`.
+Explicit invocation authorizes sending Codex only the minimum non-secret
+material needed for this review. Never send credentials, unrelated user data,
+the whole conversation, prior reviews, or hidden conclusions.
 
-## Prepare a compact packet
+## Prepare one direct review
 
 Freeze the target exactly as `code-review` requires. Create a private temporary run directory outside the repository. Write one request containing:
 
@@ -35,20 +36,51 @@ implementing the proportional durable target state rather than layering another
 workaround.
 Do not paste diffs or logs that Codex can read itself.
 
+Before consuming the sole invocation, verify from the outer runtime's documented
+permissions that the Codex CLI can read its existing authentication and write
+its normal state under the existing Codex home (`CODEX_HOME` when configured,
+otherwise the CLI default). If the host sandbox blocks that access, obtain or
+request the narrow authority needed for the one exact `codex exec` process
+before starting it. This outer process authority is distinct from the reviewer
+sandbox and must not weaken the inner `--sandbox read-only`.
+If the required authority is unavailable, return `verdict: incomplete` without
+invoking Codex.
+
+Do not launch Codex as an access probe and then retry it. Do not relocate or
+repoint `CODEX_HOME`, copy or symlink credentials, use broad bypass flags, or
+weaken the reviewer sandbox to work around host restrictions.
+
 Snapshot relevant status and diffs before invocation. Run Codex ephemerally in
-its read-only sandbox, with a bounded tool timeout and no bypass or
-approval-evasion flags. Pass the canonical schema to `--output-schema` and
-capture the last message in an output file. A representative shape is:
+its read-only sandbox with user configuration ignored and no bypass or
+approval-evasion flags. Pass the strict external schema to `--output-schema`
+and capture the last message in an output file.
+
+Use prompt-bearing `review -` for every typed target. Put the exact frozen type,
+selector, full object identities, included worktree classes, and exclusions in
+the request so Codex inspects that surface directly in the repository. Do not
+combine `--uncommitted`, `--base`, or `--commit` with the required custom
+prompt: Codex's selection modes and prompt mode are mutually exclusive.
+
+A representative shape is:
 
 ```text
-codex exec --ephemeral --sandbox read-only -C <root> --skip-git-repo-check \
-  --output-schema <schema-file> -o <output-file> review - < <request-file>
+codex exec --ignore-user-config --ephemeral --sandbox read-only -C <root> \
+  --skip-git-repo-check --output-schema <external-schema-file> \
+  -o <output-file> review - < <request-file>
 ```
 
 Global `exec` flags must precede the `review` subcommand. Confirm syntax against
 the installed CLI help. Keep untrusted request text in files or stdin, not
-interpolated shell syntax. Success requires one non-empty, complete result that
-validates against the canonical schema; an exit code alone is insufficient.
+interpolated shell syntax. Do not add a wrapper or a Python, jq, or other
+validator. Success requires one non-empty, complete JSON result conforming to
+the strict external schema; directly inspect its top-level fields and
+verdict/findings coherence. An exit code alone is insufficient.
+
+Give the outer execution call a timeout/deadline of at least 30 minutes. If the tool
+yields a running session or process handle, poll that same handle until the
+process exits or the real deadline expires. A yield, silence, or an empty poll
+is not a timeout. Never cancel a healthy yielded process or start a replacement;
+this skill permits exactly one Codex invocation.
 
 Snapshot the tree again afterward. If Codex mutated it, report the invocation failed and isolate only Codex's exact delta; reverse it only when safe and never blanket-restore a dirty tree. On timeout, malformed output, missing CLI/login, or incomplete inspection, do not retry or invent findings—return `verdict: incomplete` with the failure as residual risk.
 
@@ -57,8 +89,9 @@ Snapshot the tree again afterward. If Codex mutated it, report the invocation fa
 Independently check each supplied finding against the frozen surface and label
 it `accept`, `partial`, or `decline`, with one evidence-based sentence. This
 assessment is not another review round. Normalize valid reviewer content into
-the shared `REVIEW_RESULT` fields without hiding or embellishing it, and add
-`assessment` plus `assessment_rationale` to each finding. Note material
+the final canonical `REVIEW_RESULT` fields without hiding or embellishing it,
+and add `assessment` plus `assessment_rationale` to each finding. Ensure the
+normalized object conforms to the final canonical schema. Note material
 omissions only when directly established during assessment.
 
 Then provide the concise shared human summary: accepted/partial findings first, declined count, inspected surface, and one-line residual risk. Do not dump tool logs or the raw transcript unless requested.

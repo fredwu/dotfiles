@@ -34,9 +34,7 @@
           "location",
           "evidence",
           "impact",
-          "remediation",
-          "assessment",
-          "assessment_rationale"
+          "remediation"
         ],
         "properties": {
           "id": {
@@ -74,19 +72,6 @@
             "minLength": 1
           },
           "remediation": {
-            "type": "string",
-            "minLength": 1
-          },
-          "assessment": {
-            "type": "string",
-            "enum": [
-              "confirmed",
-              "accept",
-              "partial",
-              "decline"
-            ]
-          },
-          "assessment_rationale": {
             "type": "string",
             "minLength": 1
           }
