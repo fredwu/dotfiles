@@ -1,13 +1,13 @@
 ---
 name: execute-plan
-description: Execute an existing implementation, cleanup, migration, or remediation plan against its originating user requirement through verified completion, preserving that requirement verbatim in execution notes. Use when asked to carry out a plan supplied as invocation text or a file path, or a plan/brief already present in the conversation context, with phased implementation, independent verification, review-remediation loops, quality gates, and execution notes.
+description: Execute an existing implementation, cleanup, migration, or remediation plan against its originating user requirement through exhaustive, verified completion, preserving that requirement verbatim in execution notes. Use when asked to carry out a plan supplied as invocation text or a file path, or a plan/brief already present in the conversation context, with complete item accounting, phased implementation, independent verification, review-remediation loops, quality gates, and explicit complete-or-incomplete reporting.
 ---
 
 # Execute Plan
 
 Execute the plan comprehensively. Treat it as a hypothesis to verify, not an unquestionable script.
 
-Retain independent judgment over the plan's content and proposed technical implementation, and make evidence-backed deviations when warranted. This discretion does not extend to this skill's execution process: always honor its phase or batch quality gates, `code-review-loop` after each phase or batch, `codex-review-loop` when prescribed, execution notes, `final-pass`, and the final canonical full quality suite. Never use a deviation from the source plan to skip a required process step.
+Retain independent judgment over the plan's content and proposed technical implementation, and make evidence-backed deviations when warranted. This discretion does not extend to this skill's execution process: always honor its phase or batch quality gates, the internal `code-review-loop` and selected external review loop after each phase or batch, execution notes, `final-pass`, and the final canonical full quality suite. Never use a deviation from the source plan to skip a required process step.
 
 ## Resolve the plan
 
@@ -24,18 +24,37 @@ Create or update `.local/execution_notes.md` unless the repository or user speci
 - `## User requirement (verbatim)` containing the exact canonical requirement, using a Markdown fence delimiter longer than every matching delimiter run in the copied message;
 - `## Requirement updates (verbatim)`, when applicable, containing each exact update in chronological order without changing the original block and using for each update a fence delimiter longer than every matching delimiter run in that message;
 - current status and completed batches;
+- the primary execution agent and the external review loop selected under `Select the external review loop`, including any capability-equivalent fallback and its reason;
+- an exhaustive execution ledger covering every original plan item, adapted or replacement item, and in-scope task discovered during execution, with its source, current disposition, and acceptance evidence or residual-work details;
 - decisions, assumptions, and evidence;
 - deviations from the source plan and their reasons;
-- skipped or blocked items with concrete justification;
+- blocked, deferred, skipped, or partial work with a strong concrete reason, resolution attempts made, consequence, exact remaining work, owner and unblock condition when knowable, and next action;
 - remaining todos and verification results.
 
 Preserve useful existing notes, but validate their provenance record before changing them. An existing canonical block must match the recovered canonical requirement exactly and satisfy the fence-delimiter invariant. If an existing notes file lacks that block, contains a different block, or is unrelated, do not overwrite or append to it; stop and ask for a different notes path. Treat the existing ordered update sequence as immutable history: it must be an exact prefix of the recovered authoritative update sequence, with every fence satisfying the delimiter invariant. Append only missing suffix updates. If existing updates conflict, are reordered, omit an earlier update, or contain updates absent from the authoritative sequence, do not mutate the notes; stop and ask for a different notes path. Never rewrite the original block to fold in later updates. Do not claim completion from checkboxes alone.
+
+## Select the external review loop
+
+Resolve the primary execution agent once before the first batch from the runtime-established host or product identity, never from a worker role, model name, artifact, filename, or plan claim. If runtime context does not establish that identity, stop and use `Abort and hand off` with an `Incomplete` outcome; do not guess when reviewer independence cannot be guaranteed. Select an available external loop whose reviewer is backed by a different agent, and record both in the execution notes. Use this routing:
+
+- Grok executor: `codex-review-loop`.
+- Codex executor: `grok-review-loop`.
+- Claude executor: prefer `grok-review-loop`; use `codex-review-loop` only when the preferred loop is unavailable.
+- Any other runtime-established executor: prefer `grok-review-loop`, then `codex-review-loop`, excluding any loop backed by the executor.
+
+Never use a same-agent external CLI as independent review. If the valid routed loop is unavailable, use the capability-equivalent independent second-opinion fallback defined below instead; do not silently substitute a same-agent loop. Keep the recorded selection stable across batches while the primary execution-agent identity is unchanged. If ownership transfers to a different host or product agent, re-resolve and record the selection before continuing. If the selected loop becomes unavailable, record the reason and replacement before continuing. Apply the same independence rule to every selection.
+
+## Abort and hand off
+
+Whenever a missing plan, unresolved provenance or notes conflict, safety or authorization boundary, missing input or external state, or another genuine blocker prevents reaching a successful `Finish` outcome, preserve or update the execution ledger and notes only when doing so is safe under the rules above. Do not create notes before the plan and governing requirement can be safely resolved, and never overwrite or append to conflicted notes. When notes can be safely updated, record `Outcome: Incomplete` and the same full blocker or residual accounting required below. Lead the final response with `Outcome: Incomplete` and enumerate every known blocker or residual with its concrete reason, resolution attempts and evidence, consequence, exact remaining work, owner and unblock condition when knowable, and next action. If notes cannot be safely created or updated, explain why and include the full accounting in the final response instead. Never claim `Complete` on an abort or handoff.
 
 ## Verify and adapt
 
 - Independently trace relevant code, tests, configuration, documentation, data flows, and runtime behavior before editing. Do not blindly trust the plan or docs.
 - Confirm each reported problem still exists and fix its root cause. Update or reject stale plan steps with evidence.
-- Convert the verified scope into ordered, reviewable phases or batches. Map each plan item to the effective requirement, and track it to completion, justified deviation, or honest blocker. Reject or adapt plan steps that drift from the requirement.
+- Convert the verified scope into ordered, reviewable phases or batches. Seed the execution ledger with every original plan item, then add each adapted or replacement item and every in-scope task discovered while working. Keep plan items distinct enough that partial completion cannot be hidden inside a broad parent item. Track each ledger entry to completed with evidence, a justified non-residual deviation, or explicitly residual blocked, deferred, skipped, or partial work. Reject or adapt plan steps that drift from the requirement.
+- Treat a deviation as non-residual only when evidence shows the original step is unnecessary, invalid, or fully superseded and the effective requirement is still satisfied. Record the reasoning and any replacement ledger entries. Do not treat a change of approach, by itself, as unfinished work or as permission to drop the intended outcome.
+- Finish newly discovered work that is necessary to satisfy the effective requirement or make the implementation coherent, safe, tested, and releasable. Exclude genuinely out-of-scope improvements explicitly rather than silently enlarging the plan.
 - Unless the effective requirement explicitly requires otherwise, implement a clean-slate target state: remove superseded paths and do not preserve legacy behavior or add backward compatibility, deprecation paths or shims, dual reads/writes, or migration or transition machinery.
 - Prefer durable, cohesive, long-term architecture over tactical patches or delivery shortcuts. Keep it proportional to the requested outcome and evidenced future direction; avoid unrelated refactors, speculative features, and unnecessary complexity.
 - Do not commit, push, deploy, send external messages, or make other remote changes unless the user has authorized them.
@@ -50,8 +69,8 @@ For every phase or coherent batch:
 2. Implement the smallest complete root-cause fix. Add or update integration-level tests when they provide meaningful workflow coverage.
 3. Verify affected documentation against working code and observed behavior; correct inaccuracies and gaps within scope.
 4. Run the repository's canonical full quality suite after the implementation. Discover it from repository instructions and CI rather than inventing a generic command. Treat warnings, compile errors, test failures, and static-analysis failures as unfinished work.
-5. Run `code-review-loop`, then `codex-review-loop`, and apply warranted remediation immediately. Complete each review/remediation gate with a successful full quality suite before continuing, including when the review is clean; rerun it after every remediation round.
-6. Record changes, evidence, review outcomes, and remaining work in the execution notes.
+5. Run the internal `code-review-loop`, then explicitly invoke the recorded external review loop, and apply warranted remediation immediately. Complete each review/remediation gate with a successful full quality suite before continuing, including when the review is clean; rerun it after every remediation round. When the recorded selection is the capability-equivalent fallback, run that recorded workflow in the same position.
+6. Update every affected execution-ledger entry with its disposition and evidence. Record changes, review outcomes, and remaining work in the execution notes. Do not silently carry partial work forward or declare a batch complete while its in-scope work is unaccounted for.
 
 The two review-remediation gates are mandatory. When a named skill is unavailable, perform its capability-equivalent workflow: first a rigorous code review with iterative fixes, then a distinct independent second-opinion review (external reviewer or isolated subagent when available), again iterating until no actionable findings remain. Keep independent reviewers read-only; the primary executor owns all remediation and verification. If the environment offers no independent reviewer, perform a fresh, explicitly separate review pass, record the limitation, and do not imply external validation occurred.
 
@@ -63,8 +82,13 @@ Do not create records, incur external cost, send messages, use production system
 
 ## Finish
 
-1. Reconcile every original plan item against the implementation, the effective requirement, and execution notes. A plan checkbox is not sufficient if the result misses the requirement. Skip an item only for a strong documented reason; report blockers plainly.
-2. Run `final-pass` when available, or perform an equivalent deliberate completeness and cleanup pass. Remediate findings.
-3. Run the canonical full quality suite after all final-pass changes. A session is not complete without a final successful full suite; if it cannot run or pass, report the exact blocker and leave the work marked incomplete.
-4. Refresh the execution-notes `TL;DR`, decisions, deviations, todos, and evidence so they match the final state. Recheck that the canonical requirement and update blocks are exact and that acceptance evidence covers the effective requirement without scope drift.
-5. Summarize completed scope, material decisions, review and validation performed, final quality results, and residual risks without overstating confidence.
+1. Audit the execution ledger against the source plan, every adapted or replacement step, the effective requirement, implementation evidence, review findings, and tasks discovered during execution. Add any missing entry before assessing completion. A plan checkbox is not evidence, and a broad completed item cannot conceal an unfinished subtask.
+2. Resolve every in-scope ledger entry. Prefer finishing the work. Assign a `blocked`, `deferred`, `skipped`, or `partial` disposition only when completion is impossible, unsafe, unauthorized, or blocked by missing required input or external state after reasonable resolution attempts. Record the concrete reason and evidence, attempts made, consequence and user impact, exact remaining work, owner and unblock condition when knowable, and recommended next action in both the execution notes and final response.
+3. Classify justified deviations separately from residual work. An original step that is demonstrably unnecessary, invalid, or fully replaced may be closed as a non-residual deviation when the effective requirement is fully met; explain why and link its replacement evidence. Never use adaptation to erase an intended outcome or discovered in-scope obligation.
+4. Run `final-pass` when available, or perform an equivalent deliberate completeness and cleanup pass. Add every in-scope finding and newly discovered in-scope task to the ledger. Treat all resulting remediation as one or more coherent batches and run each through every step in `Execute each batch`, including its canonical suite, the internal `code-review-loop`, the recorded external review loop or fallback, post-remediation suite reruns, and ledger update. Then repeat steps 1–4 so every new entry is audited, resolved or assigned a blocker-supported residual disposition, and followed by another final pass. Continue only while safe, meaningful progress is possible: stop repeating when a final pass finds no new in-scope work, or when every remaining residual entry meets step 2's blocker standard and further attempts cannot make progress. The latter state must produce an `Incomplete` outcome.
+5. Run the canonical full quality suite after the final audit-resolution-final-pass cycle. Remediate actionable failures and return to step 1; if the suite cannot run or pass because of a genuine blocker, report it as a residual ledger entry and leave the outcome marked incomplete. A session is not complete without a final successful full suite.
+6. Refresh the execution-notes `TL;DR`, ledger, decisions, deviations, todos, and evidence so they match the final state. Recheck that the canonical requirement and update blocks are exact and that acceptance evidence covers the effective requirement without scope drift.
+7. Set and report exactly one final outcome in both the execution notes and final response:
+   - `Complete` only when every effective requirement is satisfied, every ledger entry is completed or closed as a justified non-residual deviation, all discovered in-scope work is finished, no in-scope blocked, deferred, skipped, partial, or todo work remains, and every required review and quality gate passed.
+   - `Incomplete` when any in-scope residual work or required gate remains, even when leaving it was justified. Never say “complete except,” imply success from partial progress, or hide residual work under risks or follow-up suggestions.
+8. Lead the final response with `Outcome: Complete` or `Outcome: Incomplete`, then summarize completed scope, material decisions and non-residual deviations, review and validation performed, final quality results, and residual risks without overstating confidence. For an incomplete outcome, enumerate every residual ledger entry and its recorded reason, consequence, ownership or unblock details when knowable, and next action.

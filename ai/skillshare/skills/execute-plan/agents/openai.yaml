@@ -1,4 +1,4 @@
 interface:
   display_name: "Execute Plan"
-  short_description: "Execute a verified plan through completion"
-  default_prompt: "Use $execute-plan [plan text or path] to preserve the originating requirement verbatim and execute the supplied plan against it, or infer the plan from the current context, through verified completion."
+  short_description: "Execute every plan item to verified completion"
+  default_prompt: "Use $execute-plan [plan text or path] to preserve the originating requirement verbatim, account for every planned, adapted, and discovered in-scope task, and execute the plan through verified completion or report an explicit incomplete outcome."
