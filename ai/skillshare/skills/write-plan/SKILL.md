@@ -34,7 +34,9 @@ For a new plan, if the initial message is unavailable, ambiguous, or cannot be r
 When a field is omitted, use the safest useful default:
 
 - Infer the subject and goals from the invocation and current conversation. Ask only when no reliable subject exists or ambiguity would materially change the investigation.
-- Preserve existing user-visible behavior, security boundaries, and data guarantees as provisional invariants; label material inferences instead of presenting them as user requirements.
+- Aim for a clean-slate target state. Do not plan legacy preservation, backward compatibility, deprecation paths or shims, dual reads/writes, or transition machinery unless the brief explicitly requires them.
+- Prefer durable, cohesive, long-term architecture over tactical patches or delivery shortcuts. Keep the design proportionate to evidenced needs and future direction rather than adding speculative abstraction.
+- Treat security boundaries and data guarantees as provisional invariants. Treat existing user-visible behavior as evidence, not an invariant; preserve it only when the brief or desired outcomes require it. Label material inferences instead of presenting them as user requirements.
 - Exclude speculative features, unrelated cleanup, and broad redesigns unless explicitly requested.
 - Treat future use cases as design context, not present scope.
 - Limit validation to read-only local inspection and non-mutating checks. Do not start services, alter persistent state, use production, incur cost, or make external calls without authorization in the brief.
@@ -68,13 +70,15 @@ Use available planning, audit, research, tracing, domain, and read-only review s
 
 Focus on issues and improvements that materially affect the brief's goals. Deduplicate overlapping findings, verify that each issue still exists, and rank it by impact, likelihood, effort, and dependency. Avoid nits, aesthetic churn, premature abstraction, speculative functionality, and complexity that is disproportionate to the current stage or expected usage.
 
+Recommend the cleanest durable target-state design. Prefer structural improvements that serve the long-term architecture over tactical fixes, and omit compatibility layers or transitional mechanisms unless the brief explicitly requires them.
+
 For each retained finding, explain:
 
 - current behavior and evidence;
 - why it matters and which requirement or outcome it affects;
 - recommended direction and meaningful alternatives;
 - affected components or files;
-- risks, dependencies, migration or compatibility concerns, and confidence or evidence gaps.
+- risks, dependencies, any explicitly required migration or compatibility constraints, and confidence or evidence gaps.
 
 Do not disguise unresolved product or architecture choices as implementation details. Conversely, do not ask the user to decide when evidence supports a safe recommendation.
 
