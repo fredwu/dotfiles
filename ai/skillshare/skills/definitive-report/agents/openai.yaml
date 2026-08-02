@@ -1,6 +1,6 @@
 interface:
   display_name: "Definitive Report"
   short_description: "Select and synthesize the strongest report"
-  default_prompt: "Use $definitive-report to compare the candidate reports and produce one definitive, actionable report."
+  default_prompt: "Use $definitive-report to preserve my originating requirement verbatim, compare the candidates against it, and produce one definitive, actionable report."
 policy:
   allow_implicit_invocation: false

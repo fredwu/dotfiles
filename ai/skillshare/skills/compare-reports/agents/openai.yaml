@@ -1,4 +1,4 @@
 interface:
   display_name: "Compare Reports"
   short_description: "Compare reports and resolve key differences"
-  default_prompt: "Use $compare-reports to compare my current report with the supplied or uniquely inferable sibling report, then give me a concise numbered decision table covering conflicts, improvements, and choices where my guidance is needed."
+  default_prompt: "Use $compare-reports to preserve my originating requirement verbatim, compare my current report with the supplied or uniquely inferable sibling against it, and give me a concise numbered decision table covering conflicts, improvements, and choices where my guidance is needed."
