@@ -1,4 +1,4 @@
 interface:
   display_name: "Final Pass"
-  short_description: "Final coherence check across completed changes"
-  default_prompt: "Use $final-pass to make one deliberate final pass over all completed changes and catch material omissions or inconsistencies."
+  short_description: "Final review with the full canonical quality gate"
+  default_prompt: "Use $final-pass to review all completed changes, resolve material omissions or inconsistencies, and run the full canonical quality and test suite before handoff."
