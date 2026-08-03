@@ -1,6 +1,6 @@
 ---
 name: compare-plans
-description: Compare the current agent's prior user-visible analysis plan with one explicit or uniquely inferable sibling plan file against the originating user requirement, reproduce that requirement verbatim, and produce a concise numbered decision table covering material conflicts, useful improvements, and questions needing user judgment. Thoroughly investigate material disagreements and recommend evidence-based resolutions without assuming or guessing. Use when the user supplies a target plan path or omits it when the current plan's filename can identify exactly one matching sibling plan.
+description: Compare the current agent's prior user-visible analysis plan with one explicit or uniquely inferable sibling plan file against the originating user requirement, reproduce that requirement verbatim, and produce a concise conflict-first, severity-ordered numbered decision table covering material conflicts, useful improvements, and questions needing user judgment. Thoroughly investigate material disagreements and recommend evidence-based resolutions without assuming or guessing. Use when the user supplies a target plan path or omits it when the current plan's filename can identify exactly one matching sibling plan.
 ---
 
 # Compare Plans
@@ -103,27 +103,37 @@ Treat materially equivalent coverage as yielding no useful finding. The current 
 
 Begin the user-visible decision brief with `## User requirement (verbatim)` and reproduce the canonical requirement exactly as recovered. Choose a Markdown fence delimiter longer than every matching delimiter run in the copied message. If authoritative updates exist, follow it with `## Requirement updates (verbatim)` and reproduce each update exactly in chronological order, choosing for each message a fence delimiter longer than every matching delimiter run in that message. These blocks are required even when there are no material findings.
 
-Then output one prioritized Markdown table under `## Findings`. Include only information that can improve the current plan or help the user give informed opinion and guidance while satisfying the effective requirement. Classify every row as one of:
+Then output one conflict-first, severity-ordered Markdown table under `## Findings`. Include only information that can improve the current plan or help the user give informed opinion and guidance while satisfying the effective requirement. Classify every row as one of:
 
 - **Conflict**: the plans materially disagree on a finding, factual claim, priority, risk, or recommendation. State both positions with section or line provenance, then give an independent recommendation and concise basis.
 - **Improvement**: a verified omission, correction, stronger piece of evidence, useful qualification, alternative, risk, or clearer decision-oriented framing worth incorporating into the current plan. State the proposed revision and why it matters.
 - **Decision point**: the best choice genuinely depends on the user's goals, risk tolerance, preferences, inaccessible evidence, or an unresolved ambiguity. State what turns on the choice, the options and tradeoffs, the specific input or evidence needed, and the best default only when evidence supports one.
+
+Assign every included row one severity based on the consequence of leaving it unresolved:
+
+- **Critical**: leaving it unresolved would breach an explicit requirement or constraint, block a safe or viable outcome, or cause severe user harm.
+- **High**: leaving it unresolved would materially jeopardize the outcome, create substantial risk, or require urgent correction.
+- **Medium**: leaving it unresolved would cause a meaningful but bounded impact or dependency and can be tolerated temporarily with a caveat.
+- **Low**: leaving it unresolved would have limited impact or urgency but remains material and decision-relevant.
+
+The materiality gate still applies: omit trivial or editorial differences even when a severity label could be assigned.
 
 Use this exact column structure:
 
 ```markdown
 ## Findings
 
-| # | Finding | Our choice / position | Their choice / position | Independent recommendation | Basis |
-|---:|---|---|---|---|---|
-| 1 | Conflict — <topic> | <position and location> | <position and location> | <keep ours, adopt theirs, combine, conditional choice, neither, or gather evidence> | <concise evidence and uncertainty> |
-| 2 | Improvement — <topic> | <current coverage or "Not covered"> | <useful addition and location> | <specific revision> | <why it matters and supporting evidence> |
-| 3 | Decision point — <topic> | <position or "Not addressed"> | <position or "Not addressed"> | <input needed and supported default, or "No default until clarified"> | <material options and tradeoffs> |
+| # | Severity | Finding | Our choice / position | Their choice / position | Independent recommendation | Basis |
+|---:|---|---|---|---|---|---|
+| 1 | Critical | Conflict — <topic> | <position and location> | <position and location> | <keep ours, adopt theirs, combine, conditional choice, neither, or gather evidence> | <concise evidence and uncertainty> |
+| 2 | High | Conflict — <topic> | <position and location> | <position and location> | <resolution> | <concise evidence and uncertainty> |
+| 3 | Medium | Improvement — <topic> | <current coverage or "Not covered"> | <useful addition and location> | <specific revision> | <why it matters and supporting evidence> |
+| 4 | Low | Decision point — <topic> | <position or "Not addressed"> | <position or "Not addressed"> | <input needed and supported default, or "No default until clarified"> | <material options and tradeoffs> |
 
 Refer to any finding by its `#`.
 ```
 
-Number rows consecutively from `1` in priority order. Give each independently discussable issue its own row so the user can refer to it unambiguously; merge only tightly coupled points that must be decided together. Keep cells concise, escape literal `|` characters, and use `<br>` only when a short in-cell line break materially improves readability.
+Sort all rows before numbering: place every **Conflict** row before every **Improvement** or **Decision point** row. Within the Conflict group, then within the remaining rows, order by severity `Critical > High > Medium > Low`; break ties by user impact, urgency, and dependency. Number rows consecutively from `1` only after this sort. Give each independently discussable issue its own row so the user can refer to it unambiguously; merge only tightly coupled points that must be decided together. Keep cells concise, escape literal `|` characters, and use `<br>` only when a short in-cell line break materially improves readability.
 
 Include every material conflict, even when the independent recommendation is to keep the current plan and no revision follows. Include decision points only when user guidance could materially change the conclusion; do not turn routine editorial choices into questions. Distinguish direct adoption from an improvement merely inspired by the target when that affects the recommendation. Keep all findings consistent with the independent conflict resolutions and avoid duplicate rationale. In each `Basis` cell, give concise provenance for the decisive evidence or name the unavailable evidence and evidence-gathering step; never present an unsupported default. After the table, include the single sentence `Refer to any finding by its #.` and nothing else.
 
