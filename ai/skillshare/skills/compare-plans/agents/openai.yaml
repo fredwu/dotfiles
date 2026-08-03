@@ -1,0 +1,4 @@
+interface:
+  display_name: "Compare Plans"
+  short_description: "Compare plans and resolve key differences"
+  default_prompt: "Use $compare-plans to preserve my originating requirement verbatim, compare my current plan with the supplied or uniquely inferable sibling against it, and give me a concise numbered decision table covering conflicts, improvements, and choices where my guidance is needed."
