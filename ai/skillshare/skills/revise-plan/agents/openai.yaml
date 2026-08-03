@@ -1,0 +1,6 @@
+interface:
+  display_name: "Revise Plan"
+  short_description: "Revise a plan from comparison findings"
+  default_prompt: "Use $revise-plan to apply the latest $compare-reports findings directly to my current plan prose without locking decisions."
+policy:
+  allow_implicit_invocation: false
