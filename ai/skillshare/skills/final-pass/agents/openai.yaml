@@ -1,4 +1,4 @@
 interface:
   display_name: "Final Pass"
-  short_description: "Final review with the full canonical quality gate"
-  default_prompt: "Use $final-pass to review all completed changes, resolve material omissions or inconsistencies, and run the full canonical quality and test suite before handoff."
+  short_description: "Final review; full gate for non-documentation changes"
+  default_prompt: "Use $final-pass to review completed changes and resolve omissions; run the full quality/test gate for non-documentation changes, while documentation-only changes skip those checks."
