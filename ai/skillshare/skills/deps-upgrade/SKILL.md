@@ -20,23 +20,23 @@ Prefer the installed Elixir/Phoenix updater: invoke `$elixir-phoenix:phx-deps-up
 
 If that updater is unavailable, perform a concise best-effort fallback:
 
-1. Run `mix hex.outdated --all`, treating its outdated exit status as inventory rather than failure.
+1. Inspect every `mix.exs` and `mix.lock` to inventory Hex, Git, and path dependencies. Run `mix hex.outdated --all`, treating its outdated exit status as inventory rather than failure.
 2. Read release and migration notes before major or coupled upgrades. Edit constraints when needed, then use canonical Mix commands.
 3. Inspect the actual `mix.lock` diff, fix breaking API/configuration changes, and keep source, manifest, and lockfile edits together in the working tree.
 
-After either path, update the Phoenix `tailwind` Hex wrapper and configured standalone version when newer compatible/current versions exist. Reinstall or exercise the binary through the project's Mix tasks.
+After either path, canonically update every inventoried Git dependency with a newer intended revision. Report blocked Git dependencies, and classify path dependencies, including umbrella-internal apps, separately without treating them as registry-versioned dependencies. Update the Phoenix `tailwind` Hex wrapper and configured standalone version when newer compatible/current versions exist. Reinstall or exercise the binary through the project's Mix tasks.
 
 ## Upgrade npm and Tailwind
 
 For every npm app or workspace, including Phoenix assets and browser extensions:
 
-1. Inventory outdated packages and inspect release or migration notes for breaking upgrades.
+1. Inventory direct and transitive outdated packages with `npm outdated --all` or the package-manager equivalent. Treat an outdated-results exit status, including its package-manager equivalent where applicable, as inventory rather than failure; do not ignore actual command errors. Inspect release or migration notes for breaking upgrades.
 2. Upgrade direct dependencies to appropriate current versions, including Tailwind and its plugins. Respect compatibility and engine constraints; report blocked upgrades.
-3. Regenerate each lockfile with the repository's canonical package-manager command. Never hand-edit a generated lockfile.
+3. Refresh the complete transitive lock tree with the repository's canonical package-manager command. Never hand-edit a generated lockfile. Explicitly report transitive packages held back by constraints, overrides, engine or peer requirements, or upstream availability.
 4. Apply required source, build configuration, CSS, extension manifest, and test changes. Follow the applicable Tailwind migration steps rather than merely changing its version.
 
 ## Verify and report
 
-Run repository-defined formatting, compile/static analysis, tests, and relevant builds for every affected Mix and npm app. Exercise every affected Tailwind integration. Fix upgrade-caused failures within scope.
+Discover the repository or project's complete canonical quality and test suite from its instructions, CI configuration, and task runners. After all upgrades, run that suite in full. Run affected-app formatting, compile/static analysis, tests, builds, and Tailwind exercises as supplemental checks. Fix upgrade-caused failures within scope, then rerun the complete canonical suite from the beginning until it passes. Do not silently skip failed or unavailable checks; resolve them or report a genuine blocker and an incomplete result.
 
 Re-run all outdated inventories at the end. Review the final status and diff to confirm lockfiles are canonical, requested ecosystems were covered, and unrelated changes remain intact. Report upgraded and blocked dependencies, migrations performed, checks passed or failed, and anything not verified.
