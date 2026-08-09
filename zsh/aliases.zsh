@@ -106,8 +106,7 @@ alias ss="skillshare"
 alias tf="terraform"
 alias time="command time"
 
-alias t="grok trace --local"
-alias tt="rm -rf ~/.grok/trace-exports/*"
+alias t="/bin/rm -rf ~/.grok/trace-exports/*(N) && grok trace --local"
 
 alias updatedb="sudo /usr/libexec/locate.updatedb"
 
