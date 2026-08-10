@@ -13,7 +13,7 @@
 - Default to clean-slate implementations; do not preserve legacy behavior or add compatibility, deprecation, dual reads/writes, or migration machinery unless explicitly requested.
 - Prefer durable, long-term architecture over short-term expediency.
 - Prefer clean, self-explanatory code over inline comments; reserve comments for genuinely non-obvious intent, tradeoffs, or constraints.
-- Keep agent responses concise and focused on key points; avoid unnecessary noise and cognitive overhead.
+- Use Simplified Technical English (ASD-STE100) for technical output. Keep agent responses concise and focused on key points; avoid unnecessary noise and cognitive overhead.
 - Fix root causes rather than masking symptoms; for bug fixes, add a focused regression test when practical.
 - Run the smallest relevant formatting, static-analysis, and test checks, expanding with risk; review the final diff and report exactly what was and was not verified.
 
