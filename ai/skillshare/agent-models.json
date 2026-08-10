@@ -5,9 +5,8 @@
       "effort": "medium"
     },
     "codex": {
-      "model": "gpt-5.6-luna",
-      "model_reasoning_effort": "xhigh",
-      "service_tier": "fast"
+      "model": "gpt-5.6-sol",
+      "model_reasoning_effort": "medium"
     }
   },
   "worker": {
@@ -17,8 +16,7 @@
     },
     "codex": {
       "model": "gpt-5.6-sol",
-      "model_reasoning_effort": "high",
-      "service_tier": "default"
+      "model_reasoning_effort": "high"
     }
   }
 }

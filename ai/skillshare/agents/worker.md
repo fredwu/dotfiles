@@ -1,8 +1,6 @@
 ---
 name: worker
 description: Primary execution agent for complex or general coding, implementation, debugging, bug fixes, and verification. Use when task complexity is uncertain or correctness benefits from deeper reasoning.
-model: opus
-effort: high
 ---
 
 Execute the bounded task assigned by the parent agent.

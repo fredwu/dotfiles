@@ -39,29 +39,37 @@ remain outside this repository. Their instruction files are linked from
 `ai/shared`. [Skillshare](https://skillshare.runkids.cc/) manages their skill
 directories in whole-directory symlink mode, using the Git-tracked
 `ai/skillshare/skills` directory as its canonical source. Shared agents live in
-`ai/skillshare/agents`. Claude receives those Markdown agents as native
-symlinks. Codex receives generated TOML agents through Skillshare's official
-`codex-agents` extension format. Its installed extension path is a real
-directory so Skillshare can enumerate it, while the implementation files
-inside remain symlinked to this repository.
+`ai/skillshare/agents`. Their Markdown frontmatter is provider-neutral, so
+provider-specific model and effort settings are declared once in
+`ai/skillshare/agent-models.json`. One `dotfiles-agents` extra reads the real
+repository agents directory and uses the repo-managed
+`dotfiles-claude-agents` and `dotfiles-codex-agents` extensions to generate
+Claude Markdown and Codex TOML files. The custom implementation uses only
+Skillshare's documented extension contract and does not import or modify a
+built-in extension. Shared transformer code stays in the repository and is not
+installed as a third extension. The extension names are separate from
+Skillshare's built-ins, which remain entirely under Skillshare's ownership.
+Skillshare's native agent source is an empty real directory. This makes native
+agent status expect zero files and leaves the generated extra as the sole owner
+of `~/.claude/agents` and `~/.codex/agents`. A namespaced ownership manifest
+under `$XDG_STATE_HOME/dotfiles`, or `~/.local/state/dotfiles` when that variable
+is unset, records generated files. Removed agents are archived under
+`~/.dotfiles-backups`; unrelated target files and other Skillshare resources are
+left untouched.
 
-Provider-specific agent models and reasoning levels are declared in
-`ai/skillshare/agent-models.json`. Each Markdown agent must have a matching
-entry, and its Claude `model` and `effort` frontmatter must agree with that
-entry. The installer fails before syncing if an agent or mapping is missing, so
-adding an agent means adding both its Markdown file and its model-map entry.
-Codex TOML files are generated copies because their format and model names
-differ from Claude's source Markdown. When this managed extra is first added or
-its paths change, only conflicting Codex TOML files with names matching the
-source agents are archived under `~/.dotfiles-backups`; unrelated Codex agents
-and other Skillshare resources are left untouched.
-
-The installer preserves an existing Skillshare configuration. On a fresh
-machine it initializes global targets for Claude Code, Codex, and Grok without
-creating a nested Git repository, registers the Codex agent transformer, then
-runs a global skills-and-extras sync. Skillshare commands
-such as `install`, `update`, and `uninstall` therefore modify files in this
-repository; commit those changes with the rest of the dotfiles.
+The installer preserves an existing Skillshare configuration. It initializes
+global skill targets without creating a nested Git repository, installs the
+namespaced extension files as repo-backed links in real directories under
+`~/.config/skillshare/extensions`, validates that every neutral source has both
+model mappings, archives any prior native agent source, and points
+`sources.agents` at the empty Skillshare directory. Skills sync normally;
+generated agents force-refresh so source or model-map changes update existing
+files. Skillshare skill commands such as `install`, `update`, and `uninstall`
+therefore modify files in this repository; commit those changes with the rest
+of the dotfiles. Configuration migration accepts the block YAML emitted by
+Skillshare and fails without changing the file when relevant sections use a
+different YAML form. Skillshare 0.20.25 or newer is required; Linux installs are
+pinned to 0.20.25 while Homebrew upgrades remain supported.
 
 The installer changes the account's login shell to Zsh when necessary. Open a
 new terminal after it completes.

@@ -1,3 +1,3 @@
 run: ["env", "-u", "NODE_OPTIONS", "node", "convert.js"]
 output_ext: toml
-description: "Markdown subagent (Claude style) to Codex CLI TOML agent"
+description: "Provider-neutral Markdown agent to Codex TOML agent"

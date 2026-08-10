@@ -4,7 +4,7 @@ NEOVIM_MIN_VERSION=0.12.0
 NEOVIM_FALLBACK_VERSION=0.12.4
 MISE_VERSION=2026.7.6
 TREE_SITTER_VERSION=0.26.11
-SKILLSHARE_VERSION=0.20.22
+SKILLSHARE_VERSION=0.20.25
 
 ensure_homebrew() {
   local brew_binary
@@ -215,11 +215,11 @@ ensure_skillshare_on_linux() {
   case "$arch" in
     x86_64)
       asset="skillshare_${SKILLSHARE_VERSION}_linux_amd64.tar.gz"
-      checksum=f4f5a56f911490eca89b6e6cc1365aac389182e44a56b3b6aa6c12f279dd936e
+      checksum=23235a9b1a673294d0b4336e70cb4a6369a7c9697b557dd095bcc7fa654686b5
       ;;
     arm64)
       asset="skillshare_${SKILLSHARE_VERSION}_linux_arm64.tar.gz"
-      checksum=09eff8b20d01b6d3e40ca1eeccf597087bafe7236af7e8bfd82371225880ab9d
+      checksum=7a1dc19bdfe676c475eb2a5ff5cb6cbac1b763b1c57e4d88a24166ef88daa70a
       ;;
   esac
 

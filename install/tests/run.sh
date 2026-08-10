@@ -161,6 +161,8 @@ test_skillshare_release_selection() {
 
   read -r name version asset checksum url executable < "$marker"
   assert_eq skillshare "$name" "Skillshare should select the Skillshare installer"
+  assert_eq 0.20.25 "$SKILLSHARE_VERSION" \
+    "Skillshare's supported Linux release should remain pinned"
   assert_eq "$SKILLSHARE_VERSION" "$version" \
     "Skillshare should select the configured version"
   assert_eq "skillshare_${SKILLSHARE_VERSION}_linux_arm64.tar.gz" "$asset" \
@@ -286,24 +288,37 @@ test_skillshare_configuration() {
 
   mkdir -p "$DOTFILES_ROOT/ai/skillshare/skills/example" \
     "$DOTFILES_ROOT/ai/skillshare/agents" \
-    "$DOTFILES_ROOT/ai/skillshare/extensions" \
-    "$DOTFILES_ROOT/install/lib"
+    "$DOTFILES_ROOT/install/lib" \
+    "$XDG_CONFIG_HOME/skillshare/extensions/codex-agents"
   printf 'fixture skill\n' > "$DOTFILES_ROOT/ai/skillshare/skills/example/SKILL.md"
+  printf 'built-in extension\n' \
+    > "$XDG_CONFIG_HOME/skillshare/extensions/codex-agents/owned-by-skillshare"
   cp "$source_root/ai/skillshare/agent-models.json" "$DOTFILES_ROOT/ai/skillshare/"
-  cp -R "$source_root/ai/skillshare/extensions/codex-agents" \
-    "$DOTFILES_ROOT/ai/skillshare/extensions/"
+  cp -R "$source_root/ai/skillshare/extensions" "$DOTFILES_ROOT/ai/skillshare/"
   cp "$source_root/install/lib/configure-skillshare-extra.js" "$DOTFILES_ROOT/install/lib/"
   cp "$source_root/ai/skillshare/agents/"*.md "$DOTFILES_ROOT/ai/skillshare/agents/"
 
-  mkdir -p "$XDG_CONFIG_HOME/skillshare/extensions"
-  ln -s "$DOTFILES_ROOT/ai/skillshare/extensions/codex-agents" \
-    "$XDG_CONFIG_HOME/skillshare/extensions/codex-agents"
-
   skillshare() {
-    printf '%s\n' "$*" >> "$invocation_log"
-    if [[ "$1" == init ]]; then
+    if [[ "$1" == --version ]]; then
+      printf 'skillshare v0.20.25\n'
+    elif [[ "$1" == init ]]; then
+      printf '%s\n' "$*" >> "$invocation_log"
       mkdir -p "$XDG_CONFIG_HOME/skillshare"
-      printf 'preserved-config\n' > "$XDG_CONFIG_HOME/skillshare/config.yaml"
+      printf '%s\n' \
+        'sources:' \
+        "  skills: \"$XDG_CONFIG_HOME/skillshare/skills\"" \
+        "  agents: \"$XDG_CONFIG_HOME/skillshare/agents\"" \
+        'mode: symlink' \
+        'targets:' \
+        '  claude:' \
+        '    skills: {}' \
+        '  codex:' \
+        '    skills: {}' \
+        '  grok:' \
+        '    skills: {}' \
+        'ignore:' > "$XDG_CONFIG_HOME/skillshare/config.yaml"
+    else
+      printf '%s\n' "$*" >> "$invocation_log"
     fi
   }
 
@@ -313,39 +328,60 @@ test_skillshare_configuration() {
   assert_eq "$DOTFILES_ROOT/ai/skillshare/skills" \
     "$(readlink "$XDG_CONFIG_HOME/skillshare/skills")" \
     "Skillshare skills source should link to the repository"
-  assert_eq "$DOTFILES_ROOT/ai/skillshare/agents" \
-    "$(readlink "$XDG_CONFIG_HOME/skillshare/agents")" \
-    "Skillshare agents source should link to the repository"
-  assert_true "Skillshare Codex extension should be a discoverable real directory" \
-    test -d "$XDG_CONFIG_HOME/skillshare/extensions/codex-agents"
-  assert_false "Skillshare Codex extension directory should not itself be linked" \
-    test -L "$XDG_CONFIG_HOME/skillshare/extensions/codex-agents"
-  assert_eq "$DOTFILES_ROOT/ai/skillshare/extensions/codex-agents/extension.yaml" \
-    "$(readlink "$XDG_CONFIG_HOME/skillshare/extensions/codex-agents/extension.yaml")" \
-    "Skillshare extension files should link to the repository"
+  assert_true "Skillshare native agents source should be a real directory" \
+    test -d "$XDG_CONFIG_HOME/skillshare/agents"
+  assert_false "Skillshare native agents source should not link to the repository" \
+    test -L "$XDG_CONFIG_HOME/skillshare/agents"
+  assert_eq 0 \
+    "$(find "$XDG_CONFIG_HOME/skillshare/agents" -mindepth 1 | awk 'END { print NR + 0 }')" \
+    "Skillshare native agents source should remain empty"
+  assert_true "Skillshare's built-in extension should remain untouched" \
+    grep -Fxq 'built-in extension' \
+    "$XDG_CONFIG_HOME/skillshare/extensions/codex-agents/owned-by-skillshare"
+  for extension in dotfiles-claude-agents dotfiles-codex-agents; do
+    assert_true "custom extension should use a discoverable real directory" \
+      test -d "$XDG_CONFIG_HOME/skillshare/extensions/$extension"
+    assert_false "custom extension directory should not itself be linked" \
+      test -L "$XDG_CONFIG_HOME/skillshare/extensions/$extension"
+  done
+  assert_false "shared transformer support should not be installed as an extension" \
+    test -e "$XDG_CONFIG_HOME/skillshare/extensions/dotfiles-agent-transform"
   assert_eq \
-    "$(find "$DOTFILES_ROOT/ai/skillshare/extensions/codex-agents" -type f | awk 'END { print NR + 0 }')" \
-    "$(find "$XDG_CONFIG_HOME/skillshare/extensions/codex-agents" -type l | awk 'END { print NR + 0 }')" \
-    "every Skillshare extension file should be repository-backed"
-  assert_true "the old whole-directory extension link should be archived during migration" \
-    test -L "$DOTFILES_BACKUP_ROOT"/*/xdg\ config/skillshare/extensions/codex-agents
+    "$DOTFILES_ROOT/ai/skillshare/extensions/dotfiles-codex-agents/extension.yaml" \
+    "$(readlink "$XDG_CONFIG_HOME/skillshare/extensions/dotfiles-codex-agents/extension.yaml")" \
+    "custom extension files should remain repository-backed"
   assert_eq 1 "$(grep -c '^init ' "$invocation_log")" \
     "Skillshare should initialize only when config is absent"
   assert_eq \
     "init --source $XDG_CONFIG_HOME/skillshare/skills --no-copy --targets claude,codex,grok --mode symlink --no-git --no-skill" \
     "$(grep '^init ' "$invocation_log")" \
     "Skillshare init should use deterministic noninteractive flags"
-  assert_eq 2 "$(grep -c '^sync --all -g$' "$invocation_log")" \
-    "Skillshare should globally sync on every run"
-  assert_eq 1 "$(grep -c '^  - name: codex-agents$' "$XDG_CONFIG_HOME/skillshare/config.yaml")" \
-    "repeat setup should configure one Codex agents extra"
-  assert_true "Codex agent sync should use the repository-backed agent source" \
+  assert_eq 2 "$(grep -c '^sync -g$' "$invocation_log")" \
+    "Skillshare should sync skills on every completed run"
+  assert_eq 2 "$(grep -c '^sync extras --force -g$' "$invocation_log")" \
+    "Skillshare should force-refresh generated extras on every completed run"
+  assert_eq 1 "$(grep -c '^  - name: dotfiles-agents$' "$XDG_CONFIG_HOME/skillshare/config.yaml")" \
+    "repeat setup should configure one namespaced agents extra"
+  assert_true "generated agent sync should use the real repository source" \
     grep -Fq "source: \"$DOTFILES_ROOT/ai/skillshare/agents\"" \
     "$XDG_CONFIG_HOME/skillshare/config.yaml"
-  assert_true "Codex agent sync should use the official extension contract" \
-    grep -Fq "extension: codex-agents" "$XDG_CONFIG_HOME/skillshare/config.yaml"
+  assert_true "native agent discovery should use the empty Skillshare source" \
+    grep -Fq "agents: \"$XDG_CONFIG_HOME/skillshare/agents\"" \
+    "$XDG_CONFIG_HOME/skillshare/config.yaml"
+  assert_true "Claude generation should use the namespaced extension" \
+    grep -Fq "extension: dotfiles-claude-agents" \
+    "$XDG_CONFIG_HOME/skillshare/config.yaml"
+  assert_true "Codex generation should use the namespaced extension" \
+    grep -Fq "extension: dotfiles-codex-agents" "$XDG_CONFIG_HOME/skillshare/config.yaml"
+  assert_true "generated agents extra should target Claude" \
+    grep -Fq "path: \"$HOME/.claude/agents\"" "$XDG_CONFIG_HOME/skillshare/config.yaml"
+  assert_true "generated agents extra should target Codex" \
+    grep -Fq "path: \"$HOME/.codex/agents\"" "$XDG_CONFIG_HOME/skillshare/config.yaml"
   assert_false "Skillshare setup should not create nested Git metadata" \
     test -e "$DOTFILES_ROOT/ai/skillshare/skills/.git"
+  assert_eq 4 \
+    "$(find "$HOME/.local/state/dotfiles/skillshare-agents.manifest" -type f -exec awk 'END { print NR + 0 }' {} \;)" \
+    "successful sync should record both outputs for every managed agent"
   finish_test "Skillshare sources, init, and global sync are idempotent"
 }
 
@@ -360,16 +396,36 @@ test_skillshare_existing_config_is_preserved() {
 
   mkdir -p "$DOTFILES_ROOT/ai/skillshare/skills" \
     "$DOTFILES_ROOT/ai/skillshare/agents" \
-    "$DOTFILES_ROOT/ai/skillshare/extensions" \
     "$DOTFILES_ROOT/install/lib" \
     "$skillshare_home/skills/local-only" \
-    "$skillshare_home/agents"
-  printf 'existing-config\n' > "$skillshare_home/config.yaml"
+    "$skillshare_home/agents" \
+    "$skillshare_home/extensions/codex-agents"
+  printf '%s\n' \
+    'targets:' \
+    '  claude:' \
+    '    skills:' \
+    '      path: /tmp/claude-skills' \
+    '    agents:' \
+    "      path: \"$HOME/.claude/agents\"" \
+    '  codex:' \
+    '    skills:' \
+    '      path: /tmp/codex-skills' \
+    '    agents:' \
+    '      path: /tmp/custom-codex-agents' \
+    'extras:' \
+    '  - name: codex-agents' \
+    "    source: \"$DOTFILES_ROOT/ai/skillshare/agents\"" \
+    '    targets:' \
+    "      - path: \"$HOME/.codex/agents\"" \
+    '        mode: copy' \
+    '        extension: codex-agents' \
+    'ignore:' > "$skillshare_home/config.yaml"
   printf 'local skill\n' > "$skillshare_home/skills/local-only/SKILL.md"
   printf 'local agent\n' > "$skillshare_home/agents/local.md"
+  printf 'built-in extension\n' \
+    > "$skillshare_home/extensions/codex-agents/owned-by-skillshare"
   cp "$source_root/ai/skillshare/agent-models.json" "$DOTFILES_ROOT/ai/skillshare/"
-  cp -R "$source_root/ai/skillshare/extensions/codex-agents" \
-    "$DOTFILES_ROOT/ai/skillshare/extensions/"
+  cp -R "$source_root/ai/skillshare/extensions" "$DOTFILES_ROOT/ai/skillshare/"
   cp "$source_root/install/lib/configure-skillshare-extra.js" "$DOTFILES_ROOT/install/lib/"
   managed_agent=
   for agent_file in "$source_root/ai/skillshare/agents/"*.md; do
@@ -381,83 +437,505 @@ test_skillshare_existing_config_is_preserved() {
     fi
   done
   [[ -n "$managed_agent" ]] || fail "Skillshare migration fixture requires a managed agent"
-  mkdir -p "$HOME/.codex/agents"
+  mkdir -p "$HOME/.claude/agents" "$HOME/.codex/agents"
+  printf 'stale generated agent\n' > "$HOME/.claude/agents/$managed_agent.md"
   printf 'stale generated agent\n' > "$HOME/.codex/agents/$managed_agent.toml"
   printf 'unrelated local agent\n' > "$HOME/.codex/agents/local-only.toml"
 
-  skillshare() { printf '%s\n' "$*" >> "$invocation_log"; }
+  skillshare() {
+    if [[ "$1" == --version ]]; then
+      printf 'skillshare v0.20.25\n'
+    else
+      printf '%s\n' "$*" >> "$invocation_log"
+    fi
+  }
 
   configure_skillshare
 
-  assert_eq existing-config "$(head -1 "$skillshare_home/config.yaml")" \
-    "existing Skillshare config content should remain intact"
-  assert_eq "sync --all -g" "$(cat "$invocation_log")" \
-    "existing Skillshare config should skip init and sync globally"
-  assert_true "existing config should gain only the managed Codex extra" \
-    grep -Fq "extension: codex-agents" "$skillshare_home/config.yaml"
+  assert_true "existing Skillshare skill target should remain intact" \
+    grep -Fq 'path: /tmp/claude-skills' "$skillshare_home/config.yaml"
+  assert_false "existing Skillshare config should skip init" \
+    grep -q '^init ' "$invocation_log"
+  assert_eq 1 "$(grep -c '^sync -g$' "$invocation_log")" \
+    "existing Skillshare config should sync skills"
+  assert_eq 1 "$(grep -c '^sync extras --force -g$' "$invocation_log")" \
+    "existing Skillshare config should force-refresh generated extras"
+  assert_true "existing config should gain the namespaced agents extra" \
+    grep -Fq "name: dotfiles-agents" "$skillshare_home/config.yaml"
+  assert_false "old Codex-only extra should be removed" \
+    grep -Fq "name: codex-agents" "$skillshare_home/config.yaml"
+  assert_eq 1 \
+    "$(grep -Fc "path: \"$HOME/.claude/agents\"" "$skillshare_home/config.yaml")" \
+    "colliding Claude path should remain only in the managed extra"
+  assert_true "unrelated native Codex agent ownership should be preserved" \
+    grep -Fq "path: /tmp/custom-codex-agents" "$skillshare_home/config.yaml"
   assert_eq "$DOTFILES_ROOT/ai/skillshare/skills" "$(readlink "$skillshare_home/skills")" \
     "existing skills source should be replaced by the repository link"
-  assert_eq "$DOTFILES_ROOT/ai/skillshare/agents" "$(readlink "$skillshare_home/agents")" \
-    "existing agents source should be replaced by the repository link"
+  assert_true "existing native agents source should become a real directory" \
+    test -d "$skillshare_home/agents"
+  assert_false "existing native agents source should not remain linked" \
+    test -L "$skillshare_home/agents"
+  assert_eq 0 "$(find "$skillshare_home/agents" -mindepth 1 | awk 'END { print NR + 0 }')" \
+    "native agent discovery should find zero agents"
+  assert_true "existing config should point native discovery at the empty source" \
+    grep -Fq "agents: \"$skillshare_home/agents\"" "$skillshare_home/config.yaml"
   assert_true "pre-existing skills should be archived before relinking" \
     test -f "$DOTFILES_BACKUP_ROOT"/*/xdg\ config/skillshare/skills/local-only/SKILL.md
   assert_true "pre-existing agents should be archived before relinking" \
     test -f "$DOTFILES_BACKUP_ROOT"/*/xdg\ config/skillshare/agents/local.md
+  assert_true "overlapping Claude agents should be archived for migration" \
+    test -f "$DOTFILES_BACKUP_ROOT"/*/.claude/agents/"$managed_agent.md"
   assert_true "overlapping Codex agents should be archived for first migration" \
     test -f "$DOTFILES_BACKUP_ROOT"/*/.codex/agents/"$managed_agent.toml"
   assert_false "overlapping Codex agent should be clear for Skillshare generation" \
     test -e "$HOME/.codex/agents/$managed_agent.toml"
   assert_true "unrelated Codex agents should not be touched" \
     test -f "$HOME/.codex/agents/local-only.toml"
+  assert_true "Skillshare's built-in extension should remain untouched" \
+    test -f "$skillshare_home/extensions/codex-agents/owned-by-skillshare"
   finish_test "existing Skillshare config and source data are preserved"
 }
 
-test_codex_agent_model_mapping_validation() {
-  local extension="$TEST_ROOT/ai/skillshare/extensions/codex-agents"
-  local agent_file agent_name generated expected_model expected_effort
-  local error_log="$HOME/missing-mapping.log"
+test_skillshare_empty_agents_source_reconciliation() {
+  local target="$HOME/.config/skillshare/agents"
+  local legacy="$HOME/legacy-agents"
+  local backup_count
 
-  agent_file=
-  for agent_file in "$TEST_ROOT/ai/skillshare/agents/"*.md; do
-    [[ -e "$agent_file" ]] || continue
-    break
-  done
-  [[ -e "$agent_file" ]] || fail "Codex conversion fixture requires a managed agent"
-  agent_name=${agent_file##*/}
-  agent_name=${agent_name%.md}
-  generated="$HOME/$agent_name.toml"
+  mkdir -p "$legacy" "$(dirname -- "$target")"
+  printf 'legacy agent\n' > "$legacy/legacy.md"
+  ln -s "$legacy" "$target"
 
-  SS_REL_PATH=${agent_file##*/} env -u NODE_OPTIONS node "$extension/convert.js" \
-    < "$agent_file" > "$generated"
-  expected_model=$(env -u NODE_OPTIONS node -e \
-    'const {loadMappings}=require(process.argv[1]); process.stdout.write(JSON.stringify(loadMappings()[process.argv[2]].codex[process.argv[3]]));' \
-    "$extension/model-map.js" "$agent_name" model)
-  expected_effort=$(env -u NODE_OPTIONS node -e \
-    'const {loadMappings}=require(process.argv[1]); process.stdout.write(JSON.stringify(loadMappings()[process.argv[2]].codex[process.argv[3]]));' \
-    "$extension/model-map.js" "$agent_name" model_reasoning_effort)
-  assert_true "Codex conversion should use the configured model" \
-    grep -Fxq "model = $expected_model" "$generated"
-  assert_true "Codex conversion should use the configured reasoning effort" \
-    grep -Fxq "model_reasoning_effort = $expected_effort" "$generated"
+  ensure_empty_skillshare_agents_source "$target"
+  assert_true "legacy agents symlink should become a real directory" test -d "$target"
+  assert_false "legacy agents symlink should be removed" test -L "$target"
+  assert_eq 0 "$(find "$target" -mindepth 1 | awk 'END { print NR + 0 }')" \
+    "replacement native source should be empty"
+  assert_eq 1 "$(find "$DOTFILES_BACKUP_ROOT" -type l | awk 'END { print NR + 0 }')" \
+    "legacy agents symlink should be archived"
 
-  if printf '%s\n' \
+  backup_count=$(find "$DOTFILES_BACKUP_ROOT" -mindepth 1 | awk 'END { print NR + 0 }')
+  ensure_empty_skillshare_agents_source "$target"
+  assert_eq "$backup_count" \
+    "$(find "$DOTFILES_BACKUP_ROOT" -mindepth 1 | awk 'END { print NR + 0 }')" \
+    "repeat reconciliation should leave an empty real directory unchanged"
+
+  printf 'local native agent\n' > "$target/local.md"
+  ensure_empty_skillshare_agents_source "$target"
+  assert_eq 0 "$(find "$target" -mindepth 1 | awk 'END { print NR + 0 }')" \
+    "native source content should be archived before the directory is cleared"
+  assert_eq 1 \
+    "$(find "$DOTFILES_BACKUP_ROOT" -path '*/.config/skillshare/agents*/local.md' -type f | awk 'END { print NR + 0 }')" \
+    "native source content should be recoverable"
+  finish_test "Skillshare native agents source stays empty and migration is recoverable"
+}
+
+test_skillshare_preflight_failures_do_not_mutate_state() {
+  local source_root=$TEST_ROOT
+  local DOTFILES_ROOT="$HOME/repository"
+  local XDG_CONFIG_HOME="$HOME/xdg"
+  local skillshare_home="$XDG_CONFIG_HOME/skillshare"
+  local error_log="$HOME/preflight-error.log"
+  export DOTFILES_ROOT XDG_CONFIG_HOME
+
+  mkdir -p "$DOTFILES_ROOT/ai/skillshare/skills" \
+    "$DOTFILES_ROOT/ai/skillshare/agents" \
+    "$DOTFILES_ROOT/install/lib" \
+    "$skillshare_home/extensions/dotfiles-claude-agents" \
+    "$skillshare_home/extensions/dotfiles-codex-agents" \
+    "$HOME/.claude/agents" "$HOME/.codex/agents" "$HOME/legacy-native-agents"
+  cp "$source_root/ai/skillshare/agent-models.json" "$DOTFILES_ROOT/ai/skillshare/"
+  cp -R "$source_root/ai/skillshare/extensions" "$DOTFILES_ROOT/ai/skillshare/"
+  cp "$source_root/install/lib/configure-skillshare-extra.js" "$DOTFILES_ROOT/install/lib/"
+  printf '%s\n' \
     '---' \
-    'name: unmapped' \
-    'description: Must fail' \
+    'name: fastworker' \
+    'description: invalid provider-specific source' \
     'model: opus' \
-    'effort: medium' \
     '---' \
-    'Instructions.' | \
-    SS_REL_PATH=unmapped.md env -u NODE_OPTIONS node "$extension/convert.js" \
-      > /dev/null 2> "$error_log"; then
-    fail "Codex conversion should reject agents without a model mapping"
-  fi
-  assert_true "missing mapping failure should identify the agent" \
-    grep -Fq "missing 'unmapped'" "$error_log"
+    'Do work.' > "$DOTFILES_ROOT/ai/skillshare/agents/fastworker.md"
+  printf '%s\n' \
+    'sources:' \
+    "  skills: \"$skillshare_home/skills\"" \
+    "  agents: \"$skillshare_home/agents\"" \
+    'targets:' \
+    '  claude:' \
+    '    skills: {}' \
+    'ignore:' > "$skillshare_home/config.yaml"
+  cp "$skillshare_home/config.yaml" "$HOME/config.before"
+  ln -s "$HOME/legacy-native-agents" "$skillshare_home/agents"
+  printf 'Claude extension marker\n' \
+    > "$skillshare_home/extensions/dotfiles-claude-agents/marker"
+  printf 'Codex extension marker\n' \
+    > "$skillshare_home/extensions/dotfiles-codex-agents/marker"
+  printf 'Claude agent\n' > "$HOME/.claude/agents/fastworker.md"
+  printf 'Codex agent\n' > "$HOME/.codex/agents/fastworker.toml"
 
-  env -u NODE_OPTIONS node "$extension/validate.js" \
+  skillshare() {
+    if [[ "$1" == --version ]]; then
+      printf 'skillshare v0.20.25\n'
+    else
+      fail "Skillshare commands should not run after invalid agent validation"
+    fi
+  }
+
+  if (configure_skillshare > /dev/null 2> "$error_log"); then
+    fail "invalid provider-specific source should stop Skillshare setup"
+  fi
+  assert_true "invalid source should fail for the expected validation reason" \
+    grep -Fq "provider field 'model'" "$error_log"
+  assert_true "invalid source should leave config byte-for-byte unchanged" \
+    cmp -s "$HOME/config.before" "$skillshare_home/config.yaml"
+  assert_eq "$HOME/legacy-native-agents" "$(readlink "$skillshare_home/agents")" \
+    "invalid source should leave the native source link unchanged"
+  assert_true "invalid source should leave installed extensions unchanged" \
+    grep -Fxq 'Claude extension marker' \
+    "$skillshare_home/extensions/dotfiles-claude-agents/marker"
+  assert_true "invalid source should leave generated Claude agents unchanged" \
+    grep -Fxq 'Claude agent' "$HOME/.claude/agents/fastworker.md"
+  assert_true "invalid source should leave generated Codex agents unchanged" \
+    grep -Fxq 'Codex agent' "$HOME/.codex/agents/fastworker.toml"
+  assert_false "invalid source should create no backup state" test -e "$DOTFILES_BACKUP_ROOT"
+  assert_false "invalid source should create no ownership manifest" \
+    test -e "$HOME/.local/state/dotfiles/skillshare-agents.manifest"
+
+  skillshare() {
+    if [[ "$1" == --version ]]; then
+      printf 'skillshare v0.20.24\n'
+    else
+      fail "Skillshare commands should not run with an unsupported version"
+    fi
+  }
+  if (configure_skillshare > /dev/null 2> "$error_log"); then
+    fail "Skillshare older than 0.20.25 should stop setup"
+  fi
+  assert_true "old Skillshare should fail with a minimum-version error" \
+    grep -Fq 'Skillshare 0.20.25 or newer is required' "$error_log"
+  assert_true "old Skillshare should leave config unchanged" \
+    cmp -s "$HOME/config.before" "$skillshare_home/config.yaml"
+  finish_test "Skillshare version and agent validation fail before all mutations"
+}
+
+test_skillshare_config_helper_fails_closed() {
+  local helper="$TEST_ROOT/install/lib/configure-skillshare-extra.js"
+  local source="$HOME/repository/ai/skillshare/agents"
+  local claude_target="$HOME/.claude/agents"
+  local codex_target="$HOME/.codex/agents"
+  local native_source="$HOME/.config/skillshare/agents"
+  local fixture snapshot
+  local -a unsupported
+
+  unsupported=(flow-sources quoted-sources indented-sources indented-targets flow-extras crlf)
+  for fixture in "${unsupported[@]}"; do
+    case "$fixture" in
+      flow-sources) printf '%s\n' 'sources: {}' 'targets:' > "$HOME/$fixture.yaml" ;;
+      quoted-sources) printf '%s\n' '"sources":' '  agents: /tmp/agents' > "$HOME/$fixture.yaml" ;;
+      indented-sources) printf '%s\n' '  sources:' '    agents: /tmp/agents' > "$HOME/$fixture.yaml" ;;
+      indented-targets) printf '%s\n' 'sources:' '  skills: /tmp/skills' '  targets:' > "$HOME/$fixture.yaml" ;;
+      flow-extras) printf '%s\n' 'targets:' 'extras: []' > "$HOME/$fixture.yaml" ;;
+      crlf) printf 'sources:\r\n  agents: /tmp/agents\r\n' > "$HOME/$fixture.yaml" ;;
+    esac
+    snapshot="$HOME/$fixture.before"
+    cp "$HOME/$fixture.yaml" "$snapshot"
+    if env -u NODE_OPTIONS node "$helper" "$HOME/$fixture.yaml" "$source" \
+      "$claude_target" "$codex_target" "$native_source" >/dev/null 2>&1; then
+      fail "config helper should reject unsupported $fixture YAML"
+    fi
+    assert_true "config helper should not modify rejected $fixture YAML" \
+      cmp -s "$snapshot" "$HOME/$fixture.yaml"
+  done
+
+  fixture="$HOME/conflict.yaml"
+  printf '%s\n' \
+    'sources:' \
+    '  skills: /tmp/skills' \
+    'targets:' \
+    '  claude:' \
+    '    skills: {}' \
+    'extras:' \
+    '  - name: personal-agents' \
+    '    source: /tmp/personal' \
+    '    targets:' \
+    "      - path: \"$claude_target\"" \
+    '        mode: copy' > "$fixture"
+  cp "$fixture" "$HOME/conflict.before"
+  if env -u NODE_OPTIONS node "$helper" "$fixture" "$source" \
+    "$claude_target" "$codex_target" "$native_source" >/dev/null 2>&1; then
+    fail "config helper should reject a preserved extra target conflict"
+  fi
+  assert_true "target conflict refusal should not modify config" \
+    cmp -s "$HOME/conflict.before" "$fixture"
+  finish_test "Skillshare config helper rejects unsupported or conflicting YAML without mutation"
+}
+
+test_skillshare_config_preflight_fails_before_mutation() {
+  local source_root=$TEST_ROOT
+  local DOTFILES_ROOT="$HOME/repository"
+  local XDG_CONFIG_HOME="$HOME/xdg"
+  local skillshare_home="$XDG_CONFIG_HOME/skillshare"
+  local error_log="$HOME/config-preflight-error.log"
+  export DOTFILES_ROOT XDG_CONFIG_HOME
+
+  mkdir -p "$DOTFILES_ROOT/ai/skillshare/skills" \
+    "$DOTFILES_ROOT/ai/skillshare/agents" \
+    "$DOTFILES_ROOT/install/lib" \
+    "$skillshare_home/extensions/dotfiles-claude-agents" \
+    "$skillshare_home/extensions/dotfiles-codex-agents" \
+    "$HOME/.claude/agents" "$HOME/.codex/agents" "$HOME/legacy-native-agents"
+  cp "$source_root/ai/skillshare/agent-models.json" "$DOTFILES_ROOT/ai/skillshare/"
+  cp -R "$source_root/ai/skillshare/extensions" "$DOTFILES_ROOT/ai/skillshare/"
+  cp "$source_root/install/lib/configure-skillshare-extra.js" "$DOTFILES_ROOT/install/lib/"
+  cp "$source_root/ai/skillshare/agents/"*.md "$DOTFILES_ROOT/ai/skillshare/agents/"
+  printf '%s\n' \
+    'sources:' \
+    '  skills: /tmp/skills' \
+    '  targets:' > "$skillshare_home/config.yaml"
+  cp "$skillshare_home/config.yaml" "$HOME/config.before"
+  ln -s "$HOME/legacy-native-agents" "$skillshare_home/agents"
+  printf 'Claude extension marker\n' \
+    > "$skillshare_home/extensions/dotfiles-claude-agents/marker"
+  printf 'Codex extension marker\n' \
+    > "$skillshare_home/extensions/dotfiles-codex-agents/marker"
+  printf 'Claude agent\n' > "$HOME/.claude/agents/fastworker.md"
+  printf 'Codex agent\n' > "$HOME/.codex/agents/fastworker.toml"
+
+  skillshare() {
+    if [[ "$1" == --version ]]; then
+      printf 'skillshare v0.20.25\n'
+    else
+      fail "Skillshare commands should not run after config preflight failure"
+    fi
+  }
+
+  if (configure_skillshare > /dev/null 2> "$error_log"); then
+    fail "unsupported existing YAML should stop Skillshare setup"
+  fi
+  assert_true "unsupported YAML should fail during configuration preflight" \
+    grep -Fq 'Skillshare agent configuration preflight failed' "$error_log"
+  assert_true "unsupported YAML should leave config byte-for-byte unchanged" \
+    cmp -s "$HOME/config.before" "$skillshare_home/config.yaml"
+  assert_eq "$HOME/legacy-native-agents" "$(readlink "$skillshare_home/agents")" \
+    "unsupported YAML should leave the native source link unchanged"
+  assert_true "unsupported YAML should leave the Claude extension unchanged" \
+    grep -Fxq 'Claude extension marker' \
+    "$skillshare_home/extensions/dotfiles-claude-agents/marker"
+  assert_true "unsupported YAML should leave the Codex extension unchanged" \
+    grep -Fxq 'Codex extension marker' \
+    "$skillshare_home/extensions/dotfiles-codex-agents/marker"
+  assert_true "unsupported YAML should leave generated Claude agents unchanged" \
+    grep -Fxq 'Claude agent' "$HOME/.claude/agents/fastworker.md"
+  assert_true "unsupported YAML should leave generated Codex agents unchanged" \
+    grep -Fxq 'Codex agent' "$HOME/.codex/agents/fastworker.toml"
+  assert_false "unsupported YAML should not install the skills source" \
+    test -e "$skillshare_home/skills"
+  assert_false "unsupported YAML should create no backup state" \
+    test -e "$DOTFILES_BACKUP_ROOT"
+  assert_false "unsupported YAML should create no ownership manifest" \
+    test -e "$HOME/.local/state/dotfiles/skillshare-agents.manifest"
+  finish_test "Skillshare config preflight fails before filesystem or target mutation"
+}
+
+test_skillshare_config_helper_narrows_legacy_cleanup() {
+  local helper="$TEST_ROOT/install/lib/configure-skillshare-extra.js"
+  local config="$HOME/config.yaml"
+  local source="$HOME/repository/ai/skillshare/agents"
+  local claude_target="$HOME/.claude/agents"
+  local codex_target="$HOME/.codex/agents"
+  local native_source="$HOME/.config/skillshare/agents"
+
+  printf '%s\n' \
+    'sources:' \
+    '  skills: /tmp/skills' \
+    'targets:' \
+    '  claude:' \
+    '    skills: {}' \
+    '    agents:' \
+    '      mode: merge' \
+    '  codex:' \
+    '    skills: {}' \
+    '    agents:' \
+    '      path: /tmp/custom-codex-agents' \
+    'extras:' \
+    '  - name: codex-agents' \
+    '    source: /tmp/unrelated-source' \
+    '    targets:' \
+    '      - path: /tmp/unrelated-target' \
+    '        mode: copy' \
+    '        extension: codex-agents' > "$config"
+
+  env -u NODE_OPTIONS node "$helper" "$config" "$source" \
+    "$claude_target" "$codex_target" "$native_source" >/dev/null
+  assert_false "pathless native agent ownership should be removed" \
+    grep -Fq 'mode: merge' "$config"
+  assert_true "unrelated native agent path should remain" \
+    grep -Fq 'path: /tmp/custom-codex-agents' "$config"
+  assert_true "unrelated legacy-named extra should remain" \
+    grep -Fq 'source: /tmp/unrelated-source' "$config"
+  assert_eq 1 "$(grep -c '^  - name: dotfiles-agents$' "$config")" \
+    "managed namespaced extra should be added once"
+  finish_test "Skillshare cleanup removes only colliding native and former managed entries"
+}
+
+test_generated_agent_manifest_prunes_only_owned_outputs() {
+  local manifest="$HOME/.local/state/dotfiles/skillshare-agents.manifest"
+  local backup_count
+
+  mkdir -p "$(dirname -- "$manifest")" "$HOME/.claude/agents" "$HOME/.codex/agents"
+  printf '%s\n' 'claude/removed.md' 'codex/removed.toml' > "$manifest"
+  printf 'managed Claude\n' > "$HOME/.claude/agents/removed.md"
+  printf 'managed Codex\n' > "$HOME/.codex/agents/removed.toml"
+  printf 'personal Claude\n' > "$HOME/.claude/agents/personal.md"
+  printf 'personal Codex\n' > "$HOME/.codex/agents/personal.toml"
+
+  reconcile_generated_agents_manifest "$manifest" \
+    'claude/worker.md' 'codex/worker.toml'
+  assert_false "removed managed Claude output should leave the live target" \
+    test -e "$HOME/.claude/agents/removed.md"
+  assert_false "removed managed Codex output should leave the live target" \
+    test -e "$HOME/.codex/agents/removed.toml"
+  assert_true "removed managed Claude output should be recoverable" \
+    test -f "$DOTFILES_BACKUP_ROOT"/*/.claude/agents/removed.md
+  assert_true "removed managed Codex output should be recoverable" \
+    test -f "$DOTFILES_BACKUP_ROOT"/*/.codex/agents/removed.toml
+  assert_true "unrelated Claude output should remain" \
+    grep -Fxq 'personal Claude' "$HOME/.claude/agents/personal.md"
+  assert_true "unrelated Codex output should remain" \
+    grep -Fxq 'personal Codex' "$HOME/.codex/agents/personal.toml"
+  assert_eq $'claude/worker.md\ncodex/worker.toml' "$(cat "$manifest")" \
+    "manifest should update to the latest successful output set"
+
+  backup_count=$(find "$DOTFILES_BACKUP_ROOT" -type f | awk 'END { print NR + 0 }')
+  reconcile_generated_agents_manifest "$manifest" \
+    'claude/worker.md' 'codex/worker.toml'
+  assert_eq "$backup_count" \
+    "$(find "$DOTFILES_BACKUP_ROOT" -type f | awk 'END { print NR + 0 }')" \
+    "repeat manifest reconciliation should be idempotent"
+  finish_test "generated agent manifest prunes only previously owned outputs"
+}
+
+test_generated_agent_manifest_waits_for_successful_sync() {
+  local source_root=$TEST_ROOT
+  local DOTFILES_ROOT="$HOME/repository"
+  local XDG_CONFIG_HOME="$HOME/xdg"
+  local skillshare_home="$XDG_CONFIG_HOME/skillshare"
+  local manifest="$HOME/.local/state/dotfiles/skillshare-agents.manifest"
+  export DOTFILES_ROOT XDG_CONFIG_HOME
+
+  mkdir -p "$DOTFILES_ROOT/ai/skillshare/skills" \
+    "$DOTFILES_ROOT/ai/skillshare/agents" \
+    "$DOTFILES_ROOT/install/lib" \
+    "$skillshare_home/agents" \
+    "$HOME/.claude/agents" \
+    "$HOME/.local/state/dotfiles"
+  cp "$source_root/ai/skillshare/agent-models.json" "$DOTFILES_ROOT/ai/skillshare/"
+  cp -R "$source_root/ai/skillshare/extensions" "$DOTFILES_ROOT/ai/skillshare/"
+  cp "$source_root/install/lib/configure-skillshare-extra.js" "$DOTFILES_ROOT/install/lib/"
+  cp "$source_root/ai/skillshare/agents/"*.md "$DOTFILES_ROOT/ai/skillshare/agents/"
+  printf '%s\n' \
+    'sources:' \
+    "  skills: \"$skillshare_home/skills\"" \
+    "  agents: \"$skillshare_home/agents\"" \
+    'targets:' \
+    '  claude:' \
+    '    skills: {}' \
+    'ignore:' > "$skillshare_home/config.yaml"
+  printf 'claude/removed.md\n' > "$manifest"
+  printf 'previously managed\n' > "$HOME/.claude/agents/removed.md"
+
+  skillshare() {
+    if [[ "$1" == --version ]]; then
+      printf 'skillshare v0.20.25\n'
+    elif [[ "$*" == 'sync extras --force -g' ]]; then
+      return 1
+    fi
+  }
+
+  if (configure_skillshare >/dev/null 2>&1); then
+    fail "failed Extras sync should fail Skillshare setup"
+  fi
+  assert_eq 'claude/removed.md' "$(cat "$manifest")" \
+    "failed Extras sync should not update ownership state"
+  assert_true "failed Extras sync should not prune prior managed output" \
+    grep -Fxq 'previously managed' "$HOME/.claude/agents/removed.md"
+  finish_test "generated agent manifest updates only after successful Extras sync"
+}
+
+test_skillshare_real_cli_accepts_generated_config_when_available() {
+  local binary
+  local version
+  local config_home="$HOME/xdg"
+  local config="$config_home/skillshare/config.yaml"
+  local status="$HOME/status.json"
+
+  binary=$(type -P skillshare || true)
+  if [[ -z "$binary" ]]; then
+    finish_test "real Skillshare config validation skipped because the binary is unavailable"
+    return
+  fi
+  version=$("$binary" --version | sed -nE 's/.*v([0-9]+\.[0-9]+\.[0-9]+).*/\1/p')
+  if [[ "$version" != 0.20.25 ]]; then
+    finish_test "real Skillshare config validation skipped because v0.20.25 is unavailable"
+    return
+  fi
+
+  mkdir -p "$config_home/skillshare/skills" "$config_home/skillshare/agents"
+  printf '%s\n' \
+    'sources:' \
+    "  skills: \"$config_home/skillshare/skills\"" \
+    "  agents: \"$config_home/skillshare/agents\"" \
+    'mode: merge' \
+    'targets:' \
+    '  claude:' \
+    '    skills: {}' \
+    'ignore:' > "$config"
+  env -u NODE_OPTIONS node "$TEST_ROOT/install/lib/configure-skillshare-extra.js" \
+    "$config" "$TEST_ROOT/ai/skillshare/agents" "$HOME/.claude/agents" \
+    "$HOME/.codex/agents" "$config_home/skillshare/agents" >/dev/null
+  HOME="$HOME" XDG_CONFIG_HOME="$config_home" "$binary" status --json -g > "$status"
+  assert_true "real Skillshare should parse the generated config" grep -Fq '"version": "0.20.25"' "$status"
+  assert_true "real Skillshare should see an empty native agent source" grep -Fq '"count": 0' "$status"
+  assert_true "real Skillshare should report no native agent drift" grep -Fq '"drift": false' "$status"
+  finish_test "real Skillshare v0.20.25 accepts generated config when available"
+}
+
+test_shared_agents_are_provider_neutral() {
+  local agent_file="$TEST_ROOT/ai/skillshare/agents/fastworker.md"
+  local claude_output="$HOME/fastworker.md"
+  local codex_output="$HOME/fastworker.toml"
+  local source
+
+  for source in "$TEST_ROOT/ai/skillshare/agents/"*.md; do
+    [[ -e "$source" ]] || continue
+    if awk '
+      NR == 1 { next }
+      $0 == "---" { exit }
+      /^(model|effort):/ { found = 1 }
+      END { exit found ? 0 : 1 }
+    ' "$source"; then
+      fail "shared agent frontmatter should not select a provider model: $source"
+    fi
+  done
+
+  env -u NODE_OPTIONS node \
+    "$TEST_ROOT/ai/skillshare/extensions/dotfiles-agent-transform/validate.js" \
     "$TEST_ROOT/ai/skillshare/agents"
-  finish_test "Codex agent mappings are complete and reject unmapped agents"
+  SS_REL_PATH=fastworker.md env -u NODE_OPTIONS node \
+    "$TEST_ROOT/ai/skillshare/extensions/dotfiles-claude-agents/convert.js" \
+    < "$agent_file" > "$claude_output"
+  SS_REL_PATH=fastworker.md env -u NODE_OPTIONS node \
+    "$TEST_ROOT/ai/skillshare/extensions/dotfiles-codex-agents/convert.js" \
+    < "$agent_file" > "$codex_output"
+
+  assert_true "Claude generation should use the model map" \
+    grep -Fxq 'model: "opus"' "$claude_output"
+  assert_true "Claude generation should use the mapped effort" \
+    grep -Fxq 'effort: "medium"' "$claude_output"
+  assert_true "Codex generation should use the model map" \
+    grep -Fxq 'model = "gpt-5.6-sol"' "$codex_output"
+  assert_true "Codex generation should use the mapped reasoning effort" \
+    grep -Fxq 'model_reasoning_effort = "medium"' "$codex_output"
+  assert_false "generated agents should not include a service tier" \
+    grep -q 'service_tier' "$codex_output"
+  finish_test "neutral agents generate provider-specific model settings"
 }
 
 test_repository_path_with_spaces() {
@@ -724,7 +1202,15 @@ new_home; test_dangling_link
 new_home; test_dotfile_install
 new_home; test_skillshare_configuration
 new_home; test_skillshare_existing_config_is_preserved
-new_home; test_codex_agent_model_mapping_validation
+new_home; test_skillshare_empty_agents_source_reconciliation
+new_home; test_skillshare_preflight_failures_do_not_mutate_state
+new_home; test_skillshare_config_helper_fails_closed
+new_home; test_skillshare_config_preflight_fails_before_mutation
+new_home; test_skillshare_config_helper_narrows_legacy_cleanup
+new_home; test_generated_agent_manifest_prunes_only_owned_outputs
+new_home; test_generated_agent_manifest_waits_for_successful_sync
+new_home; test_skillshare_real_cli_accepts_generated_config_when_available
+new_home; test_shared_agents_are_provider_neutral
 new_home; test_repository_path_with_spaces
 new_home; test_ai_config_directories_preserve_provider_data
 new_home; test_legacy_ai_symlink_is_reversed
