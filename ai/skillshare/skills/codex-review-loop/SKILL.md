@@ -1,11 +1,6 @@
 ---
 name: codex-review-loop
-description: >-
-  Run the canonical bounded review-remediation workflow using one read-only
-  external Codex CLI invocation per scheduled round, with broad rounds 1-3,
-  blocker-focused rounds 4-9, and an optional final read-only round 10. Use only when
-  explicitly invoked as $codex-review-loop or explicitly requested by name,
-  including from another skill; never invoke implicitly.
+description: Run the canonical bounded review-remediation workflow using one read-only external Codex CLI invocation per scheduled round, with broad rounds 1-3, blocker-focused rounds 4-9, and an optional final read-only round 10. Use only when explicitly invoked as $codex-review-loop or explicitly requested by name, including from another skill; never invoke implicitly.
 ---
 
 # Codex Review Loop
@@ -27,25 +22,11 @@ Use one private temporary run directory for the loop. Keep the frozen scope once
 
 For broad rounds 1-3, tell Codex to inspect the complete surface itself and apply that round's broad focus. Do not pass prior outputs, the ledger, remediation summaries, or conclusions. For focused rounds 4-9, pass only the one independently verified blocker, its current relevant surface, and immediate regression boundary; exclude lower-priority exploration. Round 10 receives the complete current surface, broad final-audit focus, and no prior conclusions.
 
-Before every scheduled invocation, apply `codex-review`'s outer-runtime
-preflight and obtain any narrow process authority before starting Codex. Keep
-the inner reviewer sandbox read-only. If authority is unavailable, record the
-round as incomplete and stop without invoking; never launch and retry, alter
-`CODEX_HOME`, copy or symlink credentials, use a bypass flag, or weaken the
-sandbox.
+Before every scheduled invocation, apply `codex-review`'s outer-runtime preflight and obtain any narrow process authority before starting Codex. Keep the inner reviewer sandbox read-only. If authority is unavailable, record the round as incomplete and stop without invoking; never launch and retry, alter `CODEX_HOME`, copy or symlink credentials, use a bypass flag, or weaken the sandbox.
 
-Use the strict shared external schema for every Codex result, then normalize
-assessed findings into the final canonical schema. Apply `codex-review`'s
-prompt-bearing `review -`, `--ignore-user-config`, ephemeral read-only execution,
-output, and direct-inspection rules to every call. Give each outer execution
-call a timeout/deadline of at least 30 minutes. If it yields a running session
-or process handle, poll that same handle until exit or the real deadline; never
-treat yield or silence as timeout, cancel it, or start a replacement. Preserve
-the exact result and completion state for independent assessment. Snapshot the
-worktree before and after every call. Treat mutation, incomplete inspection,
-empty or schema-invalid output, a real timeout, or CLI failure as an incomplete
-round; do not invent findings. Stop when the canonical progress rules require
-it.
+Use the strict shared external schema for every Codex result, then normalize assessed findings into the final canonical schema. Apply `codex-review`'s prompt-bearing `review -`, `--ignore-user-config`, ephemeral read-only execution, output-contract, direct-inspection, and guarded same-message prose-recovery rules to every call. Give each outer execution call a timeout/deadline of at least 30 minutes. If it yields a running session or process handle, poll that same handle until exit or the real deadline; never treat yield or silence as timeout, cancel it, or start a replacement. Preserve the exact result and completion state for independent assessment. Snapshot the worktree before and after every call. Treat mutation, incomplete inspection, empty or unusable output, a real timeout, or CLI failure as an incomplete round; do not invent findings.
+
+A schema-invalid but usable prose result belongs to the round that produced it; never retry or replace that round. Record prose-recovery provenance and coverage risk in the round record and final residual risk. Assess and remediate recovered findings normally after rounds 1-9. Allow recovered prose to establish clean or an early stop only when it explicitly confirms complete inspection of the frozen surface and no finding meeting the 80% threshold. Stop when the canonical progress rules require it.
 
 After rounds 1-9, independently assess the result, fix every accepted authorized item, resolve residual tasks, run proportionate checks, and update the ledger. Deferral is allowed only for a stated authority, input, or external-state blocker. During and after round 10, make no remediation.
 
