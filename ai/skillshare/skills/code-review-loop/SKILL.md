@@ -1,10 +1,6 @@
 ---
 name: code-review-loop
-description: >-
-  Run the canonical bounded internal review-remediation workflow with broad
-  rounds 1-3, blocker-focused rounds 4-9, and an optional final read-only round
-  10. Use by default for implicit requests to review and fix or iteratively
-  remediate a change; use code-review for a single read-only review.
+description: Run the canonical bounded internal review-remediation workflow with broad rounds 1-3, blocker-focused rounds 4-9, and an optional final read-only round 10. Use by default for implicit requests to review and fix or iteratively remediate a change; use code-review for a single read-only review.
 ---
 
 # Code Review Loop
@@ -21,11 +17,7 @@ Maintain an in-context ledger with stable IDs:
 ID | round | priority | location | evidence | impact | remediation | assessment | disposition | verification
 ```
 
-Assess every finding as `accept`, `partial`, or `decline`. Use dispositions
-`fixed`, `rejected`, or `blocked`. Do not use `deferred` as a convenience:
-complete every authorized, in-scope residual task before finishing. Mark work
-blocked only when it needs unavailable authority, user input, or an
-external-state change, and say exactly what is needed.
+Assess every finding as `accept`, `partial`, or `decline`. Use dispositions `fixed`, `rejected`, or `blocked`. Do not use `deferred` as a convenience: complete every authorized, in-scope residual task before finishing. Mark work blocked only when it needs unavailable authority, user input, or an external-state change, and say exactly what is needed.
 
 Apply `code-review`'s clean-slate and durable-architecture lens during assessment and remediation. For an accepted finding under that lens, remove the superseded, compatibility, or transition machinery and implement the proportional durable target state; do not preserve the old path or layer another workaround unless the effective requirements explicitly require it.
 

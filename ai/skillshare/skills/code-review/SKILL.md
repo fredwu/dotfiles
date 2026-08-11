@@ -47,12 +47,7 @@ Use priority independently from confidence: `P0` critical/systemic, `P1` core bl
 
 ## Return the shared contract
 
-Return an agent-detailed `REVIEW_RESULT` JSON object first. Use
-`references/review-result.schema.json` as the canonical machine contract. Set
-`assessment` to `confirmed` and include a concise `assessment_rationale` for
-every retained internal finding. External reviewers instead produce the strict
-unassessed shape in `references/external-review-result.schema.json`; the calling
-agent adds its assessment while normalizing into this canonical contract.
+Return an agent-detailed `REVIEW_RESULT` JSON object first. Use `references/review-result.schema.json` as the canonical machine contract. Set `assessment` to `confirmed` and include a concise `assessment_rationale` for every retained internal finding. External reviewers instead produce the strict unassessed shape in `references/external-review-result.schema.json`; the calling agent adds its assessment while normalizing into this canonical contract.
 
 ```json
 {
@@ -76,11 +71,7 @@ agent adds its assessment while normalizing into this canonical contract.
 }
 ```
 
-Order `findings` by priority then confidence. Use repository-relative locations;
-never invent provider URLs for dirty content. For a clean review, use an empty
-`findings` array and set `verdict` to `clean`. Use `incomplete` only when the
-frozen surface could not be inspected, and state why in `residual_risk`. Do not
-claim clean when inspection was incomplete.
+Order `findings` by priority then confidence. Use repository-relative locations; never invent provider URLs for dirty content. For a clean review, use an empty `findings` array and set `verdict` to `clean`. Use `incomplete` only when the frozen surface could not be inspected, and state why in `residual_risk`. Do not claim clean when inspection was incomplete.
 
 Then return a concise human section:
 
