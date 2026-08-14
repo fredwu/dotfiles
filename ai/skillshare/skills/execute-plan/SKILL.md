@@ -1,22 +1,35 @@
 ---
 name: execute-plan
-description: Execute an existing implementation, cleanup, migration, or remediation plan to exhaustive, verified completion against its originating user requirement. Use for plan text, a plan path, or a plan already in context when execution must preserve the requirement verbatim in notes, account for every item, run review and quality gates, continue while safe work remains, and report incomplete only for genuine blockers.
+description: Execute an existing implementation, cleanup, migration, or remediation plan to exhaustive, verified full completion against its originating user requirement. Use for plan text, a plan path, or a plan already in context when execution must preserve the requirement verbatim in notes, account for every item, run review and quality gates, and continue while safe work remains. Any safely actionable residual forbids a final response; reserve an incomplete outcome exclusively for genuine, evidenced blockers after every unaffected item and gate is complete.
 ---
 
 # Execute Plan
 
 Execute the plan as a hypothesis to verify. Use evidence-backed deviations when needed, but never use a deviation to skip this skill's notes, review, verification, `final-pass`, or completion gates.
 
-## Continue to a terminal state
+## Enforce the non-negotiable completion contract
 
-Own execution until all safe, authorized work is complete. Phases, batches, review rounds, agent assignments, tool calls, checkpoints, compaction, and turn boundaries are internal boundaries, not handoff points. Time, effort, context pressure, work size, inconvenience, or agent or round counts are not blockers.
+**FULL COMPLETION IS NON-NEGOTIABLE.** Treat this as a control-flow rule, not reporting guidance. Once execution starts, own it until one of these terminal states is true:
 
-Before any final response or request to continue:
+| State | Required action |
+|---|---|
+| Any safe, authorized in-scope action can advance an item, residual, or required gate | Continue execution. A final response, progress handoff, voluntary pause, or request to continue is forbidden. |
+| Every entry is resolved and every required gate passes or reaches its explicitly permitted degraded state | Report `Outcome: Complete`. |
+| Residuals remain, every residual is blocker-certified, and no safe unaffected work remains | Report `Outcome: Incomplete`. |
+
+`Incomplete` means **blocked**, never merely unfinished. Exact remaining tasks, known next actions, fixable failures, and execution-agent residuals are unfinished work and therefore commands to continue. They are not reasons to stop.
+
+Phases, batches, review rounds, agent assignments, tool calls, checkpoints, compaction, and turn boundaries are internal boundaries, not handoff points. Elapsed hours, high completion percentage, a large diff, many completed batches, context pressure, reduced failure counts, or having only a handful of failures left are also not blockers. Checkpoint concise state, decompose the next work when useful, and continue in the same logical execution.
+
+Before any final response, handoff, pause, or request to continue:
 
 1. Re-read the ledger and enumerate every pending plan item, discovered task, remediation, review, suite, final pass, and audit.
-2. If any entry can advance safely without user input or new authority, checkpoint concise state, split the work if useful, and continue. Do not ask whether to proceed.
-3. For a blocked entry, first retry, adapt, or use authorized alternatives, then complete all unaffected entries and gates.
-4. Allow `Outcome: Incomplete` only when every remaining entry has a concrete, evidenced blocker and no safe work remains. Otherwise, finish all completion criteria and report `Outcome: Complete`.
+2. Classify each unresolved entry as `actionable` or `blocker-certified`. If any entry is actionable, a final response is forbidden: checkpoint, split the work if useful, and immediately execute the next concrete action. Do not ask whether to proceed.
+3. Certify a blocker only by recording the exact boundary preventing the next action, concrete evidence, retries and authorized alternatives attempted, the specific new user input, authority, or external-state change required, and the exact remaining work. Treat any uncertified residual as actionable until it is completed or certified.
+4. Complete every unaffected entry and gate before treating any blocker as terminal.
+5. Record the terminal-state assertion in execution notes: `Safely actionable entries: 0`, `Unblocked residuals: 0`, `Unaffected unfinished entries or gates: 0`, and one blocker certification per residual. If a blocker prevents safe notes creation or updates, record the assertion and certifications in the final response instead. If any assertion is false, continue execution.
+
+If no genuine blocker exists, the only valid final response is `Outcome: Complete` after every completion criterion passes. Partial progress can be reported only as a checkpoint while execution continues, never as a terminal handoff.
 
 ## Resolve the governing plan and requirement
 
@@ -51,6 +64,8 @@ Create `<task-directory>/execution_notes.md` with a concise `TL;DR` and maintain
 - status, batches, and an exhaustive ledger of every original, adapted, replacement, and discovered in-scope item, its source, disposition, and acceptance evidence or residual details;
 - decisions, assumptions, evidence, deviations, remaining todos, verification, and any residual's reason, attempts, consequence, exact work, owner or unblock condition when known, and next action.
 
+Keep the execution status active until the terminal-state assertion passes. Do not write an `Outcome` field before then; never use `Outcome: Incomplete` as a progress status.
+
 Before updating existing notes, validate their provenance, exact canonical block, fence delimiters, and update sequence. Existing updates must be an exact prefix; append only the missing suffix. Never overwrite conflicted notes, reorder updates, or rewrite the original block. Unless an exact notes path is mandated, record the conflict and use a fresh notes path inside the selected directory. Ask only if that exact path is mandated and no safe alternative is authorized. Never infer completion from checkboxes.
 
 ## Select independent review
@@ -81,7 +96,7 @@ Use this mandatory order for each implementation or remediation batch:
 
 1. Confirm full-plan-read evidence, research behavior, and define acceptance evidence.
 2. Complete all assigned and discovered in-scope work with the smallest complete root-cause fix. Add or update meaningful workflow or integration tests. Align documentation with observed behavior.
-3. Discover the repository's canonical full quality suite from instructions and CI; run it. Warnings, build, compile, lint, analysis, or test failures are unfinished work.
+3. Discover the repository's canonical full quality suite from instructions and CI; run it. Warnings, build, compile, lint, analysis, or test failures are actionable unfinished work: fix them and rerun. Only a blocker-certified condition that prevents a required check from running or passing may support `Outcome: Incomplete`.
 4. Run the internal `code-review-loop`; apply every warranted authorized fix and rerun the full suite after each remediation round. This gate passes only when a bounded successful loop has no actionable findings.
 5. Run the full suite again after the internal gate, even if its first review was clean.
 6. Run the recorded external review loop. Apply every valid finding and rerun the full suite after each remediation round. Keep independent reviewers read-only; the executor owns fixes and verification.
@@ -98,18 +113,18 @@ When safe, applicable, and authorized, exercise production-like local or staging
 
 ## Handle blockers
 
-A genuine blocker is concrete evidence that a ledger entry cannot advance safely: missing plan or provenance, an unavoidable mandated-notes conflict, missing required input, external-state dependency, or a safety or authorization boundary. Investigate, retry reasonably, adapt, and use authorized alternatives first. Predictions of difficulty or duration are not evidence.
+A genuine blocker is concrete evidence that the next action for a ledger entry cannot advance safely: missing plan or provenance, an unavoidable mandated-notes conflict, missing required input, external-state dependency, or a safety or authorization boundary. Investigate, retry reasonably, adapt, and use authorized alternatives first. Remaining effort, a known fix, failed checks, predictions of difficulty or duration, and a desire to hand off are not blocker evidence. Apply the blocker-certification fields from the completion contract to every residual.
 
-Finish all unaffected work and gates before asking or reporting incomplete. If safe, update notes with `Outcome: Incomplete` and full residual accounting; never append to conflicted notes or create them before resolving the plan and requirement. If notes cannot be safely updated, include the accounting and reason in the final response. Failed review infrastructure alone follows degradation, not incomplete status.
+Finish all unaffected work and gates before asking or reporting incomplete. After the terminal-state assertion passes, update safe notes with `Outcome: Incomplete` and full residual accounting; never append to conflicted notes or create them before resolving the plan and requirement. If notes cannot be safely updated, include the accounting and reason in the final response. Failed review infrastructure alone follows degradation, not incomplete status.
 
 ## Finish
 
 1. Audit the ledger against the plan, effective requirement, adaptations, implementation, review findings, and discovered tasks. Add omissions. A checkbox or broad parent item is not evidence.
-2. Resolve every entry with evidence or a justified non-residual deviation. Use `blocked`, `deferred`, `skipped`, or `partial` only for a genuine blocker after reasonable attempts; record the full residual accounting in notes and the final response.
-3. Run `final-pass` or its equivalent. Add findings to the ledger and run each remediation batch through every batch gate. Repeat the audit and final pass until no new in-scope work appears or only blocker-supported residuals remain.
-4. Run the canonical full quality suite after the final audit and final-pass cycle. Fix failures and repeat from step 1. A blocked or unsuccessful required final suite is a residual and makes the outcome incomplete.
-5. Refresh the notes' `TL;DR`, ledger, decisions, deviations, todos, and evidence. Recheck exact requirement and update blocks and acceptance coverage.
-6. Set exactly one outcome in notes and the final response:
+2. Resolve every entry with evidence or a justified non-residual deviation. Use `blocked`, `deferred`, `skipped`, or `partial` only for a blocker-certified residual after reasonable attempts; record the full residual accounting in notes and the final response.
+3. Run `final-pass` or its equivalent. Add findings to the ledger and run each remediation batch through every batch gate. Repeat the audit and final pass until no new in-scope work appears or only blocker-certified residuals remain.
+4. Run the canonical full quality suite after the final audit and final-pass cycle. An unsuccessful suite is actionable unfinished work: fix it and repeat from step 1. Only a required suite that cannot run or pass because of a blocker-certified condition may remain as an incomplete residual.
+5. Refresh the notes' `TL;DR`, ledger, decisions, deviations, todos, and evidence. Recheck exact requirement and update blocks and acceptance coverage. Record and pass the terminal-state assertion from the completion contract.
+6. Only after that assertion passes, set exactly one outcome in notes and the final response:
    - `Complete`: every effective requirement and ledger entry is satisfied or closed as a justified non-residual deviation; all discovered work, internal review, valid external findings, and suites are complete; no in-scope residual or todo remains; external degradation, if any, was retried and recorded.
-   - `Incomplete`: only genuine blocker-supported residual work or a blocked required gate remains after every unaffected item and gate is complete. Never use it as a voluntary pause or say “complete except.”
+   - `Incomplete`: only blocker-certified residual work or a blocker-certified required gate remains after every unaffected item and gate is complete. Never use it for unfinished work, partial success, elapsed effort, a voluntary pause, or “complete except.”
 7. Lead with `Outcome: Complete` or `Outcome: Incomplete`. Summarize scope, material decisions and deviations, review and validation, quality results, and risks. For incomplete work, enumerate every residual's reason and evidence, attempts, consequence, exact remaining work, owner or unblock condition when known, and next action.
