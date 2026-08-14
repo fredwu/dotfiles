@@ -5,27 +5,26 @@ description: Write a read-only, evidence-backed plan to remove legacy, deprecate
 
 # Write Plan Legacy
 
-Invoke `$write-plan` and follow it fully. Apply the constraints below as this skill's specialization; do not duplicate, weaken, or replace the `$write-plan` workflow.
+Invoke `$write-plan` and follow it fully, adding the specialization below without weakening or replacing that workflow.
 
 ## Preserve the real requirement
 
-Preserve the complete visible user message that invoked `$write-plan-legacy` as the canonical `## User requirement (verbatim)` payload required by `$write-plan`. Do not expand the invocation into a fabricated prompt, substitute this skill's text for the user's message, or present these fixed skill constraints as user-authored content.
+Use the complete visible `$write-plan-legacy` user message as `$write-plan`'s canonical `## User requirement (verbatim)` payload. Do not expand it, fabricate a prompt, substitute this skill text, or label fixed skill constraints as user-authored.
 
 ## Constrain the audit
 
-- Audit only FeedBun-owned code. Leave Petal Pro boilerplate unchanged and exclude recommendations that would modify it.
-- Treat the audit as a deliberate legacy-removal sweep, including a follow-up sweep when prior cleanup has already occurred.
-- Investigate only evidenced legacy or deprecated behavior, backward-compatibility code and shims, dual reads or writes, parallel old and new approaches to the same responsibility, stale or unused code, dead code, and obsolete database fields, indexes, or related objects.
-- Assume the database will be reset. Plan direct removal without legacy-data support, compatibility paths, deprecation stages, dual-operation periods, or transition machinery.
-- Exclude intentional fallbacks and redundancy with a current product purpose, including LLM model or provider fleets and their routing or failover. Exclude proper architectural layering and unrelated quality, redesign, performance, style, or refactoring concerns.
-- Accept a clean no-findings conclusion. Do not invent issues, retain weak candidates, nitpick, or expand scope to make the plan appear substantial.
+- Audit only FeedBun-owned code; leave Petal Pro boilerplate unchanged.
+- Perform a deliberate first or follow-up legacy-removal sweep. Limit candidates to evidenced legacy or deprecated behavior, compatibility shims, dual reads or writes, parallel old/new paths for one responsibility, stale or dead code, and obsolete database fields, indexes, or related objects.
+- Assume a database reset. Plan direct removal without legacy-data support, compatibility or deprecation paths, dual-operation periods, or transition machinery.
+- Exclude intentional current-purpose fallback or redundancy, including LLM model/provider fleets and routing or failover; proper architectural layering; and unrelated quality, redesign, performance, style, or refactoring concerns.
+- Accept no findings. Do not invent issues, keep weak candidates, nitpick, or expand scope for apparent substance.
 
 ## Require evidence
 
-Trace each candidate through its definitions, references, callers, persistence, configuration, tests, and runtime or framework registration as applicable. Before classifying anything as removable, check for dynamic dispatch, macros or framework callbacks, generated references, environment-specific configuration, dependency injection, external contracts, operational tooling, and intentional fallback behavior.
+Trace each candidate through definitions, references, callers, persistence, configuration, tests, and runtime/framework registration. Before calling it removable, check dynamic dispatch, macros or callbacks, generated references, environment-specific configuration, dependency injection, external contracts, operational tooling, and intentional fallback.
 
-Retain a finding only when repository evidence supports both its legacy or dead status and safe removal direction. Record uncertainty as an evidence gap rather than converting it into a finding.
+Retain a finding only when repository evidence supports both legacy/dead status and a safe removal direction. Record uncertainty as an evidence gap.
 
 ## Plan the target state
 
-For every retained finding, plan clean removal of the obsolete path and its directly related code, tests, configuration, and database objects. Include focused verification that proves the surviving FeedBun behavior and schema remain correct. Keep the investigation and output read-only exactly as required by `$write-plan`; write the plan, but do not execute it.
+For each finding, plan removal of the obsolete path and related code, tests, configuration, and database objects. Include focused verification of surviving FeedBun behavior and schema. Keep the investigation read-only: write but do not execute the plan.

@@ -1,18 +1,15 @@
 ---
 name: final-pass
-description: Perform one deliberate final pass over completed changes, resolve material omissions or inconsistencies, and run the repository or project's full canonical quality and test suite for any change set containing non-documentation files. Skip those checks for documentation-only changes. Use at the end of implementation, especially when code, documentation, tests, or configuration must remain coherent.
+description: Perform one deliberate final pass over completed changes, resolve material omissions or inconsistencies, and run the full canonical quality and test suite for any change set containing non-documentation files. Skip those checks for documentation-only changes. Use after implementation when code, documentation, tests, and configuration must remain coherent.
 ---
 
 # Final Pass
 
-Review the completed work as a whole against the original request and the full set of changes.
+Review all completed changes against the original request. Find and resolve material omissions or inconsistencies across code, documentation, tests, and configuration.
 
-Look for anything materially missed or inconsistent, with particular attention to coherence between code, documentation, tests, and configuration. Resolve every in-scope issue before verification.
+Classify the full change set:
 
-Determine whether the full change set is documentation-only (for example, changes limited to planning documents). Always perform the review and coherence pass above. If every changed file is documentation-only, explicitly skip all repository or project quality and test checks; these checks are unnecessary for that change set.
+- **Documentation-only:** perform the review above, but explicitly skip all repository quality and test checks as unnecessary.
+- **Contains non-documentation files:** discover the complete canonical gate from repository instructions, contributor docs, task runners, manifests, and CI. Run every included format, lint, static-analysis, type, security, build, and test check. Do not substitute targeted, changed-file, stale, or proportionate checks. Fix in-scope failures and rerun the full suite until it passes.
 
-If any non-documentation file changed, discover the repository or project's complete canonical quality gate from its instructions, contributor documentation, task runners, package manifests, and CI configuration. Include formatting, linting, static analysis, type checking, security checks, builds, and tests whenever they are part of that gate.
-
-After resolving final issues, run the full canonical quality and test suite when any non-documentation file changed. Do not substitute targeted, changed-file, stale, or merely proportionate checks for the full gate. Fix in-scope failures and rerun the complete suite until it passes.
-
-Do not silently skip failures or unavailable checks. For documentation-only changes, hand off that the checks were intentionally skipped and why. Otherwise, hand off the exact commands and results, including every failure, blocked or unavailable check, and anything left unverified.
+Report the exact commands and results. For non-documentation changes, list every failed, blocked, unavailable, or unverified check; for documentation-only changes, state that checks were intentionally skipped and why.
