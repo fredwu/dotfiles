@@ -5,29 +5,20 @@ description: Run the canonical bounded review-remediation workflow using one rea
 
 # Grok Review Loop
 
-Read `../code-review-loop/SKILL.md`, `../code-review/SKILL.md`, and `../grok-review/SKILL.md`. Follow the canonical loop with these substitutions. The primary agent owns assessment, remediation, verification, and completion.
+Read `../code-review-loop/SKILL.md`, `../code-review/SKILL.md`, and `../grok-review/SKILL.md`. Follow the canonical loop with these substitutions. The primary agent owns scope, assessment, remediation, verification, and completion.
 
-Explicit invocation authorizes only scheduled bounded Grok calls and their minimum non-secret data transfer—not unrelated data, remote writes, or expanded remediation.
+Explicit invocation authorizes only the scheduled Grok calls and minimum non-secret transfer, not unrelated data, remote writes, or expanded remediation.
 
-## Use Grok as the scheduled reviewer
+## Use Grok for scheduled rounds
 
-Replace each scheduled internal `code-review` with exactly one fresh external Grok CLI call using `grok-review`'s direct-repository, `dontAsk`, read-only-sandbox, `--no-plan`, bounded-turn, no-memory mechanism and contract. Keep web search disabled. One top-level call consumes one round even on failure; never retry, substitute reviewers, or use bypass flags.
+Replace each scheduled internal `code-review` with exactly one fresh model-bearing top-level Grok call using `grok-review`'s read-only mechanism and contract. Metadata and authentication preflight do not consume the round. Map applicable repository `worker` and `fastworker` roles to Grok's built-in `general-purpose` task; these tasks remain inside the call and do not consume rounds, and subagent use is otherwise unrestricted. Forbid nested review skills or extra model-bearing Grok processes only to preserve one call per round. A failed call consumes its round; never retry, substitute reviewers, weaken the sandbox, or use bypass flags.
 
-Use one private temporary run directory and one frozen scope. Write one compact request and exact result per round. The scheduled Grok process is a separate `grok --prompt-file` invocation and will not receive `grok-review` by implicit invocation, so copy only `grok-review`'s request-body prompt contract into every request, not its caller CLI. Include only:
+Freeze one typed scope and use one private non-secret run directory plus a separate transient environment root per round. Preserve each round's preflight inspection, compact request, exact stdout, and stderr, but delete and verify removal of its transient root after preflight and any model attempt regardless of outcome. Because Grok does not receive `grok-review` implicitly, every request must include the original requirements, frozen current surface and exclusions, shared lenses and fields, round phase/focus, and `grok-review`'s inspection-first rule, confidence threshold, priority semantics, role mapping, terminal `StructuredOutput`, completeness, and one-call rules. Keep caller-only CLI, isolation, polling, assessment, and cleanup instructions out of the request.
 
-- original requirements and acceptance criteria;
-- frozen typed target, current task-attributable surface, and exclusions;
-- `grok-review`'s shared default review lens and current prompt contract;
-- round number, phase, and allowed focus.
+For broad rounds 1-3, require complete-surface inspection and pass no prior output, ledger, remediation narrative, or conclusion. For rounds 4-9, pass only the independently verified blocker, its current surface, and immediate regression boundary. Round 10 receives the complete current surface, a broad final-audit focus, and no prior conclusion.
 
-Keep phase as this loop round's phase, not `phase: single`. Set `--cwd` to the frozen root every round for direct current-repository inspection; keep request/output files in the external run directory. For broad rounds 1-3, require complete-surface inspection with that round's broad focus; pass no prior outputs, ledger, remediation summaries, or conclusions. For focused rounds 4-9, pass only one independently verified blocker, its current relevant surface, and immediate regression boundary; exclude lower-priority exploration. Give round 10 the complete current surface, broad final-audit focus, and no prior conclusions.
+Apply `grok-review`'s empty-CWD runtime, script-free API-key preflight, target-confined custom sandbox, child environment policy, `general-purpose` agent, schema, connected-tool policy, deadline, snapshots, mutation checks, and cleanup. Normalize only completed structured findings after independent assessment. Missing protected authentication, failed sandbox checks, ambient discovery, malformed output, premature `incomplete`, incomplete inspection, structured-output failure, timeout, CLI failure, or mutation makes the round incomplete; invent no findings and never treat it as clean. The failed model call consumes its scheduled round and is not retried. Follow canonical stop rules.
 
-For every result, pass strict shared schema content directly, then normalize assessed findings to the canonical schema; add no Python, jq, or other validator. Preserve the exact stdout envelope, stderr, and completion state. Apply `grok-review`'s tool, permission, sandbox, output, envelope, and at-least-30-minute outer deadline rules. Poll the same yielded handle until exit or the real deadline; yield/silence/empty poll is not timeout, and never cancel or replace a healthy process. Snapshot before and after. Mutation, incomplete inspection, missing/incoherent structured output, timeout, sandbox failure, or CLI failure makes the round incomplete; invent no findings. An incomplete Grok round is a completion failure, not a clean review; do not early-stop from it as if no findings remain while residual authorized work exists. Follow canonical stop rules.
+After rounds 1-9, assess every finding, fix each accepted authorized item, resolve residual work, run proportionate checks, and update the ledger. Use `blocked` only for missing authority, required input, or external-state change. Make no remediation during or after round 10.
 
-After rounds 1-9, independently assess, fix every accepted authorized item, resolve residual tasks, run proportionate checks, and update the ledger. Defer only for a stated authority, input, or external-state blocker. Make no remediation during or after round 10.
-
-## Return and clean up
-
-Use the canonical compact handoff and summary. Include rounds/phases, Grok completion failures, accepted/partial/declined counts, fixes, checks, unresolved findings, blockers, and residual risk. Omit raw transcripts unless requested.
-
-Delete only the validated current run directory; if cleanup cannot be verified, preserve and report its exact path. Never commit, push, publish comments, or make other remote writes without separate authorization.
+Return the canonical handoff and summary with reached rounds/phases, completion failures, dispositions, fixes, checks, unresolved findings, blockers, and residual risk. Omit raw transcripts unless requested. Delete only the validated run directory; otherwise preserve and report its path. Never commit, push, publish comments, or make other remote writes without separate authorization.

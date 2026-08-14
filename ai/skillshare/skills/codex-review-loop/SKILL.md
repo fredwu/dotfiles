@@ -5,33 +5,20 @@ description: Run the canonical bounded review-remediation workflow using one rea
 
 # Codex Review Loop
 
-Read `../code-review-loop/SKILL.md`, `../code-review/SKILL.md`, and `../codex-review/SKILL.md`. Follow the canonical loop with these substitutions. The primary agent owns assessment, remediation, verification, and completion.
+Read `../code-review-loop/SKILL.md`, `../code-review/SKILL.md`, and `../codex-review/SKILL.md`. Follow the canonical loop with these substitutions. The primary agent owns scope, assessment, remediation, verification, and completion.
 
-Explicit invocation authorizes only scheduled bounded Codex calls and their minimum non-secret data transfer—not unrelated data, remote writes, or expanded remediation.
+Explicit invocation authorizes only the scheduled Codex calls and minimum non-secret transfer, not unrelated data, remote writes, or expanded remediation.
 
-## Use Codex as the scheduled reviewer
+## Use Codex for scheduled rounds
 
-Replace each scheduled internal `code-review` with exactly one fresh external Codex CLI call using `codex-review`'s ephemeral read-only mechanism and contract. One top-level call consumes one round even on failure; never retry, substitute reviewers, or use bypass flags.
+Replace each scheduled internal `code-review` with exactly one fresh model-bearing top-level Codex call using `codex-review`'s read-only mechanism and contract. Metadata preflight does not consume the round. Worker subagents required by applicable routing instructions remain inside that call and do not consume rounds. Forbid nested review skills or extra model-bearing Codex processes only to preserve one call per round. A failed call consumes its round; never retry, substitute reviewers, weaken the sandbox, or use bypass flags.
 
-Use one private temporary run directory and one frozen scope. Write one compact request and exact result per round. Include only:
+Freeze one typed scope and use one private temporary run directory with an empty working directory. Serialize a fresh complete authorized snapshot into each scheduled round's stdin request without exposing the source repository. Preserve each round's manifest, request, and exact result. Every request must include the original requirements, frozen current surface and exclusions, shared lenses and fields, round phase/focus, and `codex-review`'s inspection, confidence threshold, priority semantics, worker delegation, terminal JSON, completeness, and one-call rules. Keep caller-only CLI, polling, assessment, and cleanup instructions out of the request.
 
-- original requirements and acceptance criteria;
-- frozen typed target, current task-attributable surface, and exclusions;
-- `codex-review`'s shared default review lens;
-- round number, phase, and allowed focus.
+For broad rounds 1-3, require complete-surface inspection and pass no prior output, ledger, remediation narrative, or conclusion. For rounds 4-9, pass only the independently verified blocker, its current surface, and immediate regression boundary. Round 10 receives the complete current surface, a broad final-audit focus, and no prior conclusion.
 
-For broad rounds 1-3, tell Codex to inspect the complete surface itself and apply that round's broad focus. Do not pass prior outputs, the ledger, remediation summaries, or conclusions. For focused rounds 4-9, pass only the one independently verified blocker, its current relevant surface, and immediate regression boundary; exclude lower-priority exploration. Round 10 receives the complete current surface, broad final-audit focus, and no prior conclusions.
+Before each call, apply `codex-review`'s outer-runtime and no-grant preflights and obtain any narrow authority before starting. Use its ordinary prompt-bearing `codex exec` form, serialized snapshot, strict schema, ephemeral no-filesystem/no-network profile, existing agent routing, deadline, polling, snapshots, and mutation checks. A failed preflight consumes no model call but makes the scheduled round incomplete. Any boundary violation, malformed or unusable output, incomplete inspection, timeout, CLI failure, or mutation makes the round incomplete; discard its review output, invent no findings, and never treat it as clean. Stop on a boundary violation because later rounds cannot repair containment.
 
-Before each invocation, apply `codex-review`'s outer-runtime preflight and obtain any narrow process authority before starting. Keep the inner sandbox read-only. If authority is unavailable, record incomplete and stop without invoking. Never launch and retry, alter `CODEX_HOME`, copy/symlink credentials, use bypass flags, or weaken the sandbox.
+After rounds 1-9, assess every finding, fix each accepted authorized item, resolve residual work, run proportionate checks, and update the ledger. Use `blocked` only for missing authority, required input, or external-state change. Make no remediation during or after round 10.
 
-For every result, use the strict shared external schema, then normalize assessed findings to the canonical schema. Apply `codex-review`'s prompt-bearing `review -`, `--ignore-user-config`, ephemeral read-only execution, output contract, direct inspection, guarded same-message prose recovery, and at-least-30-minute outer deadline. Poll the same yielded handle until exit or the real deadline; yield/silence is not timeout, and never cancel or replace a healthy process. Preserve the exact result and completion state; snapshot before and after. Mutation, incomplete inspection, empty/unusable output, real timeout, or CLI failure makes the round incomplete; invent no findings.
-
-Schema-invalid usable prose consumes its round; never retry or replace it. Record recovery provenance and coverage risk in the round and final residual risk. Assess/remediate recovered findings after rounds 1-9. Such prose establishes clean or early stop only when it explicitly confirms complete frozen-surface inspection and no finding meeting the 80% threshold. Follow canonical stop rules.
-
-After rounds 1-9, independently assess, fix every accepted authorized item, resolve residual tasks, run proportionate checks, and update the ledger. Defer only for a stated authority, input, or external-state blocker. Make no remediation during or after round 10.
-
-## Return and clean up
-
-Use the canonical compact handoff and summary. Include rounds/phases, Codex completion failures, accepted/partial/declined counts, fixes, checks, unresolved findings, blockers, and residual risk. Omit raw transcripts unless requested.
-
-Delete only the validated current run directory; if cleanup cannot be verified, preserve and report its exact path. Never commit, push, publish comments, or make other remote writes without separate authorization.
+Return the canonical handoff and summary with reached rounds/phases, completion failures, dispositions, fixes, checks, unresolved findings, blockers, and residual risk. Omit raw transcripts unless requested. Delete only the validated run directory; otherwise preserve and report its path. Never commit, push, publish comments, or make other remote writes without separate authorization.

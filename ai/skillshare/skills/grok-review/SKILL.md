@@ -5,46 +5,69 @@ description: Perform exactly one read-only external review with the local Grok C
 
 # Grok Review
 
-Perform exactly one external Grok invocation. Do not edit, remediate, publish, retry, follow up, or run a second review. The caller owns scope and assessment.
+Run one model-bearing top-level Grok review. Metadata and authentication preflight do not count. Do not edit, remediate, publish, retry, follow up, or start another model-bearing Grok process.
 
-Read `../code-review/SKILL.md`; reuse its typed target, evidence threshold, priorities, summary format, strict external schema at `../code-review/references/external-review-result.schema.json`, and final schema at `../code-review/references/review-result.schema.json`. Send only the minimum non-secret review material authorized by explicit invocation—never credentials, unrelated user data, the whole conversation, prior reviews, or hidden conclusions.
+Read `../code-review/SKILL.md`. Reuse its frozen target, lenses, thresholds, summaries, external schema at `../code-review/references/external-review-result.schema.json`, and canonical schema at `../code-review/references/review-result.schema.json`. Send only the minimum authorized non-secret material; never send credentials, unrelated data, the conversation, prior reviews, or hidden conclusions.
 
-## Prepare one direct review
+## Prepare
 
-Freeze the target per `code-review`. Create one private temporary run directory outside the repository for request, stdout, and stderr. The prompt contract is the request body only. Caller-only CLI, sandbox, polling, snapshots, and cleanup stay with the caller. Include:
+Create a private non-secret run directory outside the target. Its request contains only the requirements, frozen descriptor and exclusions, `phase: single`, user focus, shared lenses and fields, and these rules: inspect the complete surface with tools before terminal output; preserve files and scope; cite repository-relative `path:line` evidence; omit nits and speculation; disclose unfinished work; apply the clean-slate durable-architecture lens; and omit caller-only assessment fields. Include only actionable target-attributable findings with confidence at least 80/100. Assign priority independently of confidence: `P0` critical/systemic, `P1` core blocker, `P2` concrete defect, and `P3` low-impact but actionable. `incomplete` requires an attempted inspection that proved impossible, not pending work.
 
-- original requirements and acceptance criteria;
-- frozen root, type, selector and object identities;
-- included worktree classes, explicit relevant-untracked paths, and exclusions;
-- `phase: single` and any user-supplied focus;
-- the shared default lens: unless the effective requirements explicitly call for them, flag target-attributable legacy preservation, backward compatibility, deprecation paths or shims, dual reads/writes, migration or transition machinery, superseded paths, and tactical short-term architecture;
-- the shared finding fields and a requirement to return `clean` only after inspecting the complete surface;
-- that `incomplete` is only for impossible inspection, never a progress or pending message.
+Map applicable repository `worker` and `fastworker` roles to Grok's built-in `general-purpose` task. These tasks inherit the same scope and finish before synthesis; do not otherwise restrict subagent use. Call terminal `StructuredOutput` exactly once after inspection and return `clean` only after complete inspection. Do not invoke another review skill or top-level Grok process inside this call.
 
-Require tool-backed frozen-repository inspection of the named surface before the final object, preserved scope, no file changes, repository-relative `path:line` evidence, no style nits or speculation, and disclosure of unfinished required work. Tell Grok to omit `assessment` and `assessment_rationale`; the caller adds them after verification. State that existing behavior alone is not a compatibility requirement and prefer removal of superseded or transitional machinery and a proportional durable target state over another workaround. Do not paste diffs or logs Grok can read itself.
+## Run the protected call
 
-Snapshot relevant status and diffs immediately before invocation. Set `--cwd` to the frozen root; use `dontAsk`, read-only sandbox, `--no-plan`, bounded turns and execution timeout, no memory/subagents/MCP/web/update check, and only `read_file`, `grep`, `list_dir`, `run_terminal_cmd`, and `StructuredOutput`. Limit the shell tool to documented auto-approved read-only target inspection, including Git status, diff, history, search, and view commands. `dontAsk` must deny approval-requiring commands. Add no broad Bash allow rules, mutating commands, `--always-approve`, or bypass flags. Set an outer deadline of at least 30 minutes; this is not a Grok CLI flag. Poll the same yielded session/process handle until exit or the real deadline; yield, silence, or an empty poll is not a timeout. Never cancel a healthy process or replace it.
+Confirm installed help and bundled documentation. Grok 1.0.3 cannot both bootstrap from copied `auth.json` and kernel-deny that credential from reviewer tools, so this script-free path requires an already supplied `XAI_API_KEY` in the top-level environment. Never read or copy `auth.json`, use an auth-provider command, or place a secret in the request, argv, command text, or output.
 
-Pass the strict external schema's JSON content directly as one `--json-schema` argument; do not pass a schema path or build a Python, jq, or other validator. Capture stdout as the complete JSON envelope and stderr separately. A representative shape is:
+Create private empty `HOME`, `GROK_HOME`, and CWD directories. The target must be outside the CWD, `GROK_HOME`, and sandbox-writable temporary paths. In `0600` `$GROK_HOME/config.toml`, set `[models].default`, disable every installed Claude/Cursor compatibility cell and Codex sessions, and use:
 
-```text
-grok --cwd <frozen-root> --prompt-file <run-directory>/request.md --verbatim \
-  --permission-mode dontAsk \
-  --tools "read_file,grep,list_dir,run_terminal_cmd,StructuredOutput" \
-  --disallowed-tools Agent --deny MCPTool --sandbox read-only \
-  --max-turns 30 --no-plan --no-memory --no-auto-update --disable-web-search \
-  --output-format json --json-schema <schema-content> \
-  > <run-directory>/stdout.json 2> <run-directory>/stderr.log
+```toml
+[shell_environment_policy]
+inherit = "core"
+ignore_default_excludes = false
+exclude = ["*KEY*", "*SECRET*", "*TOKEN*"]
+include_only = ["PATH", "HOME", "LANG", "LC_*", "TMPDIR"]
 ```
 
-Confirm current flags and envelope names with installed CLI help/docs. Keep untrusted text in the prompt file, not interpolated shell syntax. Success requires a successful exit, exactly one stdout JSON object, the documented normal end-of-turn marker (`stopReason: end_turn` currently), object-valued `structuredOutput` under the strict external schema, and evidence of complete-surface inspection. Inspect stderr and only directly check top-level fields and verdict/findings coherence. `inspected_surface` must name the frozen paths actually read. A progress, pending, or starting `incomplete` object is incomplete inspection even when the envelope is valid. Exit code or freeform `text` alone is insufficient. `--deny MCPTool` blocks MCP invocations; skill and MCP announcements may still appear and are not review evidence.
+In `0600` `$GROK_HOME/sandbox.toml`, use the only review profile:
 
-Snapshot again afterward. The `read-only` sandbox still permits writes under `~/.grok`, including a `~/.grok/skills` symlink; detect mutation by snapshot. If Grok changed the tree, fail the invocation, isolate only its exact delta, reverse it only when safe, and never blanket-restore a dirty tree. On timeout, malformed output, missing CLI/login, sandbox failure, or incomplete inspection, return `verdict: incomplete` with the failure as residual risk; never retry or invent findings.
+```toml
+[profiles.review-target]
+extends = "strict"
+restrict_network = true
+read_only = ["<absolute-frozen-root>", "<absolute-run-directory>"]
+deny = ["<absolute-original-auth-or-excluded-secret-path>"]
+```
 
-## Assess and return
+Use one exact `deny` entry per existing secret path, or an empty list. Built-in `strict` writes to its CWD; built-in `read-only` reads everywhere. Empty CWD plus `strict` and `read_only` grants target reads without target writes, and the kernel scope includes shell tools and `task` workers. Grok 1.0.3 macOS tests confirmed target read, target write denial, denied-secret read denial, denial of `ps` parent-environment inspection, and that denying copied authentication also blocks Grok's own bootstrap. Revalidate after a Grok or platform change; fail closed if any property differs.
 
-Independently verify each finding against the frozen surface and label it `accept`, `partial`, or `decline` with one evidence-based sentence. Normalize valid content without hiding or embellishing it, add `assessment` and `assessment_rationale`, conform to canonical `REVIEW_RESULT`, and note only directly established omissions. This is not another review round.
+Run isolated `inspect --json`. Require the isolated config source, built-in `general-purpose` agent, and no hooks, plugins, skills, unexpected compatibility sources, or unapproved MCP servers. Then snapshot relevant target state.
 
-Provide the shared concise summary: accepted/partial findings first, declined count, inspected surface, and one-line residual risk. Omit logs and raw transcript unless requested.
+From the empty CWD, launch Grok with Zsh builtins, without a script or persistent wrapper. Store the validated paths, schema, inherited `PATH` and locale, and `XAI_API_KEY` in non-exported `REVIEW_*` parameters with `typeset +x`. Never print the key, enable shell tracing, or expand its value into recorded command text. Remove every inherited export, restore only the named child environment, then replace the shell:
 
-Delete only the validated current run directory; if cleanup cannot be verified, preserve and report its exact path. Make no remediation before or after returning.
+```sh
+for REVIEW_EXPORTED in ${(k)parameters[(R)*-export*]}; do
+  unset "$REVIEW_EXPORTED"
+done
+export PATH="$REVIEW_PATH" HOME="$REVIEW_HOME" GROK_HOME="$REVIEW_GROK_HOME" \
+  LANG="$REVIEW_LANG" TMPDIR="$REVIEW_TMPDIR" XAI_API_KEY="$REVIEW_API_KEY" \
+  GROK_TELEMETRY_ENABLED=0 GROK_TELEMETRY_TRACE_UPLOAD=0 \
+  GROK_TELEMETRY_MIXPANEL_ENABLED=0 GROK_EXTERNAL_OTEL=0 \
+  OTEL_METRICS_EXPORTER=none OTEL_LOGS_EXPORTER=none OTEL_TRACES_EXPORTER=none
+unset REVIEW_API_KEY REVIEW_EXPORTED
+exec grok --agent general-purpose --no-leader --storage-mode local --cwd "$REVIEW_CWD" \
+  --prompt-file "$REVIEW_REQUEST" --verbatim --permission-mode dontAsk \
+  --tools "read_file,grep,list_dir,run_terminal_cmd,task" --deny MCPTool \
+  --sandbox review-target --rules "Inspect the complete frozen target before StructuredOutput." \
+  --no-memory --no-auto-update --disable-web-search \
+  --output-format json --json-schema "$REVIEW_SCHEMA" \
+  > "$REVIEW_STDOUT" 2> "$REVIEW_STDERR"
+```
+
+Put absolute target paths in the request; do not set `--cwd` to the target. `--json-schema` supplies `StructuredOutput`; omit it from `--tools` because 1.0.3 cannot map that name and otherwise fails open. Keep shell use read-only. Add no broad allow rules, mutation commands, worker restrictions, approval bypasses, custom hooks, or scripts. For an explicitly authorized remote target, replace only the local MCP/web denies with exact named read-only operations.
+
+Poll the same process for at least 30 minutes unless it exits. Success requires exit zero, one JSON envelope, `stopReason: end_turn`, no `structuredOutputError`, schema-conforming object-valued `structuredOutput`, coherent findings, and complete inspection. Treat premature `incomplete`, prose, concatenated JSON, missing structured output, mutation, ambient discovery, missing authentication, sandbox failure, or timeout as incomplete without retry or prose recovery.
+
+Snapshot again. Reverse only the call's exact delta when safe; never blanket-restore a dirty tree. Delete and verify the transient environment regardless of outcome. Preserve the non-secret run directory on failure; delete it after validated success.
+
+Independently verify valid findings and normalize them with `assessment: accept | partial | decline` and a rationale. Return accepted and partial findings first, declined count, inspected surface, and one-line residual risk. Never commit, push, publish, or make other remote writes without separate authorization.

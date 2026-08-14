@@ -8,6 +8,43 @@
     "findings",
     "residual_risk"
   ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "verdict": {
+            "const": "findings"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "findings": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verdict": {
+            "enum": [
+              "clean",
+              "incomplete"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "findings": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ],
   "properties": {
     "verdict": {
       "type": "string",
@@ -54,7 +91,7 @@
           },
           "confidence": {
             "type": "integer",
-            "minimum": 0,
+            "minimum": 80,
             "maximum": 100
           },
           "title": {

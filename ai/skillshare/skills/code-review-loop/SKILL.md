@@ -23,7 +23,7 @@ Apply `code-review`'s clean-slate, durable-architecture lens. For accepted findi
 
 ## Run scheduled rounds
 
-For each scheduled round, run one fresh `code-review` invocation in embedded mode. Pass only:
+For each scheduled round, run one fresh `code-review` invocation in embedded mode. Worker subagents required by applicable routing instructions remain inside that invocation and do not consume rounds. Pass only:
 
 - the original requirements and acceptance criteria;
 - the frozen typed target, current task-attributable surface, and exclusions;
