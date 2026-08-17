@@ -1,0 +1,4 @@
+interface:
+  display_name: "Definitive Version"
+  short_description: "Choose the strongest plan without a full comparison"
+  default_prompt: "Use $definitive-version to choose the objectively stronger of the two definitive execution plans directly under `.local/` and return only the winning path plus material items to borrow or adapt."
