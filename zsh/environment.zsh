@@ -35,6 +35,9 @@ export PATH="$HOME/.antigravity-ide/antigravity-ide/bin:$PATH"
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:$HOME/.lmstudio/bin"
 
+# Added by MTPLX.app — terminal command
+export PATH="$HOME/.mtplx/bin:$PATH"
+
 if [[ -f "$HOME/.local/bin/env" ]]; then
   . "$HOME/.local/bin/env"
 fi
