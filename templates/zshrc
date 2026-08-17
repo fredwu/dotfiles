@@ -27,6 +27,8 @@ bashcompinit
 . ~/.zsh_pre_custom
 
 dotfiles_root="${${(%):-%N}:A:h:h}"
+# Fall back when this file is not a symlink into the repo.
+[[ -f "$dotfiles_root/zsh/environment.zsh" ]] || dotfiles_root="$HOME/.dotfiles"
 . "$dotfiles_root/zsh/environment.zsh"
 . "$dotfiles_root/zsh/zsh-tweaks.zsh"
 . "$dotfiles_root/zsh/mix_autocomplete.zsh"
