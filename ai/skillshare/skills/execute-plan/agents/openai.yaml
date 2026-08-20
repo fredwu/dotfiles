@@ -1,4 +1,4 @@
 interface:
   display_name: "Execute Plan"
   short_description: "Persist through every plan item and quality gate"
-  default_prompt: "Use $execute-plan [plan text or path] to execute every item and gate to verified full completion; treat any safely actionable residual as a command to continue, and report Incomplete only when every residual is blocker-certified and no unaffected work remains."
+  default_prompt: "Use $execute-plan to execute the supplied plan or the complete plan already produced in this conversation through every item and gate to verified full completion; report Incomplete only for blocker-certified residuals."
