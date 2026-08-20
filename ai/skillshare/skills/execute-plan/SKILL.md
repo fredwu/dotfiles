@@ -14,7 +14,7 @@ Execute the plan as a hypothesis to verify. Use evidence-backed deviations when 
 | State | Required action |
 |---|---|
 | Any safe, authorized in-scope action can advance an item, residual, or required gate | Continue execution. A final response, progress handoff, voluntary pause, or request to continue is forbidden. |
-| Every entry is resolved and every required gate passes or reaches its explicitly permitted degraded state | Report `Outcome: Complete`. |
+| Every entry is resolved and every required gate passes | Report `Outcome: Complete`. |
 | Residuals remain, every residual is blocker-certified, and no safe unaffected work remains | Report `Outcome: Incomplete`. |
 
 `Incomplete` means **blocked**, never merely unfinished. Exact remaining tasks, known next actions, fixable failures, and execution-agent residuals are unfinished work and therefore commands to continue. They are not reasons to stop.
@@ -54,30 +54,19 @@ Stop only the affected execution when full access or completeness cannot be conf
 
 Before creating workflow artifacts, inspect and select one absent task-derived directory under repository-root `.local/`, such as `.local/remove-legacy-billing/`. Resume an existing candidate only if its provenance proves the same plan and requirement; otherwise, choose a fresh numbered variant. Never use a generic `execute-plan` name, switch the directory after selection, or create execute-plan files directly under `.local/`.
 
-Contain all execute-plan and delegated workflow artifacts in this directory: notes, ledgers, checkpoints, prompts, review results, logs, retries, degradation and collision records, scratch files, and private temporary directories. Configure tools and agents accordingly and require returned artifact paths to remain inside it. Treat a tool that cannot honor the boundary as an invocation failure. Keep implementation files and repository-defined outputs at their normal paths.
+Contain all execute-plan and delegated workflow artifacts in this directory: notes, ledgers, checkpoints, prompts, review results, logs, retries, collision records, scratch files, and private temporary directories. Configure tools and agents accordingly and require returned artifact paths to remain inside it. Treat a tool that cannot honor the boundary as an invocation failure. Keep implementation files and repository-defined outputs at their normal paths.
 
 Create `<task-directory>/execution_notes.md` with a concise `TL;DR` and maintain:
 
 - exact `## User requirement (verbatim)` and chronological `## Requirement updates (verbatim)` fenced with the delimiter rule above;
 - directory rationale and provenance; plan identity and full-read evidence for the coordinator and each execution agent;
-- primary execution agent and selected external review loop, including fallbacks, retries, or degradation;
+- primary execution agent;
 - status, batches, and an exhaustive ledger of every original, adapted, replacement, and discovered in-scope item, its source, disposition, and acceptance evidence or residual details;
 - decisions, assumptions, evidence, deviations, remaining todos, verification, and any residual's reason, attempts, consequence, exact work, owner or unblock condition when known, and next action.
 
 Keep the execution status active until the terminal-state assertion passes. Do not write an `Outcome` field before then; never use `Outcome: Incomplete` as a progress status.
 
 Before updating existing notes, validate their provenance, exact canonical block, fence delimiters, and update sequence. Existing updates must be an exact prefix; append only the missing suffix. Never overwrite conflicted notes, reorder updates, or rewrite the original block. Unless an exact notes path is mandated, record the conflict and use a fresh notes path inside the selected directory. Ask only if that exact path is mandated and no safe alternative is authorized. Never infer completion from checkboxes.
-
-## Select independent review
-
-Once before the first batch, derive the primary executor from runtime-established host or product identity, not a worker role, model name, file, or plan claim. Record it and choose a review loop backed by a different agent:
-
-- Grok executor: `codex-review-loop`.
-- Codex executor: `grok-review-loop`.
-- Claude executor: prefer `grok-review-loop`, then `codex-review-loop`.
-- Other known executor: prefer `grok-review-loop`, then `codex-review-loop`, excluding loops backed by that executor.
-
-If identity is unknown, record that limitation and try an explicitly different-agent fallback. Never call a same-agent CLI independent review. Keep the choice stable until executor identity changes. If unavailable, record a capability-equivalent independent second opinion or use the retry-and-degrade rule below.
 
 ## Verify scope and implement
 
@@ -99,13 +88,9 @@ Use this mandatory order for each implementation or remediation batch:
 3. Discover the repository's canonical full quality suite from instructions and CI; run it. Warnings, build, compile, lint, analysis, or test failures are actionable unfinished work: fix them and rerun. Only a blocker-certified condition that prevents a required check from running or passing may support `Outcome: Incomplete`.
 4. Run the internal `code-review-loop`; apply every warranted authorized fix and rerun the full suite after each remediation round. This gate passes only when a bounded successful loop has no actionable findings.
 5. Run the full suite again after the internal gate, even if its first review was clean.
-6. Run the recorded external review loop. Apply every valid finding and rerun the full suite after each remediation round. Keep independent reviewers read-only; the executor owns fixes and verification.
-7. Run the full suite again after external review, including a clean or degraded review.
-8. Update notes and each ledger entry with disposition, acceptance, review, retry or degradation, and suite evidence. Close the batch only when the internal gate is clean, all valid external findings are resolved, every required suite passes, and the ledger is current. Then immediately start the next entry or finish gate.
+6. Update notes and each ledger entry with disposition, acceptance, review, retry, and suite evidence. Close the batch only when the internal gate is clean, every required suite passes, and the ledger is current. Then immediately start the next entry or finish gate.
 
-Do not advance while the internal gate is incomplete or has actionable work, a valid external finding remains, a required suite fails, or ledger evidence is stale. A successful bounded review that leaves actionable work starts a new remediation batch; never extend that invocation beyond `code-review-loop`'s schedule (broad rounds 1–3, eligible blocker-focused rounds 4–9, optional read-only round 10).
-
-Internal review is mandatory. External review infrastructure is best effort: distinguish invocation failures from implementation defects and valid findings. On an invocation failure, make one concrete fresh bounded retry, repairing it or selecting the recorded independent fallback. If both attempts fail, record their evidence, mark external review degraded or skipped, apply any findings received, and continue. External review failure alone is not a blocker. If no independent option exists, make one capability-refresh or fallback attempt, then degrade; a same-agent pass may supplement evidence but is not independent review.
+Do not advance while the internal gate is incomplete or has actionable work, a required suite fails, or ledger evidence is stale. A successful bounded review that leaves actionable work starts a new remediation batch; never extend that invocation beyond `code-review-loop`'s schedule (broad rounds 1–3, eligible blocker-focused rounds 4–9, optional read-only round 10).
 
 ## Validate real workflows
 
@@ -115,7 +100,7 @@ When safe, applicable, and authorized, exercise production-like local or staging
 
 A genuine blocker is concrete evidence that the next action for a ledger entry cannot advance safely: missing plan or provenance, an unavoidable mandated-notes conflict, missing required input, external-state dependency, or a safety or authorization boundary. Investigate, retry reasonably, adapt, and use authorized alternatives first. Remaining effort, a known fix, failed checks, predictions of difficulty or duration, and a desire to hand off are not blocker evidence. Apply the blocker-certification fields from the completion contract to every residual.
 
-Finish all unaffected work and gates before asking or reporting incomplete. After the terminal-state assertion passes, update safe notes with `Outcome: Incomplete` and full residual accounting; never append to conflicted notes or create them before resolving the plan and requirement. If notes cannot be safely updated, include the accounting and reason in the final response. Failed review infrastructure alone follows degradation, not incomplete status.
+Finish all unaffected work and gates before asking or reporting incomplete. After the terminal-state assertion passes, update safe notes with `Outcome: Incomplete` and full residual accounting; never append to conflicted notes or create them before resolving the plan and requirement. If notes cannot be safely updated, include the accounting and reason in the final response.
 
 ## Finish
 
@@ -125,6 +110,6 @@ Finish all unaffected work and gates before asking or reporting incomplete. Afte
 4. Run the canonical full quality suite after the final audit and final-pass cycle. An unsuccessful suite is actionable unfinished work: fix it and repeat from step 1. Only a required suite that cannot run or pass because of a blocker-certified condition may remain as an incomplete residual.
 5. Refresh the notes' `TL;DR`, ledger, decisions, deviations, todos, and evidence. Recheck exact requirement and update blocks and acceptance coverage. Record and pass the terminal-state assertion from the completion contract.
 6. Only after that assertion passes, set exactly one outcome in notes and the final response:
-   - `Complete`: every effective requirement and ledger entry is satisfied or closed as a justified non-residual deviation; all discovered work, internal review, valid external findings, and suites are complete; no in-scope residual or todo remains; external degradation, if any, was retried and recorded.
+   - `Complete`: every effective requirement and ledger entry is satisfied or closed as a justified non-residual deviation; all discovered work, internal review, and suites are complete; no in-scope residual or todo remains.
    - `Incomplete`: only blocker-certified residual work or a blocker-certified required gate remains after every unaffected item and gate is complete. Never use it for unfinished work, partial success, elapsed effort, a voluntary pause, or “complete except.”
 7. Lead with `Outcome: Complete` or `Outcome: Incomplete`. Summarize scope, material decisions and deviations, review and validation, quality results, and risks. For incomplete work, enumerate every residual's reason and evidence, attempts, consequence, exact remaining work, owner or unblock condition when known, and next action.
