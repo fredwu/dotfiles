@@ -1,6 +1,18 @@
 {
   "version": 1,
   "entries": {
+    "agent-device": {
+      "source": "github.com/callstack/agent-device/skills/agent-device",
+      "type": "github-subdir",
+      "installed_at": "2026-08-26T23:07:51.825742+10:00",
+      "repo_url": "https://github.com/callstack/agent-device.git",
+      "subdir": "skills/agent-device",
+      "version": "74a70f1",
+      "tree_hash": "6a74e86df5b4c1b6561c5ad2d72e71da7b794735",
+      "file_hashes": {
+        "SKILL.md": "sha256:31951806d33228c832af2bb70b9657414fd1ef8a1ee5a6cb3c05f15370aad240"
+      }
+    },
     "skillshare": {
       "source": "github.com/runkids/skillshare/skills/skillshare",
       "type": "github-subdir",
