@@ -28,3 +28,5 @@ Retain a finding only when repository evidence supports both legacy/dead status 
 ## Plan the target state
 
 For each finding, plan removal of the obsolete path and related code, tests, configuration, and database objects. Include focused verification of surviving FeedBun behavior and schema. Keep the investigation read-only: write but do not execute the plan.
+
+Use repository evidence and best judgment to decide all ordinary removal mechanics and other low-impact or readily reversible details, and integrate them into the recommended target state and execution steps. Multiple reasonable options alone do not justify a decision-table entry. Reserve that table for unresolved choices that require user judgment because they would fundamentally or drastically change the core architecture or implementation strategy, authorize destructive or expensive work beyond the assumed database reset, or be difficult to reverse.

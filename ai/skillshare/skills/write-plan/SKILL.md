@@ -62,7 +62,7 @@ For each finding, give:
 - affected components;
 - risks, dependencies, explicitly required migration or compatibility constraints, confidence, and evidence gaps.
 
-Expose unresolved product or architecture choices; do not manufacture a decision when evidence supports a safe recommendation.
+Use repository evidence and best judgment to decide all small, ordinary, low-impact, or readily reversible product and implementation details, then integrate the selected approach into the recommendations and execution steps. Multiple reasonable options alone do not make a user decision. Reserve user decisions for unresolved choices that require user judgment because they would fundamentally or drastically change the core architecture or implementation strategy, authorize destructive or expensive work, or be difficult to reverse.
 
 ## Write the plan
 
@@ -82,7 +82,7 @@ Then use this structure unless the brief warrants a better one:
 2. **Scope and constraints** — goals, invariants, non-goals, assumptions, permissions, success criteria, and effects of updates.
 3. **Current state** — verified end-to-end behavior and evidence. Add a diagram only when it materially clarifies a multi-step workflow, boundary, or bottleneck.
 4. **Findings and recommendations** — prioritized, deduplicated findings with evidence, impact, and direction.
-5. **Decision table** — only genuine choices requiring user judgment, each with a stable ID, options and tradeoffs, recommendation and reasoning, and deferral consequence. Omit when unnecessary.
+5. **Decision table** — only unresolved choices that meet the user-judgment threshold above, each with a stable ID, options and tradeoffs, recommendation and reasoning, and deferral consequence. Omit the table when no choice meets that threshold.
 6. **Execution plan** — ordered phases mapped to findings. For each, specify objective, concrete changes and affected areas, dependencies, acceptance criteria, verification, and relevant risks or rollback.
 7. **Risks and open questions** — unresolved gaps, deferred work, and assumptions to validate.
 
