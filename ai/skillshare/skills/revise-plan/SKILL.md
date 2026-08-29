@@ -1,6 +1,6 @@
 ---
 name: revise-plan
-description: Revise the current saved analysis plan in place using every finding from the latest completed compare-plans brief and any optional selective or plan-wide user guidance, defaulting unaddressed findings to their independent effective recommendations. Preserve the originating write-plan requirement and any existing user requirement updates as verbatim requirement history, and integrate later guidance throughout ordinary plan prose without creating new update history or settled decisions. Use only after compare-plans when the user explicitly invokes `/revise-plan` or `$revise-plan`.
+description: Revise the current saved analysis plan in place using every finding from the latest completed compare-plans brief and any optional selective or plan-wide user guidance, defaulting unaddressed findings to their independent effective recommendations. Preserve the originating write-plan requirement and any existing user requirement updates as verbatim requirement history, and integrate later guidance throughout ordinary plan prose without creating new update history or settled decisions. Use after compare-plans when the user asks to revise the current plan from its findings.
 ---
 
 # Revise Plan

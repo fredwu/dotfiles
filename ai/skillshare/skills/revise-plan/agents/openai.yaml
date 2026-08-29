@@ -3,4 +3,4 @@ interface:
   short_description: "Apply all findings with selective guidance"
   default_prompt: "Use $revise-plan to apply every finding from the latest $compare-plans brief, use optional context only where it clearly applies, default all others to their effective recommendations, preserve the original verbatim requirement and any existing requirement-update history, and do not require or create missing update history."
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true
