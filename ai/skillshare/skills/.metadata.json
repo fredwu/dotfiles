@@ -13,6 +13,23 @@
         "SKILL.md": "sha256:31951806d33228c832af2bb70b9657414fd1ef8a1ee5a6cb3c05f15370aad240"
       }
     },
+    "petal-design": {
+      "source": "github.com/petalframework/petal_components/skills/petal-design",
+      "type": "github-subdir",
+      "installed_at": "2026-09-01T13:24:16.330379+10:00",
+      "repo_url": "https://github.com/petalframework/petal_components.git",
+      "subdir": "skills/petal-design",
+      "version": "6fb566d",
+      "tree_hash": "fc13e85360aa6e154531faf407802114989a073a",
+      "file_hashes": {
+        "SKILL.md": "sha256:2997cb6421fdd8377e4cce1b2fbed3c9fbcd7896a83f83b2b3e0af1d0c6c7dbc",
+        "data/schemas.json": "sha256:6fb03e3d4271a785ea9d5aa5169d1caa0d3c920eec9833a3a39d6a41066217f9",
+        "references/components.md": "sha256:936c02deea92f96c1e4049110da492c5ebaa6d6146b0083ae15454dc6e67631b",
+        "references/patterns.md": "sha256:a432ec9ea0a39180d53122d60fc5898238f4b658d8e2585da2bbcc929c37d06d",
+        "references/review.md": "sha256:8b3f03695c956c75ea49339cd685af63ce495ebb48f140908fdabca453c51d68",
+        "references/tokens.md": "sha256:382f93c70de012039e93268162eec8a808df589ac46574182489f9e063a3ea4b"
+      }
+    },
     "skillshare": {
       "source": "github.com/runkids/skillshare/skills/skillshare",
       "type": "github-subdir",
