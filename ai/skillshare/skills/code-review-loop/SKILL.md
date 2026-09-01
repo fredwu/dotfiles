@@ -19,7 +19,7 @@ ID | round | priority | location | evidence | impact | remediation | assessment 
 
 Assess each finding as `accept`, `partial`, or `decline`; set disposition to `fixed`, `rejected`, or `blocked`. Never use `deferred` for authorized in-scope work. Use `blocked` only for unavailable authority, required user input, or an external-state change, and state what is needed.
 
-Apply `code-review`'s clean-slate, durable-architecture lens. For accepted findings, remove superseded, compatibility, or transition machinery and implement the proportional durable state; do not preserve the old path or add another workaround unless explicitly required.
+Apply `code-review`'s cleanup and clean-slate durable-architecture lenses. For every accepted in-scope cleanup finding, remove confirmed legacy, redundant, duplicate, dead or unused, obsolete, superseded, and no-longer-needed compatibility code plus directly related tests, configuration, and documentation, then implement the proportional durable state and verify surviving behavior. Preserve explicitly required compatibility, unrelated work, and scope; do not retain the old path or add replacement compatibility or transition machinery unless required. A clean result is acceptable; do not invent work.
 
 ## Run scheduled rounds
 

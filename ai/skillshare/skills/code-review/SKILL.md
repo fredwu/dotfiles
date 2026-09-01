@@ -37,7 +37,7 @@ Inspect the complete surface through these lenses:
 5. a clean-slate target state and proportional durable architecture;
 6. maintainability and residual required work directly attributable to the target.
 
-Unless explicitly required, report target-attributable legacy preservation, compatibility or deprecation shims, dual reads/writes, migration or transition machinery, superseded paths, and tactical architecture. Existing behavior alone is not a compatibility requirement. Recommend the durable target state, removing superseded machinery instead of layering another workaround.
+Perform a deliberate cleanup scan of the changed and directly affected frozen surface. Report only material, target-attributable cleanup findings when evidence confirms legacy, redundant, duplicate, dead or unused, obsolete, superseded, or no-longer-needed compatibility code or machinery. Include deprecation shims, dual reads or writes, migration or transition machinery, and tactical architecture only when they no longer serve required behavior. Existing behavior alone is not a compatibility requirement, but preserve required behavior, explicitly required compatibility, unrelated work, and scope. Recommend the smallest durable removal instead of another workaround. A clean result is acceptable; do not invent work.
 
 Follow applicable agent-routing instructions. Internal worker subagents remain lenses of this one review invocation, inherit its read-only frozen scope, and must finish before the primary reviewer deduplicates and independently verifies candidates.
 

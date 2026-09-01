@@ -39,4 +39,6 @@ For every npm app or workspace, including Phoenix assets and browser extensions:
 
 Discover the complete canonical quality and test suite from repository instructions, CI, and task runners. After all upgrades, run it in full, plus affected-app formatting, compile/static analysis, dependency/security audits, tests, builds, and Tailwind exercises. Fix upgrade-caused failures, then rerun the canonical suite from the beginning until it passes. Resolve failed or unavailable checks, or report a genuine blocker and incomplete result.
 
+Before final reporting, deliberately inspect the upgrade-changed and directly affected task surface for confirmed legacy, redundant, duplicate, dead or unused, obsolete, superseded, and no-longer-needed compatibility code. Remove only in-scope code, tests, configuration, or documentation made unnecessary by the upgraded versions when safe and authorized. Preserve required behavior, explicitly required supported-version compatibility, unrelated work, and scope. A clean result is acceptable; do not invent work.
+
 Rerun every outdated inventory. Review final status and diff for canonical lockfiles, complete ecosystem coverage, and preserved unrelated work. Report upgrades, blockers, migrations, check outcomes, and anything unverified.

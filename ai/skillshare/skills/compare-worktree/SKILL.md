@@ -45,6 +45,8 @@ Start with status, name-status, and diff-stat; inspect focused patches and full 
 
 Evaluate each implementation independently against the checklist, then compare. Recommend a target idea only when it materially improves the current worktree's correctness, security, compatibility, UX, performance, maintainability, requirement coverage, edge-case handling, tests, or design without adding regressions, needless scope, or complexity. Treat equivalent approaches as no action. The target may inspire a better solution without its code being copied; recommend the smallest useful change, never wholesale replacement or stylistic churn.
 
+Treat confirmed legacy, redundant, duplicate, dead or unused, obsolete, superseded, and no-longer-needed compatibility code within the current change and directly affected task surface as a material improvement only when evidence supports safe removal. Preserve required behavior, explicitly required compatibility, unrelated work, and scope. A clean result is acceptable; do not invent work. Recommend rather than edit either worktree.
+
 Output only a short prioritized bullet list of concrete current-worktree actions. Each item must state the change, its material requirement benefit, and known current/target file locations. Distinguish direct borrowing from target-inspired improvement when relevant. Do not include process narration, diff summaries, scorecards, praise, criticism, or target-worktree edits.
 
 If the target offers no material improvement, output exactly:

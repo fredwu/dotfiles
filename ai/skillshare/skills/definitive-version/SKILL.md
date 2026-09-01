@@ -43,11 +43,14 @@ Assess both candidates symmetrically against the same checklist and independentl
 - completeness, including shared omissions;
 - cohesion and absence of contradictions;
 - material risks, dependencies, and edge cases;
+- material cleanup coverage for confirmed legacy, redundant, duplicate, dead or unused, obsolete, superseded, and no-longer-needed compatibility code within the requested and directly affected task surface, without unrelated cleanup or removal of required behavior or explicitly required compatibility;
 - executability without chat history or unstated decisions;
 - prioritization and actionability;
 - acceptance criteria and verification coverage.
 
 Verify every material disagreement that could affect the choice through guaranteed read-only inspection of relevant source, configuration, schemas, tests, documentation, decisions, and version history. Candidate agreement and citations are leads, not proof. Reconcile conflicting evidence by scope, version, date, assumptions, and observed repository behavior. Do not imply that inaccessible or uninspected evidence was verified.
+
+A clean result is acceptable; do not invent cleanup work. Use cleanup coverage only to assess or recommend plans; never edit implementation.
 
 Select the candidate that is strongest overall, not the candidate that wins the most isolated points. Shared omissions remain defects in both candidates and may affect whether either is executable. Reject scope expansion even when it appears comprehensive.
 

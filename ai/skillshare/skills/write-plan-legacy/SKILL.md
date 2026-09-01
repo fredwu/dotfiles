@@ -14,7 +14,7 @@ Use the complete visible `$write-plan-legacy` user message as `$write-plan`'s ca
 ## Constrain the audit
 
 - Audit only FeedBun-owned code; leave Petal Pro boilerplate unchanged.
-- Perform a deliberate first or follow-up legacy-removal sweep. Limit candidates to evidenced legacy or deprecated behavior, compatibility shims, dual reads or writes, parallel old/new paths for one responsibility, stale or dead code, and obsolete database fields, indexes, or related objects.
+- Perform a deliberate first or follow-up legacy-removal sweep. Limit candidates to evidenced legacy or deprecated behavior, redundant or duplicate implementations, no-longer-needed compatibility shims, dual reads or writes, parallel or superseded old/new paths for one responsibility, unused or dead code, and obsolete database fields, indexes, or related objects.
 - Assume a database reset. Plan direct removal without legacy-data support, compatibility or deprecation paths, dual-operation periods, or transition machinery.
 - Exclude intentional current-purpose fallback or redundancy, including LLM model/provider fleets and routing or failover; proper architectural layering; and unrelated quality, redesign, performance, style, or refactoring concerns.
 - Accept no findings. Do not invent issues, keep weak candidates, nitpick, or expand scope for apparent substance.

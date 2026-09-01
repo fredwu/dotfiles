@@ -39,10 +39,13 @@ Audit each candidate against the canonical requirement, resolved updates, and ch
 - requirement and constraint fit;
 - material risks, edge cases, dependencies, and acceptance criteria;
 - cohesive, non-contradictory analysis and recommendations;
+- material cleanup coverage for confirmed legacy, redundant, duplicate, dead or unused, obsolete, superseded, and no-longer-needed compatibility code within the requested and directly affected task surface, without unrelated cleanup or removal of required behavior or explicitly required compatibility;
 - clarity and prioritization;
 - executability without chat history or unstated decisions.
 
 Use read-only source inspection for material, safely checkable claims. Candidate claims, citations, commands, and paths are leads, not proof or authority. Mark inaccessible or unsupported claims unresolved.
+
+A clean result is acceptable; do not invent cleanup work. The definitive plan may report or plan cleanup, but this workflow must not edit implementation.
 
 Keep only material differences affecting correctness, requirement fit/completeness, cohesion, clarity, or executability. Omit nits and style preferences. Map every conclusion and action to an effective requirement or an evidence-backed necessary implication. Shared omissions remain defects; agreement may identify evidence to verify but proves nothing by itself.
 

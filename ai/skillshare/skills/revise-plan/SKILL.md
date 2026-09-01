@@ -39,6 +39,8 @@ Treat `Our choice`, `Their choice`, and `Independent recommendation` as advice, 
 
 Keep dispositions internal. Audit the whole plan against a fresh checklist built from the original plus only explicit later requirement changes. Repair every material omission, contradiction, or shared drift, including defects absent from the brief. Map each conclusion, action, boundary, dependency, and criterion to an effective requirement or verified necessary implication; surface genuine blockers instead of guessing. Agreement between plans is not proof.
 
+Ensure the revised plan reports or plans every material finding for confirmed legacy, redundant, duplicate, dead or unused, obsolete, superseded, and no-longer-needed compatibility code in the requested and directly affected task surface. Preserve required behavior, explicitly required compatibility, unrelated work, and scope. A clean result is acceptable; do not invent work or edit implementation.
+
 ## Revise in place
 
 The invocation authorizes only updating the resolved plan in place. Use another path only when explicitly requested, and never overwrite an unrelated file. Preserve unrelated worktree changes. Do not edit sibling plans, implementation, tests, configuration, documentation, dependencies, generated artifacts, or external state.

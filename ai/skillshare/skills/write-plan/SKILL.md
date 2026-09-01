@@ -46,6 +46,7 @@ Trace relevant entry points, control and data flow, persistence, integrations, f
 - Separate verified facts, inferences, open questions, and recommendations.
 - Cite repository-relative files and lines, symbols, commands, or observations. Do not paste large logs.
 - Assess relevant correctness, reliability, data integrity, performance, security and privacy, cohesion, operability, maintainability, and user experience. Distinguish degraded inputs from infrastructure failures when the brief does.
+- Within the requested and directly affected task surface, deliberately inspect for legacy, redundant, duplicate, dead or unused, obsolete, superseded, and no-longer-needed compatibility code. Plan removal only when evidence confirms the candidate and required behavior remains covered. Keep cleanup material and in scope; a clean result is acceptable, so do not invent work.
 - Stop when evidence supports the material findings and execution plan.
 
 Use fitting planning, audit, research, tracing, domain, or read-only review capabilities. Optional subagents may inspect bounded read-only slices; personally reconcile their evidence. Do not make optional tools or delegation prerequisites.
@@ -96,6 +97,7 @@ Run an independent read-only challenge/review when available; otherwise perform 
 - canonical requirement and update payloads exactly reproduce visible authoritative messages;
 - evidence supports recommendations and genuine decisions present fair options;
 - phases, dependencies, acceptance criteria, risks, and validation are coherent;
+- every material cleanup finding in the task surface maps to an execution step, or the plan records an evidence-backed no-change conclusion without introducing unrelated cleanup;
 - duplication, low-value detail, contradictions, and scope drift are absent;
 - the path and TL;DR match the final artifact.
 
