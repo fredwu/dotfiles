@@ -1,7 +1,7 @@
 {
   "fastworker": {
     "claude": {
-      "model": "opus",
+      "model": "inherit",
       "effort": "medium"
     },
     "codex": {
@@ -11,7 +11,7 @@
   },
   "worker": {
     "claude": {
-      "model": "opus",
+      "model": "inherit",
       "effort": "high"
     },
     "codex": {
