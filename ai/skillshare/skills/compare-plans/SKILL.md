@@ -39,6 +39,8 @@ Build an internal checklist of explicit behavior, constraints, acceptance criter
 
 Read both plans completely when practical. For a very large plan, inspect every conclusion, recommendation, caveat, evidence reference, and requirement-relevant section; disclose sampling only when it materially limits confidence. Map each plan to the checklist and record shared omissions or drift as current-plan defects.
 
+When material disagreements span independent evidence domains and subagents are available, prefer bounded parallel read-only verification while continuing the core comparison. Give each subagent the same governing checklist and evidence gate plus one distinct question; do not ask a subagent to choose a winner. Wait for every result and personally reconcile it identity-blind and symmetrically against both plans. Delegation does not replace complete-plan coverage.
+
 Apply one evidence gate to every finding and recommendation:
 
 - Trace it to an effective requirement or an explicit, evidence-backed implication.

@@ -49,7 +49,7 @@ Trace relevant entry points, control and data flow, persistence, integrations, f
 - Within the requested and directly affected task surface, deliberately inspect for legacy, redundant, duplicate, dead or unused, obsolete, superseded, and no-longer-needed compatibility code. Plan removal only when evidence confirms the candidate and required behavior remains covered. Keep cleanup material and in scope; a clean result is acceptable, so do not invent work.
 - Stop when evidence supports the material findings and execution plan.
 
-Use fitting planning, audit, research, tracing, domain, or read-only review capabilities. Optional subagents may inspect bounded read-only slices; personally reconcile their evidence. Do not make optional tools or delegation prerequisites.
+Use fitting planning, audit, research, tracing, domain, or read-only review capabilities. When the investigation has two or more independent read-only slices and subagents are available, prefer bounded parallel inspections while continuing useful local work. Give each subagent the governing requirement, a distinct scope, and required evidence; wait for all results and personally verify and reconcile them. Keep dependent work serial, and do not make delegation a prerequisite.
 
 ## Prioritize material work
 
@@ -91,7 +91,7 @@ Make steps executable in one autonomous session when reasonable. Name likely fil
 
 ## Review before handoff
 
-Run an independent read-only challenge/review when available; otherwise perform a separate fresh self-review. Revise the plan after checking that:
+Prefer an independent read-only subagent challenge of the complete plan when available; otherwise perform a separate fresh self-review. Revise the plan after checking that:
 
 - every goal and invariant maps to a finding, step, or explicit no-change conclusion;
 - canonical requirement and update payloads exactly reproduce visible authoritative messages;

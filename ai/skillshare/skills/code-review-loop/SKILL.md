@@ -23,7 +23,9 @@ Apply `code-review`'s cleanup and clean-slate durable-architecture lenses. For e
 
 ## Run scheduled rounds
 
-For each scheduled round, run one fresh `code-review` invocation in embedded mode. Worker subagents required by applicable routing instructions remain inside that invocation and do not consume rounds. Pass only:
+Run rounds and remediation sequentially. Within a round, explicitly request `code-review`'s parallel inspection policy when the frozen surface has independent assignments. Review subagents receive only that round's allowed input, never edit, and do not consume rounds; the coordinator alone assesses findings and updates the ledger. After the review finishes and the coordinator accepts a finding, it may delegate that round's remediation and verification serially under applicable routing instructions. Wait for each delegate, inspect and reconcile its changes and evidence, and retain ownership of every residual before starting the next review round.
+
+For each scheduled round, run one fresh `code-review` invocation in embedded mode. Pass only:
 
 - the original requirements and acceptance criteria;
 - the frozen typed target, current task-attributable surface, and exclusions;

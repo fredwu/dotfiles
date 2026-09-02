@@ -14,6 +14,10 @@ Upgrade every discovered dependency while preserving unrelated work. Do not comm
 3. Inventory outdated Mix and npm dependencies, coupled packages, constraints, generated files, and app-specific checks.
 4. Check Tailwind independently in all forms: npm package, Phoenix `tailwind` Hex wrapper, and configured standalone binary.
 
+After the repository and status preflight, prefer available subagents for parallel inventories of independent ecosystems or applications. Reconcile the inventories before assigning parallel upgrades, and do so only for scopes that do not share manifests, lockfiles, generated outputs, source files, or services. Assign exact path ownership and require migration, repair, and affected-check evidence. Keep coupled packages, shared workspaces, final integration and cleanup, outdated reinventory, and canonical full-suite reruns coordinated and serial; the primary agent owns every residual.
+
+After all assigned upgrades, wait for every upgrade worker to finish. Before final integration, cleanup, outdated reinventory, or the canonical full suite, the primary agent must inspect and reconcile each worker's diff, evidence, and residuals.
+
 ## Upgrade Mix and Hex
 
 Prefer the installed Elixir/Phoenix updater: invoke `$elixir-phoenix:phx-deps-update` in Codex or `/phx:deps-update` in Claude/Grok. Use its inventory, update, breaking-fix, and verification phases. Run or select scopes as needed until every outdated group, including coupled groups, is covered. Skip its commit/PR actions unless explicitly requested, leaving reviewed working-tree changes only.

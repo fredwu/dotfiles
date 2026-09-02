@@ -34,6 +34,8 @@ If the candidates differ on a requirement detail that can change the winner and 
 
 Build an internal checklist of the objective, scope, constraints, priorities, risks, edge cases, and acceptance criteria. Do not reproduce this checklist or the requirement in the response.
 
+When the plans or decisive evidence are substantial, prefer available subagents for isolated parallel read-only audits of neutral candidates or disjoint evidence questions, using the same checklist and evidence standard. Do not reveal another candidate's conclusions or ask auditors to choose a winner. Wait for every result, then personally read both plans fully, verify decisive claims, compare symmetrically, and make the final choice.
+
 ## Assess and verify
 
 Assess both candidates symmetrically against the same checklist and independently inspected repository evidence. Internally consider:

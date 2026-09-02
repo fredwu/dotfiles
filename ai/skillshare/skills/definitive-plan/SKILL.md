@@ -33,6 +33,8 @@ Resolve `.local/` relative to the repository root, or workspace if none. This go
 
 ## Audit independently
 
+When candidates are numerous or evidence domains are independent, prefer available subagents for bounded parallel read-only candidate audits or disjoint evidence checks. Give candidate auditors the same canonical requirement, checklist, neutral labels, and evidence standard; do not expose other candidates' conclusions or ask them to select the base. Wait for every result, then personally complete required candidate coverage, verify and reconcile the evidence, and make every selection, conflict-resolution, and synthesis decision. Only the primary agent writes and reads back the definitive plan.
+
 Audit each candidate against the canonical requirement, resolved updates, and checklist before comparison. Apply one evidentiary standard and assess:
 
 - correctness and authoritative support;

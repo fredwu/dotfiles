@@ -41,6 +41,8 @@ Inspect these layers separately in each worktree:
 
 Start with status, name-status, and diff-stat; inspect focused patches and full files as needed. Include deletions, renames, modes, submodules, generated files, and tests. Treat binaries and unreadable submodules as limited evidence, and never expose secrets from untracked or configuration files. Also evaluate each effective implementation from base through all committed and local changes, preserving layer provenance.
 
+After resolving history and the comparison base, prefer available subagents for bounded parallel read-only inspection when the worktrees contain independent components or layers. Give each the same verified base and requirements checklist plus a distinct scope. Wait for every result; the primary agent independently validates evidence, compares the implementations, deduplicates overlap, and owns every reported action. Delegation does not replace full layer coverage.
+
 ### 4. Evaluate and report
 
 Evaluate each implementation independently against the checklist, then compare. Recommend a target idea only when it materially improves the current worktree's correctness, security, compatibility, UX, performance, maintainability, requirement coverage, edge-case handling, tests, or design without adding regressions, needless scope, or complexity. Treat equivalent approaches as no action. The target may inspire a better solution without its code being copied; recommend the smallest useful change, never wholesale replacement or stylistic churn.
