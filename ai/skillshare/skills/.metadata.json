@@ -33,13 +33,13 @@
     "skillshare": {
       "source": "github.com/runkids/skillshare/skills/skillshare",
       "type": "github-subdir",
-      "installed_at": "2026-08-10T17:39:26.779068+10:00",
+      "installed_at": "2026-09-02T13:08:43.274349+10:00",
       "repo_url": "https://github.com/runkids/skillshare.git",
       "subdir": "skills/skillshare",
-      "version": "14959e2",
-      "tree_hash": "4a841ea0a8cf1d04f8b9c82fd00a67fcd466658c",
+      "version": "47bda2a",
+      "tree_hash": "fdf59a2844aab6bee430b45983ba17cf2d0c1ed4",
       "file_hashes": {
-        "SKILL.md": "sha256:230e4a65da9106217fd6306084fb82810faa4d66a4093c1fe85f0d9cc80142c9",
+        "SKILL.md": "sha256:245dc5b807771f464d7aae818f2d850dcf82b0f05633cacb14e821baf18b02c8",
         "references/TROUBLESHOOTING.md": "sha256:14855dbd2f20ad7042941959f257c79f768d103e89e55d74d8c3b3d38f9ff5ee",
         "references/audit.md": "sha256:85a31c32f17f39ce2baa5189a8004c6adec506e5fcf7d20378caa103b015fd5d",
         "references/backup.md": "sha256:0d85d481fcb0f7ca88c31d1ca56d393a9ae18b8ac4f6c050edd62840cbd45257",
