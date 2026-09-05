@@ -1,6 +1,6 @@
 ---
 name: code-review-loop
-description: Run a bounded review-remediation workflow with broad rounds 1-3, blocker-focused rounds 4-9, and optional final read-only round 10. Use for implicit review-and-fix or iterative-remediation requests; use code-review for one read-only review.
+description: Review, remediate, and verify code through bounded rounds. Use for review-and-fix requests; use code-review for one read-only review.
 ---
 
 # Code Review Loop
@@ -17,13 +17,13 @@ Maintain an in-context ledger with stable IDs:
 ID | round | priority | location | evidence | impact | remediation | assessment | disposition | verification
 ```
 
-Assess each finding as `accept`, `partial`, or `decline`; set disposition to `fixed`, `rejected`, or `blocked`. Never use `deferred` for authorized in-scope work. Use `blocked` only for unavailable authority, required user input, or an external-state change, and state what is needed.
+Assess each finding as `accept`, `partial`, or `decline`; set disposition to `fixed`, `rejected`, `blocked`, or `unresolved`. Use `unresolved` for accepted findings left by the terminal audit or an explicit stop condition; record the reason and next action. Never use `deferred` for authorized in-scope work. Use `blocked` only for unavailable authority, required user input, or an external-state change, and state what is needed.
 
-Apply `code-review`'s cleanup and clean-slate durable-architecture lenses. For every accepted in-scope cleanup finding, remove confirmed legacy, redundant, duplicate, dead or unused, obsolete, superseded, and no-longer-needed compatibility code plus directly related tests, configuration, and documentation, then implement the proportional durable state and verify surviving behavior. Preserve explicitly required compatibility, unrelated work, and scope; do not retain the old path or add replacement compatibility or transition machinery unless required. A clean result is acceptable; do not invent work.
+Apply `code-review`'s cleanup and durable-architecture lenses. Remove accepted, authorized cleanup findings and their directly related artifacts; verify surviving behavior. Preserve required compatibility and scope without adding unnecessary transition machinery.
 
 ## Run scheduled rounds
 
-Run rounds and remediation sequentially. Within a round, explicitly request `code-review`'s parallel inspection policy when the frozen surface has independent assignments. Review subagents receive only that round's allowed input, never edit, and do not consume rounds; the coordinator alone assesses findings and updates the ledger. After the review finishes and the coordinator accepts a finding, it may delegate that round's remediation and verification serially under applicable routing instructions. Wait for each delegate, inspect and reconcile its changes and evidence, and retain ownership of every residual before starting the next review round.
+Keep rounds and remediation sequential. Within a round, use `code-review`'s parallel inspection policy for independent assignments. Review workers never edit and do not consume rounds. After assessment, delegate remediation and verification serially under applicable routing instructions. Join delegates and reconcile changes and evidence before the next review; the coordinator owns the ledger and residual work.
 
 For each scheduled round, run one fresh `code-review` invocation in embedded mode. Pass only:
 
@@ -54,7 +54,7 @@ Focus each reached round on exactly one verified blocker, its correction, and im
 
 ### Round 10: final read-only audit
 
-Use round 10 only after focused rounds or when material uncertainty requires a final audit. Broadly review the complete current typed surface without prior conclusions. This is the final invocation: perform no remediation during or after it, record any findings as unresolved, and stop. Never exceed round 10.
+Use round 10 only after focused rounds or when material uncertainty requires a final audit. Broadly review the complete current typed surface without prior conclusions. This is the final review: perform no remediation during it or afterward within this loop invocation, record any findings as unresolved, and return to the caller. Never exceed round 10.
 
 ## Finish
 

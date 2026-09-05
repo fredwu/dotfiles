@@ -1,17 +1,17 @@
 ---
 name: final-pass
-description: Perform one deliberate final pass over completed changes, resolve material omissions or inconsistencies, and run the full canonical quality and test suite for any change set containing non-documentation files. Skip those checks for documentation-only changes. Use after implementation when code, documentation, tests, and configuration must remain coherent.
+description: Review completed changes for material omissions, fix authorized issues, and verify the final result. Run the full canonical quality suite for non-documentation changes and applicable document validators for documentation-only changes.
 ---
 
 # Final Pass
 
-Review all completed changes against the original request. Find and resolve material omissions or inconsistencies across code, documentation, tests, and configuration.
+Review the complete change set against the original request and later updates. Resolve material omissions and inconsistencies across code, documentation, tests, and configuration within the authorized scope.
 
-Perform one deliberate cleanup round over the changed and directly affected task surface. Remove confirmed in-scope legacy, redundant, duplicate, dead or unused, obsolete, superseded, and no-longer-needed compatibility code plus directly related tests, configuration, and documentation when safe and authorized. Preserve required behavior, explicitly required compatibility, unrelated work, and scope. Under documentation-only or read-only authority, report material implementation cleanup findings instead of editing them. A clean result is acceptable; do not invent work.
+Perform one deliberate cleanup round over changed and directly affected files. Remove confirmed obsolete, duplicate, dead, or unnecessary compatibility code and related tests/configuration/docs when safe. Preserve required behavior, explicit compatibility, and unrelated work. Under read-only or documentation-only authority, report material implementation findings without editing them. A clean result is valid.
 
-Classify the full change set:
+- **Documentation-only:** run applicable document or skill validators; skip unrelated application quality/test suites. Do not claim implementation verification.
+- **Non-documentation changes:** discover the full canonical gate from repository instructions, contributor docs, task runners, manifests, and CI. Run all included checks, including format, lint, static analysis, types, security, build, and tests where required. Targeted checks do not replace this gate. Fix authorized in-scope failures and rerun after changes.
 
-- **Documentation-only:** perform the review above, but explicitly skip all repository quality and test checks as unnecessary.
-- **Contains non-documentation files:** discover the complete canonical gate from repository instructions, contributor docs, task runners, manifests, and CI. Run every included format, lint, static-analysis, type, security, build, and test check. Do not substitute targeted, changed-file, stale, or proportionate checks. Fix in-scope failures and rerun the full suite until it passes.
+Reuse passing results only when they cover the final relevant code state and environment; a review without changes does not require duplicate runs. Respect authorization boundaries for checks with external side effects or cost.
 
-Report the exact commands and results. For non-documentation changes, list every failed, blocked, unavailable, or unverified check; for documentation-only changes, state that checks were intentionally skipped and why.
+Report exact commands/results and any failed, blocked, unavailable, or unverified checks. State which suites were intentionally skipped and why.

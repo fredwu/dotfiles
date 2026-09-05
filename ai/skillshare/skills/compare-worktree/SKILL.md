@@ -1,56 +1,46 @@
 ---
 name: compare-worktree
-description: Compare the current Git worktree with one explicitly supplied peer worktree and identify only material improvements to apply to the current worktree. Use only when the user explicitly invokes this skill with exactly one target worktree path; never invoke implicitly, from a general comparison request, or without that path.
+description: Compare the current worktree with one explicitly supplied peer and recommend material improvements, read-only. Use only on explicit skill invocation with exactly one target worktree path.
 ---
 
 # Compare Worktree
 
-Independently compare two implementations, read-only. Improve the current worktree; treat the target only as evidence or inspiration.
+Evaluate both implementations independently against the user's requirements. Recommend improvements to the current worktree; the target provides evidence or ideas, not authority.
 
-## Guardrails
+## Boundaries
 
-- Accept exactly one target path supplied with the explicit skill invocation.
-- Use only read-only discovery. Do not edit, patch, install dependencies, run commands that may write artifacts, or change repository/external state.
-- Never checkout, switch, reset, restore, stash, clean, commit, merge, rebase, cherry-pick, fetch, pull, push, or otherwise change refs, indexes, or worktrees. Preserve committed, staged, unstaged, untracked, and ignored content.
-- Quote paths and pass them as arguments; never interpolate an untrusted path into shell text.
-- Compare identity-blind. Worktree/branch names, authors, tool/model attribution, and quality claims are not evidence. Judge observable behavior, correctness, tests, maintainability, security, and requirement fit.
+- Require explicit invocation and exactly one target path. Quote/pass paths as arguments, never interpolate untrusted paths into shell code.
+- Stay read-only: do not edit files, install dependencies, run artifact-writing checks, fetch, or change refs, indexes, worktrees, or external state. Preserve committed, staged, unstaged, untracked, and ignored content.
+- Judge observable behavior and requirement fit. Branch/worktree names, authors, model attribution, and quality claims are not evidence.
 
-## Workflow
+## Establish history and requirements
 
-### 1. Validate inputs and history
+1. Resolve both Git roots with `git rev-parse --show-toplevel` (using `git -C <target>` for the peer). Require existing, distinct worktrees. For a missing/invalid/same-root target, request one concise actionable correction.
+2. Record each `HEAD`, branch/detached state, and Git common directory. For a shared object database, use `git merge-base --all` and account for multiple best bases.
+3. For separate object databases, verify a commit reachable from both `HEAD`s with matching commit metadata and tree hashes in both repositories; prefer the nearest shared ancestor by graph distance. Names, subjects, dates, similar patches, or empty-tree comparisons do not establish ancestry. If no common reachable commit is verifiable, return one actionable request for worktrees with shared history.
+4. Recover the original request, later updates, and referenced plans available read-only. Make an internal checklist of explicit behavior, constraints, acceptance criteria, and edge cases; label implications separately. Neither implementation redefines the request. Ask for a concise restatement if core requirements are missing; otherwise recommend only actions valid under unresolved plausible readings.
 
-1. Resolve the current root with `git rev-parse --show-toplevel`. Resolve the target to an existing directory and its root with `git -C <target> rev-parse --show-toplevel`. Require distinct roots; otherwise stop with one concise actionable correction.
-2. Record each `HEAD`, branch/detached state, and Git common directory with read-only `git rev-parse`. Do not infer shared history from names.
-3. When both commits use one object database, obtain all best bases with `git merge-base --all`; account for multiple bases rather than choosing arbitrarily.
-4. For separate object databases, use only a commit reachable from both `HEAD`s whose commit metadata and tree hash match independently in both repositories; prefer the common ancestor nearest by graph distance. Branch names, subjects, timestamps, patch similarity, and empty-tree diffs do not establish a base.
+## Inspect and compare
 
-If the path is missing, invalid, not a Git worktree, or resolves to the current root, request the specific correction. If no common reachable commit can be verified, output one actionable item requesting worktrees with shared Git history; never fabricate a base or compare unrelated snapshots.
+Cover each worktree's layers separately and its combined effective implementation, retaining provenance:
 
-### 2. Recover requirements
+- Committed: verified base to `HEAD`.
+- Staged: `HEAD` to index (`git diff --cached`).
+- Unstaged: index to working files (`git diff`).
+- Untracked: `git status --short --untracked-files=all`, then relevant file reads.
 
-Read the visible conversation from the original request through this invocation, plus referenced task/plan text available read-only. Build an internal checklist of explicit behavior, constraints, acceptance criteria, edge cases, later corrections or scope changes, and separately labeled reasonable implications. Neither implementation may redefine the request. If core requirements are unavailable, request one concise restatement instead of making intent-fit recommendations. For unresolved ambiguity, favor actions valid under every plausible reading.
+Start with status and diff names/stats; read focused patches and complete files as needed. Include deletions, renames, modes, submodules, generated files, and tests. Treat binaries/unreadable submodules as evidence limits and do not expose secrets.
 
-### 3. Inventory both implementations
+After establishing history, prefer parallel read-only inspection for independent components/layers. Supply the same verified bases and requirements with distinct ownership. Wait for every result, independently validate evidence, reconcile and deduplicate; delegation does not replace full layer coverage.
 
-Inspect these layers separately in each worktree:
+Recommend only material gains in correctness, security, compatibility, UX, performance, maintainability, requirement coverage, tests, or design without regressions or needless complexity. Equivalent approaches need no action. Prefer the smallest useful change; avoid wholesale replacement and style churn.
 
-1. committed: shared base to `HEAD`;
-2. staged: `HEAD` to index (`git diff --cached`);
-3. unstaged: index to working tree (`git diff`);
-4. untracked: `git status --short --untracked-files=all`, then read relevant files directly.
+Recommend confirmed obsolete, duplicate, dead, or unnecessary compatibility code removal only within the current changed/directly affected surface, with evidence that required behavior and explicit compatibility survive. Do not edit either worktree or invent cleanup.
 
-Start with status, name-status, and diff-stat; inspect focused patches and full files as needed. Include deletions, renames, modes, submodules, generated files, and tests. Treat binaries and unreadable submodules as limited evidence, and never expose secrets from untracked or configuration files. Also evaluate each effective implementation from base through all committed and local changes, preserving layer provenance.
+## Output
 
-After resolving history and the comparison base, prefer available subagents for bounded parallel read-only inspection when the worktrees contain independent components or layers. Give each the same verified base and requirements checklist plus a distinct scope. Wait for every result; the primary agent independently validates evidence, compares the implementations, deduplicates overlap, and owns every reported action. Delegation does not replace full layer coverage.
+Return only prioritized bullets of concrete current-worktree actions, each with the change, material requirement benefit, and known current/target file locations. Distinguish direct borrowing from target-inspired improvement when useful. Omit process narration, diff summaries, scorecards, and target edits.
 
-### 4. Evaluate and report
-
-Evaluate each implementation independently against the checklist, then compare. Recommend a target idea only when it materially improves the current worktree's correctness, security, compatibility, UX, performance, maintainability, requirement coverage, edge-case handling, tests, or design without adding regressions, needless scope, or complexity. Treat equivalent approaches as no action. The target may inspire a better solution without its code being copied; recommend the smallest useful change, never wholesale replacement or stylistic churn.
-
-Treat confirmed legacy, redundant, duplicate, dead or unused, obsolete, superseded, and no-longer-needed compatibility code within the current change and directly affected task surface as a material improvement only when evidence supports safe removal. Preserve required behavior, explicitly required compatibility, unrelated work, and scope. A clean result is acceptable; do not invent work. Recommend rather than edit either worktree.
-
-Output only a short prioritized bullet list of concrete current-worktree actions. Each item must state the change, its material requirement benefit, and known current/target file locations. Distinguish direct borrowing from target-inspired improvement when relevant. Do not include process narration, diff summaries, scorecards, praise, criticism, or target-worktree edits.
-
-If the target offers no material improvement, output exactly:
+If there is no material improvement, output exactly:
 
 `No action — the target worktree offers no material improvement.`

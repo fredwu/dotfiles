@@ -1,4 +1,4 @@
 interface:
   display_name: "Compare Plans"
   short_description: "Conflict-first, severity-ordered plan comparison"
-  default_prompt: "Use $compare-plans to preserve only my originating requirement verbatim once, treat later guidance as non-persistent working context, compare my current plan with the supplied or clear sibling plan against it, and return a conflict-first, severity-ordered decision table with all conflicts before improvements or decision points."
+  default_prompt: "Use $compare-plans to compare the current plan with the supplied or clear sibling plan and return a conflict-first table of independently supported recommendations."
