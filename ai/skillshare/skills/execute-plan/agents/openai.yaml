@@ -1,4 +1,4 @@
 interface:
   display_name: "Execute Plan"
-  short_description: "Persist through every plan item and quality gate"
-  default_prompt: "Use $execute-plan to complete the supplied or complete same-session plan, including review and verification; report any evidenced blockers."
+  short_description: "Complete the full plan and checks in one session"
+  default_prompt: "Use $execute-plan to complete the full plan in one autonomous session, including review, remediation, and required checks; stop only for a concrete blocker or my instruction."

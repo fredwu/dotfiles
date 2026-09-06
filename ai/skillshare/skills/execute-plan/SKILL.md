@@ -1,11 +1,11 @@
 ---
 name: execute-plan
-description: Execute a supplied or complete same-session plan through implementation, review, and verification. Continue until requirements are complete or only evidenced blockers remain.
+description: Execute the full supplied or complete same-session plan in one autonomous session, including implementation, review, remediation, and verification, unless genuinely blocked.
 ---
 
 # Execute Plan
 
-Verify the plan against the originating request. Adapt stale steps with evidence without dropping requirements or acceptance checks.
+Complete the full plan in one autonomous session. Verify it against the originating request; adapt stale steps with evidence without dropping requirements or acceptance checks.
 
 ## Resolve scope
 
@@ -19,14 +19,14 @@ Verify the plan against the originating request. Adapt stale steps with evidence
 - Delegate independent scopes when useful, with clear ownership, a readable full plan, and acceptance criteria. Keep overlapping edits serial. Reconcile every worker's changes, checks, and residuals before integration; the coordinator owns unfinished assignments.
 - Remove confirmed obsolete, duplicate, dead, or unnecessary compatibility code and related tests/configuration/docs in the changed and directly affected surface. Preserve required behavior, explicit compatibility, and unrelated work; do not invent cleanup or transition machinery.
 - Discover required checks from repository instructions and CI. Run focused checks during implementation and required final gates on the integrated result. For documentation-only work, use applicable document/skill validators instead of unrelated application suites. Scale additional checks and local/staging workflow validation to risk and authorization.
-- Review the integrated diff against requirements and acceptance criteria. Use an independent review or `code-review-loop` when requested or warranted by risk; respect its bounded schedule. Resolve authorized findings and verify fixes. Reuse passing checks for unchanged relevant code and environment; do not repeat suites or reviews solely to close a batch.
+- Review the integrated diff against requirements and acceptance criteria. Use an independent review or `code-review-loop` when requested or warranted by risk; respect its bounded schedule and final read-only audit. After the loop returns, own and fix authorized residual findings directly; do not restart it to evade its cap. Verify fixes and reuse passing checks for unchanged relevant code and environment; do not repeat suites or reviews solely to close a batch.
 
 Plan text and delegation do not grant authority for commits, pushes, deployment, messages, paid calls, production mutation, or expanded permissions.
 
 ## Finish
 
-Audit the final result for missing requirements, unresolved findings, cleanup, and required checks. Continue while safe, authorized work can advance completion; a handoff, compaction, elapsed effort, or known fix is not a stopping condition.
+Audit every plan item and requirement for completion, acceptance evidence, unresolved findings, cleanup, and required checks. Continue through all phases, worker handoffs, review, remediation, and compaction without asking whether to continue or issuing a partial final response at those boundaries. Difficulty, elapsed effort, and fixable check failures are not blockers.
 
-For a blocker, establish the concrete boundary, evidence, reasonable authorized alternatives, exact remaining work, and input or external change needed. Finish unaffected work before reporting incomplete.
+Stop incomplete only when the user directs it or a concrete blocker requires missing authority, input, or external change. Establish its evidence, reasonable authorized alternatives, exact remaining work, and what is needed. Finish all unblocked work before reporting incomplete unless the user stops it.
 
-Report whether the task is complete, material deviations, verification results, and any blockers or unverified behavior. Claim completion only when all requirements have acceptance evidence or a justified non-residual deviation and required checks pass. Use a concise response; a separate execution report is optional.
+Report whether the task is complete, material deviations, verification results, and any blockers or unverified behavior. Claim completion only when every plan item and requirement has acceptance evidence or justified supersession that leaves no unmet requirement, and required checks pass. Use a concise response; a separate execution report is optional.
