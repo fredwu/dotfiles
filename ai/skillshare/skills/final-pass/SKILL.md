@@ -1,17 +1,14 @@
 ---
 name: final-pass
-description: Review completed changes for material omissions, fix authorized issues, and verify the final result. Run the full canonical quality suite for non-documentation changes and applicable document validators for documentation-only changes.
+description: Review completed changes for material omissions, fix authorized issues, and verify the final result with applicable checks.
 ---
 
 # Final Pass
 
-Review the complete change set against the original request and later updates. Resolve material omissions and inconsistencies across code, documentation, tests, and configuration within the authorized scope.
+Review the full change set against the original request and later updates. Resolve material omissions and inconsistencies across code, documentation, tests, and configuration within scope.
 
-Perform one deliberate cleanup round over changed and directly affected files. Remove confirmed obsolete, duplicate, dead, or unnecessary compatibility code and related tests/configuration/docs when safe. Preserve required behavior, explicit compatibility, and unrelated work. Under read-only or documentation-only authority, report material implementation findings without editing them. A clean result is valid.
+Perform one cleanup round over changed and directly affected files. Remove confirmed obsolete, duplicate, dead, or unnecessary compatibility code and related tests/configuration/docs. Preserve required behavior, explicit compatibility, and unrelated work. With read-only or documentation-only authority, report material implementation findings without editing them. A clean result is valid.
 
-- **Documentation-only:** run applicable document or skill validators; skip unrelated application quality/test suites. Do not claim implementation verification.
-- **Non-documentation changes:** discover the full canonical gate from repository instructions, contributor docs, task runners, manifests, and CI. Run all included checks, including format, lint, static analysis, types, security, build, and tests where required. Targeted checks do not replace this gate. Fix authorized in-scope failures and rerun after changes.
+Discover required gates from repository instructions and CI. Run applicable checks on the final relevant state, with additional checks proportional to risk. For documentation-only changes, use document or skill validators and skip unrelated application suites. Fix authorized in-scope failures and verify repairs; reuse passing results for unchanged relevant code and environment. Respect authorization boundaries for checks with external effects or cost.
 
-Reuse passing results only when they cover the final relevant code state and environment; a review without changes does not require duplicate runs. Respect authorization boundaries for checks with external side effects or cost.
-
-Report exact commands/results and any failed, blocked, unavailable, or unverified checks. State which suites were intentionally skipped and why.
+Briefly report changes, check results, and failed, blocked, skipped, or unverified checks that affect confidence. Do not claim implementation verification from document validators. Separate reports and check logs are optional unless requested or required by the repository.

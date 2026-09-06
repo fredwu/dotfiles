@@ -26,6 +26,6 @@ codex exec --ephemeral --ignore-user-config --ignore-rules --enable multi_agent 
 
 Confirm syntax and profile enforcement with the installed CLI. Keep untrusted text in files, not shell interpolation. Do not add `:minimal`, a workspace root, temporary-directory access, or any other filesystem grant. Add no script, wrapper, approval-evasion, unrelated capability restriction, or bypass flag.
 
-Set an outer deadline of at least 30 minutes and poll only the yielded handle until exit or the real deadline; silence is not a timeout. Success requires one non-empty schema-conforming terminal JSON result, coherent verdict and findings, and complete-surface inspection. Preserve the exact result and completion state.
+Set an outer deadline of at least 30 minutes and poll only the yielded handle until exit or the real deadline; silence is not a timeout. Success requires one non-empty schema-conforming terminal JSON result, coherent verdict and findings, and complete-surface inspection. Keep the exact result and completion state until assessment; retained logs are optional.
 
 Fail on boundary violation, mutation, timeout, missing CLI or login, empty or schema-invalid output, or incomplete inspection. Treat any output produced after a boundary violation as unusable. Reverse only the call's exact delta when safe; never blanket-restore a dirty tree, retry, recover findings from invalid output, or invent findings.

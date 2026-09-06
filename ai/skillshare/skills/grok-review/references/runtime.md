@@ -53,4 +53,4 @@ Put absolute target paths in the request; do not set `--cwd` to the target. `--j
 
 Poll the same process for at least 30 minutes unless it exits. Success requires exit zero, one JSON envelope, `stopReason: end_turn`, no `structuredOutputError`, schema-conforming object-valued `structuredOutput`, coherent findings, and complete inspection. Treat premature `incomplete`, prose, concatenated JSON, missing structured output, mutation, ambient discovery, missing authentication, sandbox failure, or timeout as incomplete without retry or prose recovery.
 
-Snapshot again. Reverse only the call's exact delta when safe; never blanket-restore a dirty tree. Delete and verify the transient environment regardless of outcome. Preserve the non-secret run directory on failure; delete it after validated success.
+Snapshot again. Reverse only the call's exact delta when safe; never blanket-restore a dirty tree. Delete and verify the transient environment regardless of outcome. Retain non-secret diagnostics only when useful; otherwise remove the validated task-created run directory. Report any retained paths.

@@ -21,4 +21,4 @@ Require terminal `StructuredOutput` exactly once, conforming to [the external sc
 
 Apply the runtime's preflight, isolation, deadline, completion, mutation, and cleanup checks. Independently verify valid findings and normalize to [the canonical schema](../code-review/references/review-result.schema.json) with `assessment: accept | partial | decline` and `assessment_rationale`. This assessment is not another review round.
 
-Return `REVIEW_RESULT` JSON first, then accepted and partial findings, declined count, inspected surface, and one-line residual risk. Omit raw logs unless requested. Never commit, push, publish comments, or make remote writes without separate authorization.
+For embedded reviews or requested JSON, return one canonical `REVIEW_RESULT`. Otherwise summarize accepted and partial findings, declined count, inspected surface, and residual risk. Do not duplicate the result or save a report unless useful or requested; omit raw logs. Never commit, push, publish comments, or make remote writes without separate authorization.

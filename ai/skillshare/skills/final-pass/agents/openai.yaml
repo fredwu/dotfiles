@@ -1,4 +1,4 @@
 interface:
   display_name: "Final Pass"
   short_description: "Review final changes and run applicable quality gates"
-  default_prompt: "Use $final-pass to resolve material omissions and run the full quality gate for code changes or applicable validators for documentation-only changes."
+  default_prompt: "Use $final-pass to resolve material omissions and verify the final changes with applicable checks."
