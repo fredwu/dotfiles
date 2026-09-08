@@ -19,4 +19,4 @@ Use one private non-secret run directory and a separate transient environment ro
 
 Apply the runtime's completion checks. Failures are incomplete, never clean; invent no findings and assess only valid completed output. Stop on boundary violations; otherwise follow canonical stop rules.
 
-Return the canonical concise handoff, including reached rounds/phases and completion failures. Apply the runtime cleanup contract to every round and the shared run directory, including failure and abandoned rounds; do not retain diagnostics for user presentation.
+Return the canonical handoff with reached rounds/phases and completion failures. Apply runtime cleanup to every round and the shared run directory, including failure or abandonment.

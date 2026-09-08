@@ -25,4 +25,4 @@ Start with status and diff names/stats, then focused patches and complete files 
 
 Recommend only material requirement, correctness, security, compatibility, UX, performance, maintainability, or validation gains. Prefer the smallest useful change, preserve required behavior, and omit equivalent alternatives or style churn. Include confirmed obsolete or unnecessary code removal only within the changed/directly affected scope; do not invent cleanup.
 
-Return prioritized action bullets with the change, requirement benefit, and known current/target locations. Distinguish direct borrowing from inspired improvements when useful. Include material evidence limits without a separate report. If no material improvement exists, say: `No action — the target worktree offers no material improvement.`
+Return concise action bullets ordered by impact, with the change, requirement benefit, and current/target locations. Distinguish direct borrowing from adaptations when useful. Include material evidence limits. Use plain language; omit praise and process narration. If no material improvement exists, say so briefly.

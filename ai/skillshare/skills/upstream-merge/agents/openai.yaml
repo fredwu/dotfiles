@@ -1,4 +1,4 @@
 interface:
   display_name: "Upstream Merge"
-  short_description: "Merge upstream into main with careful conflicts"
+  short_description: "Merge upstream and preserve customizations"
   default_prompt: "Use $upstream-merge to merge `upstream` into `main`, preserving intentional customizations and incorporating compatible upstream improvements."
