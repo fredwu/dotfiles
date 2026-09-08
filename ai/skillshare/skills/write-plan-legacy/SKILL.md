@@ -5,7 +5,7 @@ description: Save a legacy-removal plan for FeedBun-owned code, excluding Petal 
 
 # Write Plan Legacy
 
-Use `$write-plan` with these constraints; its saved-plan, verbatim requirement, read-only, verification, and default of one autonomous execution session apply. Only explicit user direction changes that session default. The canonical requirement is the complete visible `write-plan-legacy` user message, not this skill's text.
+Use `$write-plan` with these constraints; its saved-plan, verbatim requirement, read-only, temporary-file, verification, and default of one autonomous execution session apply. Only explicit user direction changes that session default. The canonical requirement is the complete visible `write-plan-legacy` user message, not this skill's text.
 
 - Audit FeedBun-owned code only; leave Petal Pro boilerplate unchanged.
 - Find evidenced obsolete, duplicate, dead, superseded, or unnecessary compatibility code and database objects.

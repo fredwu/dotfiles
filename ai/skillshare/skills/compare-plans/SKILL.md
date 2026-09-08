@@ -5,7 +5,7 @@ description: Compare the current completed analysis plan with one supplied or id
 
 # Compare Plans
 
-Compare independently and read-only. Return findings in the response; no report file is required. Do not edit either plan or external state, or run artifact-writing checks.
+Compare independently and read-only. Return findings in the response and keep comparison state in context; create no scratch files or reports. Do not edit either plan or external state, or run artifact-writing checks.
 
 ## Inputs and authority
 

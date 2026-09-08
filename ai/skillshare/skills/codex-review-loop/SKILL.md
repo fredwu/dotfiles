@@ -15,8 +15,8 @@ Replace each reached internal review with one fresh model-bearing top-level Code
 
 Pass the canonical round's permitted inputs and `codex-review`'s reviewer instructions; exclude caller-only runtime, assessment, and cleanup instructions.
 
-Use one private run directory with an empty working directory. Serialize a fresh complete authorized snapshot for each round without exposing the source repository. Keep the current manifest, request, exact result, and completion state until assessed; retaining earlier round files is optional. Apply the required runtime preflights and no-grant profile on every call.
+Use one private run directory with an empty working directory. Serialize a fresh complete authorized snapshot for each round without exposing the source repository. Keep the current manifest, request, exact result, and completion state until assessed; remove earlier round files once no agent needs them. Apply the required runtime preflights and no-grant profile on every call.
 
 Apply the runtime's completion checks. Failures are incomplete, never clean; invent no findings and assess only valid completed output. Stop on boundary violations; otherwise follow canonical stop rules.
 
-Return the canonical concise handoff, including reached rounds/phases and completion failures. Retained non-secret diagnostics are optional. Remove only validated task-created temporary paths and report any retained paths.
+Return the canonical concise handoff, including reached rounds/phases and completion failures. Apply the runtime cleanup contract to every round and the shared run directory, including failure and abandoned rounds; do not retain diagnostics for user presentation.

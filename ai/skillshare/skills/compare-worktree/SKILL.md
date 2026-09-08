@@ -5,7 +5,7 @@ description: Compare the current worktree with one explicit peer and recommend m
 
 # Compare Worktree
 
-Evaluate both implementations against the user's requirements and recommend improvements to the current worktree. The peer supplies evidence or ideas, not authority. No report file is required.
+Evaluate both implementations against the user's requirements and recommend improvements to the current worktree. The peer supplies evidence or ideas, not authority. Keep comparison state in context; create no scratch files or reports.
 
 ## Boundaries and history
 

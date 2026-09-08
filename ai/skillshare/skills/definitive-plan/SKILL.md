@@ -39,6 +39,6 @@ Resolve ordinary reversible choices from evidence and judgment; reserve material
 
 Use runtime-derived `claude`, `codex`, or `grok` as the agent suffix; ask if unknown. An explicit output path must be under `.local/`. Normalize its stem to exactly `<base>-definitive-plan-<agent>.md`, completing a partial `-definitive` or `-definitive-plan` suffix or replacing another agent suffix. Otherwise use a concise safe topic as the base.
 
-Never overwrite an existing file. Insert the first free `-v2`, `-v3`, etc. before the agent suffix for collisions. Read back the saved plan and check exact requirement/history preservation, coverage, evidence, consistency, and executability. No separate report, ranking, or ledger is required.
+Never overwrite an existing file. Insert the first free `-v2`, `-v3`, etc. before the agent suffix for collisions. Read back the saved plan and check exact requirement/history preservation, coverage, evidence, consistency, and executability. Keep working state in context; create no scratch files, separate reports, rankings, or ledgers under this plan-only write contract. Preserve the saved plan as a durable deliverable even though it is in `.local/`. For execution steps that need scratch, specify a concrete agent purpose and removal after use, preserving unrelated files and durable deliverables.
 
 Link the saved plan, name its base, and briefly report material corrections or conflict resolutions and verification limits.

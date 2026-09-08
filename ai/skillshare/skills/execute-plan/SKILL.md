@@ -11,7 +11,7 @@ Complete the full plan in one autonomous session unless the plan explicitly spec
 
 - Use the supplied plan text, path, or attachment; otherwise use the most recent complete user-visible plan for this request. Ask only if no complete plan is identifiable or competing sources materially change execution.
 - Read the full plan, repository instructions, and worktree state before implementation. Recover the originating requirement and later updates from visible user messages; use the plan's requirement blocks only when those messages are unavailable. Later user instructions control conflicts. Resolve material gaps before affected work.
-- Track requirements, deviations, acceptance evidence, and remaining work in a form suited to the task. Files, ledgers, and saved agent exchanges are optional unless the user or repository requires them. Preserve verbatim requirement/update blocks when updating a saved plan; do not duplicate them or the plan just for bookkeeping.
+- Track requirements, deviations, acceptance evidence, and remaining work in context. Use files, ledgers, or saved agent exchanges only for a concrete agent need or an explicitly requested durable deliverable. Preserve verbatim requirement/update blocks when updating a saved plan; do not duplicate them or the plan just for bookkeeping.
 
 ## Implement and verify
 
@@ -29,4 +29,8 @@ Audit every plan item and requirement for completion, acceptance evidence, unres
 
 Stop with work remaining only at an explicit plan session boundary consistent with user direction, when the user directs it, or when a concrete blocker requires missing authority, input, or external change. For a blocker, establish its evidence, reasonable authorized alternatives, exact remaining work, and what is needed; finish all unblocked work within the authorized session before reporting incomplete. At an explicit session boundary, report completed and remaining work without claiming the full plan is complete.
 
-Report whether the task is complete, material deviations, verification results, and any blockers or unverified behavior. Claim completion only when every plan item and requirement has acceptance evidence or justified supersession that leaves no unmet requirement, and required checks pass. Use a concise response; a separate execution report is optional.
+Report whether the task is complete, material deviations, verification results, and any blockers or unverified behavior. Claim completion only when every plan item and requirement has acceptance evidence or justified supersession that leaves no unmet requirement, and required checks pass. Use a concise chat response; save a separate execution report only when explicitly requested.
+
+## Temporary files
+
+Prefer context or in-memory tracking. Create temporary or transit files only for a concrete agent need, such as tool input, verification, or an active handoff; never create them only for user presentation. Track exact task-owned paths and remove them once their consumers finish, on success, failure, or abandonment; verify removal before returning. Retain scratch only for active agent continuation, with an explicit cleanup owner and removal point. Report cleanup failures or active handoff paths. Preserve requested durable deliverables, including saved plans in `.local/`, and pre-existing or unrelated files; never clean a shared directory wholesale.

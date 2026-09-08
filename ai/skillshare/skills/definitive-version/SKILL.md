@@ -5,7 +5,7 @@ description: Choose between two definitive execution plans and return the winner
 
 # Definitive Version
 
-Select one plan read-only. Do not edit plans, synthesize a third plan, or run checks that write artifacts or alter external state. No report file is required.
+Select one plan read-only. Do not edit plans, synthesize a third plan, or run checks that write artifacts or alter external state. Keep selection state in context; create no scratch files or reports.
 
 ## Inputs and authority
 
