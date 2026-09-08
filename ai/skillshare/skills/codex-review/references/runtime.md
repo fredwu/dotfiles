@@ -2,36 +2,35 @@
 
 Read this before preflight or a review call. These constraints apply to single reviews and every external loop round.
 
-Before invoking, confirm the outer runtime permits the exact `codex exec` process to read existing authentication and write normal ephemeral CLI state. Obtain narrow authority before starting if needed; otherwise return incomplete without using Codex as an access probe, relocating its home, copying credentials, or weakening isolation.
+Use the installed `codex exec` CLI as a normal headless process. Authentication is the CLI's cached login in `$CODEX_HOME/auth.json` (default `~/.codex/auth.json`), or whatever fallback the CLI already applies. Do not require `OPENAI_API_KEY` or any other credential environment variable. Do not read, copy, or relocate the CLI's auth files, and do not put a secret in the request, argv, command text, or output. If the CLI reports no credentials, return incomplete and tell the user to run `codex login`.
 
-Do not rely on legacy `--sandbox read-only` or `--add-dir`: they constrain writes, not reads. Before any model-bearing call, validate the exact no-grant permission profile with non-model probes. Model tools and workers must have no filesystem or network grants, no approval path, and no inherited environment. Confirm that tool processes cannot read the Codex authentication location, a non-secret sentinel in an unrelated temporary directory, or the source repository. Authentication may be visible to the parent CLI only. If any check fails or the installed CLI cannot express this boundary, return incomplete without a model call.
+Do not relocate `HOME` or `CODEX_HOME`. Create a private empty `0700` CWD outside the target and the run directory. Put the complete authorized snapshot in the stdin request. Do not set `-C` to the target or pass `--add-dir`.
 
-Snapshot relevant status and diffs before and after the call. Run Codex from the empty directory with the complete snapshot on stdin. Keep `--ephemeral`, `--ignore-user-config`, `--ignore-rules`, approval policy `never`, no filesystem grants, tool and hosted-web network disabled, an empty inherited tool environment, no ambient hooks/apps/plugins/memory, and explicit multi-agent routing. Do not expose the repository or any payload directory as a workspace or additional directory.
+`--sandbox read-only` with an empty CWD keeps the workspace not writable. Host reads remain possible; the snapshot is the authorized surface. `--ignore-user-config` skips `$CODEX_HOME/config.toml` so the review does not inherit that file's MCP servers, plugin list, or sandbox default. Auth and skill discovery still use `CODEX_HOME` and the usual skill paths. `--enable multi_agent` exposes worker spawn. Then snapshot relevant target state.
 
-Configure no MCP server or connected tool. Capture any explicitly authorized remote evidence into the serialized snapshot before the Codex call.
+From the empty CWD, launch Codex with Zsh builtins, without a script or persistent wrapper. Keep untrusted text in files.
 
-Use ordinary prompt-bearing `codex exec` for every target so multi-agent routing and the strict output schema remain in the same turn context. Put the exact frozen type, selector, identities, included worktree classes, and exclusions in the serialized request.
-
-```text
-codex exec --ephemeral --ignore-user-config --ignore-rules --enable multi_agent \
+```sh
+exec codex exec --ephemeral --ignore-user-config --ignore-rules \
+  --enable multi_agent \
   --disable apps --disable plugins --disable hooks --disable memories \
-  -C <empty-private-directory> -c 'approval_policy="never"' \
+  --sandbox read-only \
+  -C "$REVIEW_CWD" \
+  -c 'approval_policy="never"' \
   -c 'web_search="disabled"' \
-  -c 'default_permissions="review_payload_only"' \
-  -c 'permissions.review_payload_only={filesystem={":root"="deny"},network={enabled=false}}' \
   -c 'shell_environment_policy={inherit="none"}' \
-  --skip-git-repo-check --output-schema <external-schema-file> \
-  -o <output-file> - < <request-file>
+  --skip-git-repo-check --output-schema "$REVIEW_OUTPUT_SCHEMA" \
+  -o "$REVIEW_STDOUT" - < "$REVIEW_REQUEST"
 ```
 
-Confirm syntax and profile enforcement with the installed CLI. Keep untrusted text in files, not shell interpolation. Do not add `:minimal`, a workspace root, temporary-directory access, or any other filesystem grant. Add no script, wrapper, approval-evasion, unrelated capability restriction, or bypass flag.
+`--ephemeral` does not persist a session. `$REVIEW_OUTPUT_SCHEMA` must be [output.schema.json](output.schema.json), the external result fields without `allOf`; the installed CLI rejects `allOf`. After the call, still enforce the external schema's verdict/findings cardinality. Add no approval bypass, extra filesystem grant, MCP server, or wrapper.
 
-Set an outer deadline of at least 30 minutes and poll only the yielded handle until exit or the real deadline; silence is not a timeout. Success requires one non-empty schema-conforming terminal JSON result, coherent verdict and findings, and complete-surface inspection. Keep the exact result and completion state until assessment; capture logs only when needed for agent completion checks or diagnosis.
+Poll the same process for at least 30 minutes unless it exits. Success requires exit zero and one schema-conforming JSON object in `$REVIEW_STDOUT`. Leading prose or a failed worker spawn does not make a completed inspection incomplete if that object is present. Treat empty or invalid output, mutation, authentication failure, sandbox refusal, or timeout as incomplete without retry.
 
-Fail on boundary violation, mutation, timeout, missing CLI or login, empty or schema-invalid output, or incomplete inspection. Treat any output produced after a boundary violation as unusable. Reverse only the call's exact delta when safe; never blanket-restore a dirty tree, retry, recover findings from invalid output, or invent findings.
+Snapshot again. Reverse only the call's exact delta when safe; never blanket-restore a dirty tree. Then apply the scratch lifecycle.
 
 ## Scratch lifecycle
 
-The caller owns cleanup after child exit; shell `exec` cannot perform it. Create scratch only for agent isolation, transfer, completion checks, or diagnosis, never user presentation. Track every task-created request, output, schema copy, log, probe, working directory, and environment root. After consumers exit and assessment finishes, remove them and verify removal on success, preflight/call failure, or abandonment. Stop task-owned consumers before early cleanup. Preserve canonical schemas, pre-existing CLI state, requested deliverables, and unrelated files; never delete shared directories wholesale.
+The caller owns cleanup after child exit; shell `exec` cannot perform it. Create scratch only for agent isolation, transfer, completion checks, or diagnosis, never user presentation. Track every task-created request, output, schema copy, log, probe, and working directory. After consumers exit and assessment finishes, remove them and verify removal on success, preflight/call failure, or abandonment. Stop task-owned consumers before early cleanup. Preserve canonical schemas, pre-existing CLI state, requested deliverables, and unrelated files; never delete shared directories wholesale.
 
-Retain only non-secret scratch for active agent continuation, with a cleanup owner and removal point. Report retained paths or cleanup failures, not raw logs.
+Always remove each empty CWD after its attempt; never retain it for handoff. Retain only non-secret request or diagnostic scratch for active agent continuation, with a cleanup owner and removal point. Report retained paths or cleanup failures, not raw logs.
