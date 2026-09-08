@@ -11,7 +11,7 @@ Read [code-review](../code-review/SKILL.md) for the frozen target, lenses, confi
 
 ## Prepare the request
 
-Create a private non-secret run directory outside the target. Include requirements, frozen descriptor and exclusions, `phase: single`, user focus, and `code-review`'s lenses, evidence threshold, priority semantics, and finding fields. Require complete-surface tool inspection before terminal output, preserved files and scope, repository-relative `path:line` evidence, and disclosure of unfinished work. Omit caller-only assessment fields.
+Create a private non-secret run directory outside the target. Include requirements, frozen descriptor and exclusions, caller-supplied round context, user focus, and `code-review`'s evidence threshold, priority semantics, and finding fields. Apply all review lenses in standalone and broad loop rounds; narrow only for an explicitly authorized blocker check. Require complete-surface tool inspection before terminal output, preserved files and scope, repository-relative `path:line` evidence, and disclosure of unfinished work. Omit caller-only assessment fields.
 
 Map applicable repository `worker` and `fastworker` roles to Grok's built-in `general-purpose` task. Workers inherit scope and finish before synthesis; do not otherwise restrict delegation. Forbid nested review skills and additional top-level Grok processes.
 
