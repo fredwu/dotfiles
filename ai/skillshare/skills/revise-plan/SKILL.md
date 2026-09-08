@@ -19,6 +19,8 @@ Later explicit user task changes affect scope, analysis, steps, and validation; 
 
 ## Apply and reassess
 
+Keep the revised plan executable in one autonomous session unless the user explicitly requests otherwise. State that contract and carry implementation, review, remediation, cleanup, and verification through completion. Remove session breaks and routine confirmation handoffs inferred from phases, milestones, checkpoints, size, complexity, or risk; a copied plan's schedule is not a user exception. Preserve concrete blockers and required authorization for affected actions, with independent work able to continue.
+
 Apply every finding's independent recommendation unless superseded by clear user guidance or contradicted by evidence or governing requirements. Guidance about selected findings does not exclude the others. If guidance maps ambiguously, retain the supported default and report material ambiguity. A recommendation to keep the current position may need no edit; preserve valid conditions and evidence-gathering steps.
 
 Verify premises in proportion to their freshness, uncertainty, and impact. Adapt or reject unsupported, obsolete, unsafe, or out-of-scope advice and explain material departures in the response. User preferences are not facts; missing evidence is not certainty.

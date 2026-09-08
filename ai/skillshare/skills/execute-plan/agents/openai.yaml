@@ -1,4 +1,4 @@
 interface:
   display_name: "Execute Plan"
-  short_description: "Complete the full plan and checks in one session"
-  default_prompt: "Use $execute-plan to complete the full plan in one autonomous session, including review, remediation, and required checks; stop only for a concrete blocker or my instruction."
+  short_description: "Execute the full plan; default to one autonomous session"
+  default_prompt: "Use $execute-plan to complete the full plan, including review, remediation, and required checks, in one autonomous session unless the plan explicitly specifies otherwise; respect concrete blockers and my instructions."

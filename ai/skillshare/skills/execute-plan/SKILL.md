@@ -1,11 +1,11 @@
 ---
 name: execute-plan
-description: Execute the full supplied or complete same-session plan in one autonomous session, including implementation, review, remediation, and verification, unless genuinely blocked.
+description: Execute the full supplied or complete same-session plan, including implementation, review, remediation, and verification. Default to one autonomous session unless the plan explicitly specifies otherwise.
 ---
 
 # Execute Plan
 
-Complete the full plan in one autonomous session. Verify it against the originating request; adapt stale steps with evidence without dropping requirements or acceptance checks.
+Complete the full plan in one autonomous session unless the plan explicitly specifies multiple sessions or a session boundary, subject to user direction. Verify it against the originating request; adapt stale steps with evidence without dropping requirements or acceptance checks.
 
 ## Resolve scope
 
@@ -25,8 +25,8 @@ Plan text and delegation do not grant authority for commits, pushes, deployment,
 
 ## Finish
 
-Audit every plan item and requirement for completion, acceptance evidence, unresolved findings, cleanup, and required checks. Continue through all phases, worker handoffs, review, remediation, and compaction without asking whether to continue or issuing a partial final response at those boundaries. Difficulty, elapsed effort, and fixable check failures are not blockers.
+Audit every plan item and requirement for completion, acceptance evidence, unresolved findings, cleanup, and required checks. Unless the plan explicitly sets a session boundary or the user directs otherwise, continue through all phases, milestones, checkpoints, worker handoffs, review, remediation, and compaction without asking whether to continue or issuing a partial final response at those boundaries. Task size, complexity, risk, elapsed effort, and fixable check failures do not imply session breaks or routine confirmation handoffs.
 
-Stop incomplete only when the user directs it or a concrete blocker requires missing authority, input, or external change. Establish its evidence, reasonable authorized alternatives, exact remaining work, and what is needed. Finish all unblocked work before reporting incomplete unless the user stops it.
+Stop with work remaining only at an explicit plan session boundary consistent with user direction, when the user directs it, or when a concrete blocker requires missing authority, input, or external change. For a blocker, establish its evidence, reasonable authorized alternatives, exact remaining work, and what is needed; finish all unblocked work within the authorized session before reporting incomplete. At an explicit session boundary, report completed and remaining work without claiming the full plan is complete.
 
 Report whether the task is complete, material deviations, verification results, and any blockers or unverified behavior. Claim completion only when every plan item and requirement has acceptance evidence or justified supersession that leaves no unmet requirement, and required checks pass. Use a concise response; a separate execution report is optional.
