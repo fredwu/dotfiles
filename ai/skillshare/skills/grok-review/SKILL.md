@@ -11,11 +11,11 @@ Read [code-review](../code-review/SKILL.md) for the frozen target, lenses, confi
 
 ## Prepare the request
 
-Create a private non-secret run directory outside the target. Include requirements, frozen descriptor and exclusions, caller-supplied round context, user focus, and `code-review`'s evidence threshold, priority semantics, and finding fields. Apply all review lenses in standalone and broad loop rounds; narrow only for an explicitly authorized blocker check. Require complete-surface tool inspection before terminal output, preserved files and scope, repository-relative `path:line` evidence, and disclosure of unfinished work. Omit caller-only assessment fields.
+Create a private non-secret run directory outside the target. Include requirements, frozen descriptor and exclusions, the authorized snapshot for the frozen type, caller-supplied round context, user focus, and `code-review`'s evidence threshold, priority semantics, and finding fields. The snapshot must include status, diff, and any contents the live worktree does not already hold. If that snapshot cannot be serialized, return incomplete without a model call. Apply all review lenses in standalone and broad loop rounds; narrow only for an explicitly authorized blocker check. Require complete-surface tool inspection before terminal output, preserved files and scope, repository-relative `path:line` evidence, and disclosure of unfinished work. Omit caller-only assessment fields.
 
-Map applicable repository `worker` and `fastworker` roles to Grok's built-in `general-purpose` task. Workers inherit scope and finish before synthesis; do not otherwise restrict delegation. Forbid nested review skills and additional top-level Grok processes.
+Map applicable repository `worker` and `fastworker` roles to Grok's built-in `general-purpose` task. Workers inherit scope and the same read-only toolset and finish before synthesis. Forbid nested review skills and additional top-level Grok processes.
 
-Require terminal `StructuredOutput` exactly once, conforming to [the external schema](../code-review/references/external-review-result.schema.json). Emit it only after complete inspection or an attempted inspection that proved impossible; never as progress. `clean` requires complete inspection.
+Require one terminal JSON object conforming to [the external schema](../code-review/references/external-review-result.schema.json). Emit it only after complete inspection or an attempted inspection that proved impossible; never as progress. `clean` requires complete inspection.
 
 ## Assess and return
 

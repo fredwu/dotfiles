@@ -2,61 +2,55 @@
 
 Read this before preflight or a review call. These constraints apply to single reviews and every external loop round.
 
-Confirm installed help and bundled documentation. This script-free path requires an already supplied `XAI_API_KEY` in the top-level environment. In the original Grok 1.0.3 validation, denying tools access to copied authentication also blocked CLI bootstrap. Treat that as historical evidence and revalidate containment for the installed version; do not assume later versions preserve it. Never read or copy `auth.json`, use an auth-provider command, or place a secret in the request, argv, command text, or output.
+Use the installed `grok` CLI as a normal headless process. Authentication is the CLI's cached `grok login` session in `$GROK_HOME/auth.json` (default `~/.grok/auth.json`), or whatever fallback the CLI already applies. Do not require `XAI_API_KEY` or any other credential environment variable. Do not read, copy, or relocate the CLI's auth files, and do not put a secret in the request, argv, command text, or output. If the CLI reports no credentials, return incomplete and tell the user to run `grok login`.
 
-Create private empty `HOME`, `GROK_HOME`, and CWD directories. The target must be outside the CWD, `GROK_HOME`, and sandbox-writable temporary paths. In `0600` `$GROK_HOME/config.toml`, set `[models].default`, disable every installed Claude/Cursor compatibility cell and Codex sessions, and use:
+Do not relocate `HOME` or `GROK_HOME`; that hides the login session. Create a private empty `0700` CWD outside the target and the run directory. The target must stay outside that CWD and outside sandbox-writable temporary paths.
 
-```toml
-[shell_environment_policy]
-inherit = "core"
-ignore_default_excludes = false
-exclude = ["*KEY*", "*SECRET*", "*TOKEN*"]
-include_only = ["PATH", "HOME", "LANG", "LC_*", "TMPDIR"]
-```
+Confirm installed help and bundled documentation for the flags below. `grok inspect` does not accept `--sandbox`; inspect from the empty CWD only to record version, CWD, and project root. Do not fail inspect because the real Grok home still has hooks, skills, plugins, or MCP servers. Then snapshot relevant target state.
 
-In `0600` `$GROK_HOME/sandbox.toml`, use the only review profile:
+`--sandbox workspace` with an empty CWD keeps the target readable and not writable. Do not require `strict`, `read-only`, or a custom profile: those can refuse to start on some hosts (for example when a runtime-socket deny path is a symlink). Pass `--no-leader` so a user `[cli] use_leader` setting does not attach this process to a shared leader. Pass `--storage-mode local` so the session is not written back to the backend; it still lands under `$GROK_HOME/sessions` for the empty CWD.
 
-```toml
-[profiles.review-target]
-extends = "strict"
-restrict_network = true
-read_only = ["<absolute-frozen-root>", "<absolute-run-directory>"]
-deny = ["<absolute-original-auth-or-excluded-secret-path>"]
-```
+Do not pass `--json-schema`. On the installed CLI it can force a first-turn schema object and skip tool inspection. Put the external schema in the request and require the final answer to be exactly one conforming JSON object.
 
-Use one exact `deny` entry per existing secret path, or an empty list. Built-in `strict` writes to its CWD; built-in `read-only` reads everywhere. Empty CWD plus `strict` and `read_only` grants target reads without target writes, and the kernel scope includes shell tools and `task` workers. Grok 1.0.3 macOS tests confirmed target read, target write denial, denied-secret read denial, denial of `ps` parent-environment inspection, and that denying copied authentication also blocks Grok's own bootstrap. Revalidate after a Grok or platform change; fail closed if any property differs.
-
-Run isolated `inspect --json`. Require the isolated config source, built-in `general-purpose` agent, and no hooks, plugins, skills, unexpected compatibility sources, or unapproved MCP servers. Then snapshot relevant target state.
-
-From the empty CWD, launch Grok with Zsh builtins, without a script or persistent wrapper. Store the validated paths, schema, inherited `PATH` and locale, and `XAI_API_KEY` in non-exported `REVIEW_*` parameters with `typeset +x`. Never print the key, enable shell tracing, or expand its value into recorded command text. Remove every inherited export, restore only the named child environment, then replace the shell:
+From the empty CWD, launch Grok with Zsh builtins, without a script or persistent wrapper. Store the real `PATH`, `HOME`, `GROK_HOME` (or `$HOME/.grok`), `LANG`, `TMPDIR`, and validated paths in non-exported `REVIEW_*` parameters. Do not enable shell tracing. Unset every inherited export, then restore only that narrow child environment.
 
 ```sh
 for REVIEW_EXPORTED in ${(k)parameters[(R)*-export*]}; do
   unset "$REVIEW_EXPORTED"
 done
 export PATH="$REVIEW_PATH" HOME="$REVIEW_HOME" GROK_HOME="$REVIEW_GROK_HOME" \
-  LANG="$REVIEW_LANG" TMPDIR="$REVIEW_TMPDIR" XAI_API_KEY="$REVIEW_API_KEY" \
-  GROK_TELEMETRY_ENABLED=0 GROK_TELEMETRY_TRACE_UPLOAD=0 \
-  GROK_TELEMETRY_MIXPANEL_ENABLED=0 GROK_EXTERNAL_OTEL=0 \
-  OTEL_METRICS_EXPORTER=none OTEL_LOGS_EXPORTER=none OTEL_TRACES_EXPORTER=none
-unset REVIEW_API_KEY REVIEW_EXPORTED
-exec grok --agent general-purpose --no-leader --storage-mode local --cwd "$REVIEW_CWD" \
+  LANG="$REVIEW_LANG" TMPDIR="$REVIEW_TMPDIR"
+unset REVIEW_EXPORTED
+exec grok --agent general-purpose --cwd "$REVIEW_CWD" \
   --prompt-file "$REVIEW_REQUEST" --verbatim --permission-mode dontAsk \
-  --tools "read_file,grep,list_dir,run_terminal_cmd,task" --deny MCPTool \
-  --sandbox review-target --rules "Inspect the complete frozen target before StructuredOutput." \
-  --no-memory --no-auto-update --disable-web-search \
-  --output-format json --json-schema "$REVIEW_SCHEMA" \
+  --tools "read_file,grep,list_dir,task" \
+  --disallowed-tools "run_terminal_cmd,search_replace,search_tool,use_tool" \
+  --deny MCPTool \
+  --deny "Read($REVIEW_GROK_HOME)" --deny "Read($REVIEW_GROK_HOME/**)" \
+  --deny "Read(~/.grok)" --deny "Read(~/.grok/**)" \
+  --deny "Glob($REVIEW_GROK_HOME)" --deny "Glob($REVIEW_GROK_HOME/**)" \
+  --deny "Glob(~/.grok)" --deny "Glob(~/.grok/**)" \
+  --deny "Read($REVIEW_HOME/.ssh)" --deny "Read($REVIEW_HOME/.ssh/**)" \
+  --deny "Read(~/.ssh)" --deny "Read(~/.ssh/**)" \
+  --deny "Glob($REVIEW_HOME/.ssh)" --deny "Glob($REVIEW_HOME/.ssh/**)" \
+  --deny "Glob(~/.ssh)" --deny "Glob(~/.ssh/**)" \
+  --sandbox workspace --no-memory --no-leader --storage-mode local \
+  --rules "Inspect the frozen target with read_file, grep, or list_dir before the final JSON object. Do not emit that object until inspection finishes." \
+  --no-auto-update --disable-web-search --no-plan \
+  --output-format json \
   > "$REVIEW_STDOUT" 2> "$REVIEW_STDERR"
 ```
 
-Put absolute target paths in the request; do not set `--cwd` to the target. `--json-schema` supplies `StructuredOutput`; omit it from `--tools` because 1.0.3 could not map that name and otherwise failed open; verify the installed version preserves the intended tool boundary. Keep shell use read-only. Add no broad allow rules, mutation commands, worker restrictions, approval bypasses, custom hooks, or scripts. For an explicitly authorized remote target, replace only the local MCP/web denies with exact named read-only operations.
+Permission denies are tool-layer only and do not block CLI bootstrap. Do not kernel-deny the auth files. Deny each credential tree as both the directory and its descendants, in absolute and literal `~` form; `~` is matched as text. `Read` also covers `grep`. `Glob` covers `list_dir`. `--disallowed-tools` applies to the parent and to `task` workers. Treat a successful tool read of those trees as a boundary violation. Other home paths remain readable under `workspace`; do not invent an unbounded deny list, and do not deny `$HOME/**` when the target lives under `$HOME`.
 
-Poll the same process for at least 30 minutes unless it exits. Success requires exit zero, one JSON envelope, `stopReason: end_turn`, no `structuredOutputError`, schema-conforming object-valued `structuredOutput`, coherent findings, and complete inspection. Treat premature `incomplete`, prose, concatenated JSON, missing structured output, mutation, ambient discovery, missing authentication, sandbox failure, or timeout as incomplete without retry or prose recovery.
+Put absolute target paths in the request; do not set `--cwd` to the target. Add no broad allow rules, mutation commands, approval bypasses, custom hooks, or scripts. For an explicitly authorized remote target, replace only the local MCP/web denies with exact named read-only operations.
 
-Snapshot again. Reverse only the call's exact delta when safe; never blanket-restore a dirty tree. Delete and verify the transient environment regardless of outcome.
+Poll the same process for at least 30 minutes unless it exits. Success requires exit zero, one JSON envelope, `stopReason: end_turn`, and one schema-conforming result object: use `structuredOutput` when it is a conforming object, otherwise the last conforming JSON object in envelope `text`. Leading prose does not make a tool-using review incomplete. The result must show complete inspection: at least one tool turn, and not a pre-inspection `incomplete`. Treat a missing or invalid object, tool-less output, mutation, ambient discovery, authentication failure, sandbox refusal, or timeout as incomplete without retry.
+
+Snapshot again. Reverse only the call's exact delta when safe; never blanket-restore a dirty tree. Then apply the scratch lifecycle.
 
 ## Scratch lifecycle
 
-The caller owns cleanup after child exit; shell `exec` cannot perform it. Create scratch only for agent isolation, transfer, completion checks, or diagnosis, never user presentation. Track every task-created request, output, schema copy, log, probe, working directory, and environment root. After consumers exit and assessment finishes, remove them and verify removal on success, preflight/call failure, or abandonment. Stop task-owned consumers before early cleanup. Preserve canonical schemas, pre-existing CLI state, requested deliverables, and unrelated files; never delete shared directories wholesale.
+The caller owns cleanup after child exit; shell `exec` cannot perform it. Create scratch only for agent isolation, transfer, completion checks, or diagnosis, never user presentation. Track every task-created request, output, schema copy, log, probe, working directory, and the child session group under `$GROK_HOME/sessions` for that CWD. After consumers exit and assessment finishes, remove them and verify removal on success, preflight/call failure, or abandonment. Stop task-owned consumers before early cleanup. Preserve canonical schemas, pre-existing CLI state, requested deliverables, and unrelated files; never delete shared directories wholesale.
 
-Always remove each transient environment after its attempt; never retain it for handoff. Retain only non-secret request or diagnostic scratch for active agent continuation, with a cleanup owner and removal point. Report retained paths or cleanup failures, not raw logs.
+Always remove each empty CWD and its child session group after its attempt; never retain them for handoff. Retain only non-secret request or diagnostic scratch for active agent continuation, with a cleanup owner and removal point. Report retained paths or cleanup failures, not raw logs.
