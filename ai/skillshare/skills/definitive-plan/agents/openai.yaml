@@ -1,6 +1,6 @@
 interface:
   display_name: "Definitive Plan"
   short_description: "Select and synthesize the strongest plan"
-  default_prompt: "Use $definitive-plan to preserve my originating requirement verbatim, compare the candidates against it, and produce one definitive, actionable plan."
+  default_prompt: "Use $definitive-plan to resolve the current requirements, compare the candidates against them, and produce one definitive, actionable plan with a TL;DR."
 policy:
   allow_implicit_invocation: false

@@ -5,7 +5,7 @@ description: Save a legacy-removal plan for FeedBun-owned code, excluding Petal 
 
 # Write Plan Legacy
 
-Use `$write-plan` with the constraints below, including its authority, autonomous session, risk handling, temporary-file, verification, and chat rules. The canonical requirement is the complete visible `write-plan-legacy` user message, not this skill's text.
+Use `$write-plan` with the constraints below, including its authority, autonomous session, risk handling, temporary-file, verification, and chat rules. Use its requirement interpretation and TL;DR format. Distinguish the task requirements from the skill constraints below; do not copy the invocation or this skill's text as the user's brief.
 
 - Audit FeedBun-owned code only; leave Petal Pro boilerplate unchanged.
 - Find evidenced obsolete, duplicate, dead, superseded, or unnecessary compatibility code and database objects.

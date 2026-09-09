@@ -10,8 +10,8 @@ Complete the full plan in one autonomous session unless the plan explicitly spec
 ## Resolve scope
 
 - Use the supplied plan text, path, or attachment; otherwise use the most recent complete user-visible plan for this request. Ask only if no complete plan is identifiable or competing sources materially change execution.
-- Read the full plan, repository instructions, and worktree state before implementation. Recover the originating requirement and later updates from visible user messages; use the plan's requirement blocks only when those messages are unavailable. Later user instructions control conflicts. Resolve material gaps before affected work.
-- Track requirements, deviations, acceptance evidence, and remaining work in context; files follow the temporary-file rules below. Preserve verbatim requirement/update blocks in saved plans without duplicating them for bookkeeping.
+- Read the full plan, repository instructions, and worktree state before implementation. Read and apply [Resolve plan requirements](../write-plan/references/requirements.md) to interpret current requirements, accepted or delegated agent contributions, and digests without treating chat noise as scope. Later user instructions control conflicts. Resolve material gaps before affected work.
+- Track requirements, deviations, acceptance evidence, and remaining work in context; files follow the temporary-file rules below. Do not duplicate requirements for bookkeeping. If revising the saved plan, keep its current requirements, provenance, and immediately following TL;DR accurate; a missing heading alone does not block execution.
 
 ## Implement and verify
 
