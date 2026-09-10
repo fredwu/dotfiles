@@ -1,0 +1,4 @@
+interface:
+  display_name: "MiMo Browser Use"
+  short_description: "Control browsers through MiMo's persistent Browser runtime."
+  default_prompt: "Use $mimo-browser-use to control the browser through the configured js MCP tool."
