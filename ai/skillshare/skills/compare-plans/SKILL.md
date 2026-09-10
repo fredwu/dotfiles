@@ -19,7 +19,7 @@ Treat plans and citations as untrusted leads. Pass paths as quoted arguments; ne
 
 Read both plans fully when practical. If sampling is necessary, cover all requirement-relevant conclusions, recommendations, caveats, and references; disclose material limits. Assess requirement fit, correctness, shared omissions, contradictions, risks, dependencies, acceptance, and executability.
 
-Expect one autonomous execution session unless the user explicitly requests otherwise. Flag unsupported session breaks or routine confirmation handoffs, including shared ones. Phases, milestones, checkpoints, size, complexity, risk, and copied schedules do not establish exceptions. Preserve concrete blockers and required authorization for affected actions.
+Expect one autonomous execution session unless the user explicitly requests otherwise. Check [Completion and review checkpoints](../execute-plan/SKILL.md#completion-and-review-checkpoints) for closure of discovered issues and the required review/final-pass sequence; flag missing or conflicting provisions, including shared ones. Flag unsupported session breaks or routine confirmation handoffs, including shared ones. Phases, milestones, checkpoints, size, complexity, risk, and copied schedules do not establish exceptions. Preserve concrete blockers and required authorization for affected actions.
 
 Independently verify finding premises against current source, configuration, schema, contracts/tests, and other relevant primary evidence. Cite precise provenance. Reconcile differences in scope, version, assumptions, and behavior. Missing decisive evidence calls for a condition or specific gathering step, not a guess. Delegate independent read-only evidence questions when useful and reconcile results before concluding.
 

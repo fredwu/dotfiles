@@ -1,4 +1,4 @@
 interface:
   display_name: "Final Pass"
-  short_description: "Review final changes and run required checks"
-  default_prompt: "Use $final-pass to resolve material omissions and verify the final changes with applicable checks."
+  short_description: "Resolve phase or execution residuals and verify completion"
+  default_prompt: "Use $final-pass to resolve all task-relevant omissions and residual issues, then verify this phase or the full execution with applicable checks."

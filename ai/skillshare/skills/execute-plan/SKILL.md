@@ -1,6 +1,6 @@
 ---
 name: execute-plan
-description: Execute the full supplied or complete same-session plan, including implementation, review, remediation, and verification. Default to one autonomous session unless the plan explicitly specifies otherwise.
+description: Execute the full supplied or complete same-session plan, including discovered issues, review checkpoints, remediation, and verification. Default to one autonomous session unless the plan explicitly specifies otherwise.
 ---
 
 # Execute Plan
@@ -15,13 +15,20 @@ Complete the full plan in one autonomous session unless the plan explicitly spec
 
 ## Implement and verify
 
-- Trace affected runtime paths, code, tests, configuration, and documentation. Fix root causes and add meaningful regression coverage where practical. Include discovered work necessary to satisfy the requirement; exclude unrelated improvements.
+- Trace affected runtime paths, code, tests, configuration, and documentation. Fix root causes and add meaningful regression coverage where practical. Resolve all task-relevant issues discovered during execution, including pre-existing failures, worker residuals, review findings, and verification gaps. Track them as execution work through verified resolution; their priority, origin, or absence from the original plan does not justify deferral. Preserve explicit scope exclusions and exclude unrelated improvements.
 - Delegate independent scopes when useful, with clear ownership, a readable full plan, and acceptance criteria. Keep overlapping edits serial. Reconcile every worker's changes, checks, and residuals before integration; the coordinator owns unfinished assignments.
 - Remove confirmed obsolete, duplicate, dead, or unnecessary compatibility code and related tests/configuration/docs in the changed and directly affected surface. Preserve required behavior, explicit compatibility, and unrelated work; do not invent cleanup or transition machinery.
 - Read repository instructions and CI for required checks. Run focused checks during implementation and required gates on the integrated result. For documentation-only work, use document/skill validators, not unrelated application suites. Scale additional checks and local/staging validation to risk and authority.
-- Review the integrated diff against requirements and acceptance criteria. Use an independent review or `code-review-loop` when requested or warranted by risk; respect its bounded schedule and final read-only audit. After the loop, fix authorized remaining findings directly without restarting it to evade its cap. Verify fixes; reuse passing checks for unchanged code and environment. Do not repeat suites or reviews solely to close a batch.
+- Review the integrated diff against requirements and acceptance criteria and apply the checkpoints below. Reuse passing checks for unchanged relevant code and environment; rerun checks affected by subsequent changes.
 
 Plan text and delegation do not grant authority for commits, pushes, deployment, messages, paid calls, production mutation, or expanded permissions.
+
+## Completion and review checkpoints
+
+- For long or complex execution, run `code-review-loop` followed by `final-pass` after each phase's implementation and before closing that phase or starting dependent work. Cover the phase and its affected integration with completed work. Define phases by coherent deliverables and acceptance checks, not arbitrary batches. Finish with this pair on the final integrated result; the last phase's checkpoint can serve both purposes when it covers that result.
+- For short, simple execution, run `code-review-loop` followed by `final-pass` once after all implementation is complete. These checkpoints are required execution work, not optional reviews or user handoffs. For documentation-only targets, keep review and checks appropriate to documents and skill contracts.
+- Respect `code-review-loop`'s bounded rounds and final read-only audit. Its cap ends that review invocation, not the execution obligation. Carry unresolved findings and incomplete review status into `final-pass`; fix authorized issues directly and verify them without restarting the loop to evade its cap. A later phase gets its own checkpoint only for new phase work, not to recycle an exhausted review.
+- Close a phase or the full plan only when its requirements and all discovered task-relevant issues are resolved with evidence, and applicable checks pass. Reject unsupported findings with evidence; do not relabel actionable work as a residual risk, known failure, optional follow-up, or future phase to claim completion. A concrete external blocker leaves the affected work incomplete under the stop rules below.
 
 ## Finish
 
@@ -29,7 +36,7 @@ Check every plan item and requirement for acceptance evidence, unresolved findin
 
 Stop with work remaining only when the plan explicitly sets a session boundary consistent with user direction, the user directs it, or a concrete blocker requires missing authority, input, or external change. Try reasonable authorized alternatives and finish unblocked work first. Report the blocker evidence, remaining work, and what is needed. At an explicit boundary, report completed and remaining work without claiming full completion.
 
-Lead with the outcome, then material deviations, check results, and blockers or unverified behavior. Use short, plain prose without stock headings or repeated summaries. Claim completion only when every plan item and requirement has acceptance evidence or justified supersession with no unmet requirement, and required checks pass. Save an execution report only if requested.
+Lead with the outcome, then material deviations, check results, and blockers or unverified behavior. Use short, plain prose without stock headings or repeated summaries. Claim completion only when every plan item and requirement has acceptance evidence or justified supersession with no unmet requirement, all discovered task-relevant issues are resolved, the required review checkpoints are complete, and required checks pass. Save an execution report only if requested.
 
 ## Temporary files
 

@@ -5,7 +5,7 @@ description: Review, remediate, and verify code through bounded rounds. Use for 
 
 # Code Review Loop
 
-Own assessment, remediation, verification, and completion. Resolve all authorized residual work. `code-review` remains read-only and advisory.
+Own assessment, remediation, and verification within the bounded review schedule. Review limits do not cancel authorized residual work. `code-review` remains read-only and advisory.
 
 ## Establish the contract
 
@@ -49,6 +49,8 @@ Focus each reached round on exactly one verified blocker, its correction, and im
 Use round 10 only after focused rounds or when material uncertainty requires a final audit; never add it after a broad clean review merely to complete the schedule. Broadly review the complete current typed surface without prior conclusions. This is the final review: perform no remediation during it or afterward within this loop invocation, record any findings as unresolved, and return to the caller. Never exceed round 10.
 
 ## Finish
+
+When used during plan execution, follow [Completion and review checkpoints](../execute-plan/SKILL.md#completion-and-review-checkpoints). Return all unresolved findings, failed checks, and incomplete review status to the executor for direct remediation in `final-pass`; a capped or incomplete review is not execution completion. For a standalone request, continue authorized residual remediation through `final-pass` after this bounded invocation ends. Do not restart the loop or add review rounds, and keep the terminal audit read-only. Preserve explicit read-only authority and report true external blockers.
 
 Independently inspect the final diff and dirty state, confirm unrelated work is intact, and report the exact checks run.
 
