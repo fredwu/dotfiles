@@ -15,8 +15,3 @@
 - Fix root causes rather than masking symptoms; for bug fixes, add a focused regression test when practical.
 - After every coding task or session, perform one deliberate cleanup round over the changed and directly affected task surface. Remove confirmed legacy, redundant, duplicate, dead or unused, obsolete, superseded, and no-longer-needed compatibility code, including directly related tests, configuration, and documentation, when safe and authorized. Preserve required behavior, explicitly required compatibility, unrelated work, and authorized scope. For planning or other read-only tasks, report or plan only material cleanup findings; do not edit implementation. A clean result is acceptable; do not invent work.
 - Run the smallest relevant formatting, static-analysis, and test checks, expanding them in proportion to risk. Review the final diff and report exactly what was and was not verified.
-
-## Token-optimized CLI proxy for shell commands
-
-- Claude: @~/.claude/RTK.md
-- Codex: read and follow `~/.codex/RTK.md` before running shell commands.
