@@ -26,7 +26,7 @@ Snapshot dirty state and preserve exclusions and resolved identities. Treat repo
 
 ## Review and assess
 
-Inspect the complete surface for requirements, correctness, boundaries, call sites, tests, regressions, security, privacy, performance, and availability. Consult history, discussion, comments, and conventions when relevant. Check for unfinished acceptance criteria and material residual work attributable to the target.
+Inspect the complete surface for requirements, correctness, boundaries, call sites, tests, regressions, security, privacy, performance, and availability. In embedded focused loop rounds, follow the caller's canonical discovery priorities and repair coverage while retaining the complete target and necessary context. Consult history, discussion, comments, and conventions when relevant. Check for unfinished acceptance criteria and material residual work attributable to the target.
 
 Check the changed and directly affected surface for confirmed dead, redundant, obsolete, or unnecessary compatibility code and related tests, configuration, and documentation. Recommend a small durable correction; preserve required behavior, explicit compatibility, unrelated work, and scope. Do not invent cleanup work.
 

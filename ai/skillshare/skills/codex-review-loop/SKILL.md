@@ -5,7 +5,7 @@ description: Review and remediate code through bounded external Codex CLI rounds
 
 # Codex Review Loop
 
-Read [code-review-loop](../code-review-loop/SKILL.md) and [codex-review](../codex-review/SKILL.md), including their required references. Inherit the canonical loop, including complete coverage in rounds 1-3 and early clean completion; substitute only the reviewer and runtime below.
+Read [code-review-loop](../code-review-loop/SKILL.md) and [codex-review](../codex-review/SKILL.md), including their required references. Inherit the canonical loop, including early broad clean completion, mandatory fresh review after every remediation (also after round 3), focused continuation and broad closing reviews in rounds 4-9, sequential review counting, and the final broad read-only audit if round 10 is reached; substitute only the reviewer and runtime below.
 
 Explicit invocation authorizes reached Codex calls and minimum non-secret transfer only. It does not authorize unrelated data transfer, remote writes, or expanded remediation.
 
