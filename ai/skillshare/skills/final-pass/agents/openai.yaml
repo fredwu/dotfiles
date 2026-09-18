@@ -1,4 +1,4 @@
 interface:
   display_name: "Final Pass"
   short_description: "Resolve phase or execution residuals and verify completion"
-  default_prompt: "Use $final-pass to resolve all task-relevant omissions and residual issues, then verify this phase or the full execution with applicable checks."
+  default_prompt: "Use $final-pass to resolve all task-relevant omissions and residual issues, then run the project's full testing and quality checks, subject to the skill's explicit exceptions."

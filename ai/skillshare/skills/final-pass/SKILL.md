@@ -1,6 +1,6 @@
 ---
 name: final-pass
-description: Close a completed phase or execution after review; resolve omissions and residual issues, then verify the result with applicable checks.
+description: Close a completed phase or execution after review; resolve omissions and residual issues, then run the project's full testing and quality checks.
 ---
 
 # Final Pass
@@ -13,11 +13,15 @@ Do not use this recovery to replace a fresh review still required and available 
 
 Perform one cleanup round over changed and directly affected files. Remove confirmed obsolete, duplicate, dead, or unnecessary compatibility code and related tests/configuration/docs. Preserve required behavior, explicit compatibility, and unrelated work. With read-only or documentation-only authority, report material implementation findings without editing them. A clean result is valid.
 
-Discover required gates from repository instructions and CI. Run applicable checks on the final relevant state, with additional checks proportional to risk. For documentation-only changes, use document or skill validators and skip unrelated application suites. Fix authorized in-scope failures and verify repairs; reuse passing results for unchanged relevant code and environment. Respect authorization boundaries for checks with external effects or cost.
+Discover the project's full testing and quality gates from repository instructions (including AGENTS.md), CI workflows, scripts, and contributor/testing documentation. Run every required gate during each final-pass invocation on the final relevant state. Targeted tests, smoke tests, or document validators do not replace full suites or quality checks. Small changes, long runtime, and earlier passing runs are not reasons to reduce coverage. Add checks proportional to risk where required gates leave a gap.
+
+Only explicit user instructions, documentation-only work, or checks that incur actual external charges permit skips. For documentation-only work, run required document or skill validators and skip unrelated application suites; this exception does not cover code, configuration, or test changes anywhere in the checkpoint. Skip paid checks, such as smoke tests that call billed APIs, unless already authorized; ordinary runtime and local compute are not paid-check exceptions. Run all remaining free coverage. Preserve authorization boundaries for external effects; missing access, services, or authority blocks a required check rather than exempting it. Try reasonable authorized alternatives and report unresolved blockers.
+
+Fix authorized in-scope failures and verify repairs. Reuse passing results only from this final-pass invocation when their relevant code, configuration, dependencies, and environment remain unchanged; otherwise rerun the affected gates. A failed or blocked required gate keeps the checkpoint incomplete. Record each required gate's command, result (passed, failed, skipped, or blocked), and the reason for any skip or blocker.
 
 After repairs, inspect the affected result and verify it again as needed until no actionable task-relevant issue remains and required checks pass. A phase checkpoint does not end execution: return to the executor to continue the remaining plan. Stop with work remaining only for user direction, an explicit authorized session boundary, or a concrete blocker requiring missing authority, input, or external change; first try reasonable authorized alternatives and complete independent work. Report blocked work as incomplete, not a completed result with residuals.
 
-Lead with changes or findings, then check results and material verification gaps. Use short, plain prose without stock headings or repeated summaries. Do not claim implementation verification from document validators. Save a user report only if requested; check logs follow the temporary-file rules.
+Lead with changes or findings, then report check results, explicit skips, and blockers. Use short, plain prose without stock headings or repeated summaries. Do not claim implementation verification from document validators. Save a user report only if requested; check logs follow the temporary-file rules.
 
 ## Temporary files
 
