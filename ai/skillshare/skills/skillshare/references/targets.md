@@ -34,6 +34,23 @@ targets:
     mode: merge
 ```
 
+## Project Folders From the Global Config (`projects`)
+
+Use when projects should get **different** skills. Global targets already give every project the same set; project mode (`-p`) keeps the setup in the repo for teammates. For personal projects, list the folders in the global `config.yaml` instead of giving each a `.skillshare/`. One `skillshare sync` writes them all.
+
+```yaml
+projects:
+  ~/work/shop-web:
+    targets: [claude, cursor, codex]   # tools used there; paths are derived
+    skills: { mode: copy, include: ["frontend-*"] }   # present = on, empty = all
+    agents: {}
+```
+
+- Shows up in `sync`/`status`/`diff` as `<name>@<target>` (e.g. `shop-web@claude`). Tools sharing a folder (`.agents/skills`) are one target.
+- A missing folder is skipped with a warning, never recreated.
+- `skillshare target` and `collect` ignore these; edit `config.yaml` or the dashboard's Projects page.
+- MCP for the same folders lives under `mcp.projects` (see [mcp.md](mcp.md)).
+
 ## Target Filters
 
 Control which skills and agents sync to each target using include/exclude glob patterns.

@@ -140,7 +140,7 @@ extras:
 
 The `extension:` field names an extension directory under `.skillshare/extensions/` (project) or `~/.config/skillshare/extensions/` (global). It transforms each source file during sync and implies `copy` mode.
 
-For project agents, prefer native target `agents:` config. Use `extras: agents` only when you need extras-only behavior like `flatten` or `extension`.
+For project agents, prefer native target `agents:` config; it also accepts `extension:` (e.g. `agents: { extension: opencode-agents }`, implies `copy`). Use `extras: agents` only when you need extras-only behavior like `flatten`.
 
 ## Typical workflow
 

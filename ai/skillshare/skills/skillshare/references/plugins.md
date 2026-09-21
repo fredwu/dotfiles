@@ -22,6 +22,11 @@ from display names. External catalog sources are not auto-converted. Multiple lo
 Safe internal relative symlinks are preserved; escaping, absolute, broken, cyclic,
 and `.git` links are rejected. A malformed manifest does not hide other formats.
 
+`add` without `--target`, or an interactive picker confirmed with nothing selected,
+keeps the plugin in Skillshare and installs it nowhere; `list` shows it as `no targets`.
+Add targets later with the same source and `--name`, which installs the source as it is
+then. Such a package stays managed when its last target is removed.
+
 Use `--source-ref TAG_OR_COMMIT` with discover/add/update for a remote Git source.
 Bindings retain `source_ref` and the reviewed `commit`; `--revision` is a separate
 preview token. Use `--entry dist/plugin.js` with discover/add for an explicit
@@ -61,6 +66,9 @@ skillshare plugin update demo --target claude --dry-run --json -g
 skillshare plugin update demo --target claude --no-tui -g
 skillshare plugin remove demo --dry-run --json -g
 ```
+
+`remove NAME --target` uninstalls that binding. `remove NAME` without `--target`, once
+no Agent holds it, drops the package from Skillshare entirely.
 
 Claude supports native updates; Codex does not. Cursor/Antigravity replace managed
 local copies; Pi/OpenCode refresh reviewed source snapshots. Imported Pi/OpenCode v1 packages must be updated natively. OpenCode v2 global
