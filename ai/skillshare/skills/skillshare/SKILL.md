@@ -8,7 +8,7 @@ description: |
   noninteractive automation, and guidance for the terminal UI.
 argument-hint: "[command] [target] [--json] [--dry-run] [-p|-g]"
 metadata:
-  version: v0.21.3
+  version: v0.21.6
 ---
 
 # Skillshare CLI
@@ -29,8 +29,9 @@ Check `skillshare <command> --help` if the installed version differs from these 
 - MCP uses its own receiving targets and source definitions. Read [mcp.md](references/mcp.md)
   before editing MCP settings or importing native configurations. Its Agent notes cover
   what is specific to Claude Code, Codex, OpenCode and Pi: scopes and files, names and
-  credentials they refuse, Pi's required extension choice and `directTools`, turning a
-  global server off in one project, and `mcp.projects` for many folders from one config.
+  credentials they refuse, Pi's required extension choice, `directTools` and `piOptions`,
+  turning a global server off in one project, and `mcp.projects` for many folders from
+  one config.
 - Plugins keep their native components together. Read [plugins.md](references/plugins.md)
   for installation, import, sync selection, updates, and native compatibility limits
   across Claude, Codex, Cursor, Antigravity, Pi, and OpenCode.

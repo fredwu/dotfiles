@@ -9,8 +9,16 @@ and MCP client support are identical.
 skillshare target list                        # List all targets
 skillshare target claude                      # Show target info
 skillshare target add myapp ~/.myapp/skills   # Add custom target
+skillshare target add claude-work --agent claude --config-dir ~/.claude-work   # Another account of an Agent
 skillshare target remove myapp                # Remove target (safe)
 ```
+
+Another account (`agent` + `config_dir` in config.yaml): `--agent` accepts `claude`
+(`CLAUDE_CONFIG_DIR`), `codex` (`CODEX_HOME`) and `pi` (`PI_CODING_AGENT_DIR`). The skills
+path follows the directory (`<config_dir>/skills` for Codex and Pi, even though Codex also
+reads the shared `~/.agents/skills`); only Claude has an agents directory. Any number of
+accounts can be added, and the target name is also valid in `mcp.targets` and a server's
+`targets`.
 
 ## Project Targets (`-p`)
 

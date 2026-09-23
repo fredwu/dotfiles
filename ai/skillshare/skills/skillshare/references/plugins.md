@@ -94,6 +94,11 @@ and OpenCode, never falling back to global scope.
   Preserve the whole tree and register its file URL in the native JSON/JSONC config.
   Version 1 uses `plugin`, version 2 uses `plugins`. Runtime dependencies must already
   be available. The CLI version selects the schema; do not guess from docs alone.
+- Another account of an Agent (a target with `agent:` and `config_dir:` in the global
+  config) is a plugin target under its own name: `--target claude-work`, `--from
+  claude-work`. Supported for `claude`, `codex` and `pi`. Skillshare runs that Agent's CLI
+  against the account's config directory, through `CLAUDE_CONFIG_DIR`, `CODEX_HOME` or
+  `PI_CODING_AGENT_DIR`, and the account keeps its own bindings. Global scope only.
 - Local directory plugins cannot import unowned folders or marketplace installs.
   Importing Pi/OpenCode entries with filters/options is blocked to avoid losing them.
   Supply `--name` when a native package source is not a valid logical name.
