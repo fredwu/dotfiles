@@ -11,7 +11,7 @@ Explicit invocation authorizes reached Grok calls and minimum non-secret transfe
 
 ## Substitute the reviewer
 
-Replace each reached internal review with one fresh model-bearing top-level Grok call under `grok-review`'s runtime and result contract in embedded mode. Failed preflight makes the round incomplete without a model call; a failed call consumes its round. Never retry, substitute reviewers, weaken isolation, or use bypass flags. Nested workers do not consume rounds; forbid nested review skills and extra top-level review processes.
+Replace each reached internal review with one fresh model-bearing top-level Grok call under `grok-review`'s runtime and result contract in embedded mode. Failed preflight makes the round incomplete without a model call; a failed call consumes its round. Never retry, substitute reviewers, weaken isolation, or use bypass flags. Disable Grok subagents and forbid nested review skills and extra top-level review processes.
 
 Pass the canonical round's permitted inputs and `grok-review`'s reviewer instructions; exclude caller-only runtime, assessment, and cleanup instructions.
 
