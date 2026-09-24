@@ -1,22 +1,22 @@
 {
   "fastworker": {
     "claude": {
-      "model": "inherit",
+      "model": "opus",
       "effort": "medium"
     },
     "codex": {
-      "model": "gpt-6-astra",
-      "model_reasoning_effort": "low"
+      "model": "gpt-6-sol",
+      "model_reasoning_effort": "medium"
     }
   },
   "worker": {
     "claude": {
-      "model": "inherit",
+      "model": "opus",
       "effort": "high"
     },
     "codex": {
-      "model": "gpt-6-astra",
-      "model_reasoning_effort": "medium"
+      "model": "gpt-6-sol",
+      "model_reasoning_effort": "high"
     }
   }
 }
