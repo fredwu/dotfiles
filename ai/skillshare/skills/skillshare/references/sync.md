@@ -123,6 +123,8 @@ skillshare pull                # Pull + sync
 skillshare pull --dry-run      # Preview
 ```
 
+If both machines committed, `pull` merges them and resolves `.metadata.json` conflicts automatically. A conflict in any other file stops the pull, undoes the merge, and names the files; the user resolves it with git in the source directory.
+
 **Project mode:** Use `git pull` directly, then `skillshare sync`.
 
 ## Common Workflows

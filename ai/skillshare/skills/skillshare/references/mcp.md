@@ -106,7 +106,7 @@ setups usually go wrong.
 - Another account: a target with `agent:` and `config_dir: <dir>` is an MCP target by its own
   name, and `mcp import --from <name>` reads that file. `claude` (`CLAUDE_CONFIG_DIR`) writes
   `<dir>/.claude.json`, `codex` (`CODEX_HOME`) writes `<dir>/config.toml`, `pi`
-  (`PI_CODING_AGENT_DIR`) writes `<dir>/mcp.json` and needs `piExtension: pi-mcp-adapter`,
+  (`PI_CODING_AGENT_DIR`) writes `<dir>/mcp-adapter.json` and needs `piExtension: pi-mcp-adapter`,
   because `pi-mcp-extension` always reads `~/.pi/agent/mcp.json`. Global scope only; a project
   uses the Agent's own name, and a project's off switch goes to every account that has the
   server.
@@ -177,17 +177,19 @@ Pi has no built-in MCP. It needs one third-party extension, which the user insta
 `pi install npm:pi-mcp-adapter` or `pi install npm:pi-mcp-extension`. Syncing config
 does not install it.
 
-| Scope | File |
-|---|---|
-| Global | `~/.pi/agent/mcp.json` |
-| Project | `.pi/mcp.json` |
+| Scope | `pi-mcp-adapter` | `pi-mcp-extension` |
+|---|---|---|
+| Global | `~/.pi/agent/mcp-adapter.json` | `~/.pi/agent/mcp.json` |
+| Project | `.pi/mcp-adapter.json` | `.pi/mcp.json` |
 
 - Every Pi server needs `piExtension`. Scripts pass `--target pi --pi-extension
   pi-mcp-adapter` (or `pi-mcp-extension`) to `add`, `edit` and `import`. All Pi servers
   in one source must use the same extension.
 - `pi-mcp-adapter` supports `fromEnv` in `env` and `headers`, connects on demand, and
   its global path honors `PI_CODING_AGENT_DIR`. After a sync the user restarts Pi and
-  checks the connection with `/mcp`.
+  checks the connection with `/mcp-adapter`.
+- `pi-mcp-adapter` 3.0 no longer reads `mcp.json`. Sync moves the adapter entries that
+  Skillshare wrote there to `mcp-adapter.json`; the user's own `mcp.json` entries stay.
 - `pi-mcp-extension` does not interpolate references. HTTP references are rejected. A
   stdio variable that keeps its own name (`TOKEN: {fromEnv: TOKEN}`) is inherited from
   Pi's process instead. Global sync rejects `PI_CODING_AGENT_DIR`. New servers need

@@ -20,6 +20,18 @@ reads the shared `~/.agents/skills`); only Claude has an agents directory. Any n
 accounts can be added, and the target name is also valid in `mcp.targets` and a server's
 `targets`.
 
+Instruction file of a custom target (`instructions` in config.yaml; `target add` has no
+flag for it, the dashboard sets it in the Custom target dialog or the target's file tab):
+
+```yaml
+targets:
+  myapp:
+    path: ~/.myapp/skills
+    instructions:
+      path: ~/.myapp/AGENTS.md   # global: absolute or ~/; project: relative to the root
+      import: true               # the tool follows @path lines
+```
+
 ## Project Targets (`-p`)
 
 ```bash

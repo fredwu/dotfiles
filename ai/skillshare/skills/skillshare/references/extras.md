@@ -45,7 +45,7 @@ skillshare extras list --json
 skillshare extras list -p
 ```
 
-Statuses: `synced`, `drift`, `not synced`, `no source`.
+Statuses: `synced`, `drift`, `modified` (a single-file symlink or merge target replaced by a different real file), `not synced`, `no source`.
 
 JSON output returns an array of:
 ```json
@@ -73,21 +73,23 @@ skillshare extras remove prompts -p
 | `--force` / `-f` | Skip y/N confirmation prompt |
 | `-p` / `-g` | Force project / global mode |
 
-After removal, run `sync extras` to clean up orphaned links.
+After removal, run `sync extras` to clean up orphaned links. A single-file extra (below) needs no cleanup: remove restores each target file.
 
 ## extras collect
 
-Collect local (non-symlinked) files from a target back into the extras source directory.
+Collect local (non-symlinked) files from a target back into the extras source directory. Merge-mode targets get symlinks in place of collected files; copy-mode targets keep their files. Files already in source are skipped unless `--force`.
 
 ```bash
 skillshare extras collect rules
 skillshare extras collect rules --from ~/.claude/rules --dry-run
+skillshare extras collect rules --force   # overwrite source with target edits
 skillshare extras collect prompts -p
 ```
 
 | Flag | Description |
 |------|-------------|
 | `--from <path>` | Target to collect from (required if multiple targets) |
+| `--force` / `-f` | Overwrite files that already exist in source |
 | `--dry-run` | Preview without changes |
 | `-p` / `-g` | Force project / global mode |
 
@@ -137,6 +139,33 @@ extras:
       - path: ~/.claude/commands
         mode: symlink
 ```
+
+A single-file extra syncs one file instead of the directory. `as` renames it per
+target; `import` mode (single-file only) keeps an `@<source file>` line in a
+managed block of the target file instead of replacing it:
+
+```yaml
+extras:
+  - name: personal
+    file: AGENTS.md          # extras/personal/AGENTS.md
+    targets:
+      - path: ~/.codex       # ~/.codex/AGENTS.md -> symlink
+      - path: ~/.claude
+        as: CLAUDE.md
+        mode: import         # CLAUDE.md keeps its content, imports the file
+```
+
+The first sync records the target's attach-time state as its restore point
+(a file, a symlink, or no file), then replaces it. `extras remove` and
+`extras <name> --remove-target <path> --prune` put that state back; in `import`
+mode they only drop the managed line when the file has other content. Later edits
+that sync, overwrite, or restore replace are kept as drift backups in
+`~/.local/state/skillshare/extras/backups/<id>/drift/` and are never restored.
+`--remove-target` without `--prune` leaves the file and forgets the restore point.
+`flatten` and `extension` are rejected on a single-file extra; `extras collect`
+does not apply. The web dashboard (Extras -> AGENTS.md) manages these as shared
+AGENTS.md files; its rename conversion (project mode) is blocked while the file
+uses a shared AGENTS.md.
 
 The `extension:` field names an extension directory under `.skillshare/extensions/` (project) or `~/.config/skillshare/extensions/` (global). It transforms each source file during sync and implies `copy` mode.
 
