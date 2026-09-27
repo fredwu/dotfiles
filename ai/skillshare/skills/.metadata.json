@@ -4,36 +4,38 @@
     "agent-device": {
       "source": "github.com/callstack/agent-device/skills/agent-device",
       "type": "github-subdir",
-      "installed_at": "2026-08-26T23:07:51.825742+10:00",
+      "installed_at": "2026-09-28T02:24:54.533888+10:00",
       "repo_url": "https://github.com/callstack/agent-device.git",
       "subdir": "skills/agent-device",
-      "version": "74a70f1",
-      "tree_hash": "6a74e86df5b4c1b6561c5ad2d72e71da7b794735",
+      "version": "16e0757",
+      "tree_hash": "0d0064c0b798cc53ac75d812909bfbaae773f424",
+      "commit": "16e07572ab28227563fd76ab062cb375c4b7e1db",
       "file_hashes": {
-        "SKILL.md": "sha256:31951806d33228c832af2bb70b9657414fd1ef8a1ee5a6cb3c05f15370aad240"
+        "SKILL.md": "sha256:ad3b4ccbd2d43c3baae80a5b0d5aaad14becffb49fabccb6c93d61d44dcd6698"
       }
     },
     "petal-design": {
       "source": "github.com/petalframework/petal_components/skills/petal-design",
       "type": "github-subdir",
-      "installed_at": "2026-09-01T13:24:16.330379+10:00",
+      "installed_at": "2026-09-28T02:24:56.911064+10:00",
       "repo_url": "https://github.com/petalframework/petal_components.git",
       "subdir": "skills/petal-design",
-      "version": "6fb566d",
-      "tree_hash": "fc13e85360aa6e154531faf407802114989a073a",
+      "version": "a4c825c",
+      "tree_hash": "a37fe70538b0e2a71c82a177cc9350f1fb9f6aab",
+      "commit": "a4c825c40f6457fc8f4f3012abfa4648885a2779",
       "file_hashes": {
-        "SKILL.md": "sha256:2997cb6421fdd8377e4cce1b2fbed3c9fbcd7896a83f83b2b3e0af1d0c6c7dbc",
-        "data/schemas.json": "sha256:6fb03e3d4271a785ea9d5aa5169d1caa0d3c920eec9833a3a39d6a41066217f9",
-        "references/components.md": "sha256:936c02deea92f96c1e4049110da492c5ebaa6d6146b0083ae15454dc6e67631b",
+        "SKILL.md": "sha256:e08e7e28e2d76af336de93772261e064bf35f9831bd721b90f98b7612b7f0c9e",
+        "data/schemas.json": "sha256:9929d8eaead3a30b7faea66b167e2549cb018a54925e4e48923178cb8326982a",
+        "references/components.md": "sha256:ec9414e2296b89267aeb0e0eefe9c202c6f5dc0704fba967ce9331f1438ad0d2",
         "references/patterns.md": "sha256:a432ec9ea0a39180d53122d60fc5898238f4b658d8e2585da2bbcc929c37d06d",
         "references/review.md": "sha256:8b3f03695c956c75ea49339cd685af63ce495ebb48f140908fdabca453c51d68",
-        "references/tokens.md": "sha256:382f93c70de012039e93268162eec8a808df589ac46574182489f9e063a3ea4b"
+        "references/tokens.md": "sha256:8e6d4d7e83071bace56b53ae0cf0849a44acd73159b0fc5ea3b2bd1290ac0aa4"
       }
     },
     "skillshare": {
       "source": "github.com/runkids/skillshare/skills/skillshare",
       "type": "github-subdir",
-      "installed_at": "2026-09-28T02:15:14.724+10:00",
+      "installed_at": "2026-09-28T02:24:58.869637+10:00",
       "repo_url": "https://github.com/runkids/skillshare.git",
       "subdir": "skills/skillshare",
       "version": "682d142",
