@@ -5,6 +5,10 @@
 - Delegate clearly bounded, simple, low-risk work to the `fastworker` agent, including search, documentation, and test tasks.
 - Wait for delegated work to finish and review its results before producing the final response.
 
+## Tool routing
+
+- Use the cua-driver skill by default for native desktop app and window tasks. Respect explicitly requested tools. Use browser-specific tools for web pages and agent-device for mobile or TV devices.
+
 ## Coding discipline
 
 - Keep changes narrowly scoped to the request; avoid unrelated refactors, dependency changes, and formatting churn.
