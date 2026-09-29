@@ -32,6 +32,38 @@ targets:
       import: true               # the tool follows @path lines
 ```
 
+Other files a tool reads (`files` in config.yaml, dashboard only): each entry is relative
+to the tool's folder (`~/.pi/agent` for pi; `.pi` in a project) and gets its own tab.
+Pi and oh-my-pi already get `APPEND_SYSTEM.md`. Removing an entry never deletes the file.
+
+```yaml
+targets:
+  pi:
+    files: [SYSTEM.md, prompts/review.md]
+```
+
+## Skills Off
+
+For a tool that already reads another target's folder (Pi also reads `~/.agents/skills`
+of `universal`), stop syncing skills to it so it does not find each skill twice. Agents, MCP
+servers and instructions stay managed.
+
+```bash
+skillshare target pi --skills=false --dry-run   # Preview what is removed
+skillshare target pi --skills=false             # Save skills.enabled: false, remove links into the source
+skillshare target pi --skills=true              # Back on; next `skillshare sync` syncs again
+skillshare target add gemini ~/.gemini/skills --no-skills   # Add with skills off
+```
+
+Merge mode removes the links; symlink mode removes the folder link; copy mode keeps the
+copies and lists them apart (the tool still loads them; delete them to avoid duplicates);
+a folder an enabled target also writes to is left alone. `sync`/`diff`/`status`/`doctor`
+skip the target's skills. `--skills` cannot be combined with include/exclude flags in one
+command. Works with `-p`.
+
+When `sync` warns that two targets "sync skills to <folder> with different filters, so each
+sync undoes the other", run the `skillshare target <name> --skills=false` it prints.
+
 ## Project Targets (`-p`)
 
 ```bash

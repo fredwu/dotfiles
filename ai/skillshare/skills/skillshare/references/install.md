@@ -23,6 +23,7 @@ git.company.com/team/skills   # Self-hosted
 # Full URLs
 github.com/user/repo          # Discovers skills in repo
 github.com/user/repo/path     # Direct subdirectory
+github.com/user/repo/tree/v1.2.0/path  # Pinned to a tag, commit or branch (GitLab -/tree/<ref>/, Bitbucket src/<ref>/)
 https://github.com/...        # HTTPS URL
 git@github.com:...            # SSH URL
 git@host:owner/repo//subdir   # SSH with subpath (// separator)
@@ -66,7 +67,7 @@ skillshare install user/repo --skip-audit             # Skip security scan
 | `--name <n>` | Override skill name |
 | `--kind <skill\|agent>` | Restrict resource discovery |
 | `--agent, -a <names>` | Select agents by name (comma-separated) |
-| `--branch, -b <name>` | Select a Git branch |
+| `--branch, -b <name>` | Select a Git branch, tag or commit SHA (overrides a ref in a web URL) |
 | `--force, -f` | Overwrite existing and explicitly override audit blocking |
 | `--update, -u` | Update if exists |
 | `--track, -t` | Track for updates (preserves .git) |

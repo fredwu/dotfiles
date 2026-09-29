@@ -11,13 +11,28 @@ skillshare backup                # All targets
 skillshare backup claude         # Specific target
 skillshare backup agents         # Agent targets
 skillshare backup --all          # Skills + agents
-skillshare backup --list         # List existing backups
-skillshare backup --cleanup      # Remove old backups
+skillshare backup --list [-p]    # List existing backups (-p: the project's)
+skillshare backup --cleanup [-p] # Remove old backups
+skillshare backup --delete <timestamp> [-p] [--dry-run]  # Delete one backup (timestamp from --list)
 ```
 
 **Location:** `~/.local/share/skillshare/backups/<timestamp>/` (XDG data dir, not config). Project agent backups: `.skillshare/backups/`.
 
 **Scope:** Local target content only. Merge-mode symlinks are skipped — they point into the source, which is already the source of truth, and `sync` recreates them. A target holding only symlinks produces no backup. Retention (10 snapshots / 30 days / 500 MB, newest always kept) runs automatically after every `sync`.
+
+## backup files
+
+Earlier versions of single files skillshare rewrote (AGENTS.md, CLAUDE.md, shared-file locations).
+
+```bash
+skillshare backup files [list] [-p|-g]                        # Files with saved versions
+skillshare backup files show <path>                           # Versions, newest first
+skillshare backup files restore <path> <id> [--unlink] [--dry-run]
+```
+
+IDs: `<time>[.<reason>]` (saved before a write; reason `convert`, `shim`, `edit`, `collect`, `attach`, `restore`), `drift:<time>[.<reason>]` (a user edit skillshare replaced; `overwrite`, `mode`, `restore`), `origin` (the file before a shared file was first attached). Restore saves the current content first; a symlinked path needs `--unlink`. In a project, only files inside it. A target named `files` needs `backup -t files`.
+
+The dashboard's **Settings › Backup** has the same in three tabs: **Target folders**, **Files**, **MCP** (also in project mode, scoped to the project).
 
 ## restore
 

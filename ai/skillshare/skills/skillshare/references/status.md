@@ -16,6 +16,8 @@ Project mode output includes: source path, targets with sync mode, remote skills
 
 **Sync drift detection:** Warns when targets have fewer linked skills than source (merge mode). Example: `⚠ claude: 3 skill(s) not synced (12/15 linked)`. Run `skillshare sync` to fix.
 
+In Windows copy fallback, agent counts in `status` and `doctor` distinguish identical unowned files as `local preserved` (for example, `0/1 linked, 1 local preserved`). Up-to-date managed copies still count as linked.
+
 ## diff
 
 Show differences between source and targets. Interactive TUI on TTY, plain text otherwise.

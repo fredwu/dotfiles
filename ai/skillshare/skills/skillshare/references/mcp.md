@@ -81,7 +81,8 @@ Names such as `company-docs` (letters, digits, hyphens) work across all clients.
 ## Ownership and conflicts
 
 - Skillshare only changes entries it wrote. A native entry that already matches the
-  source is reported unchanged and stays unmanaged until imported.
+  source but is not managed yet is planned as `adopt`: sync records it without
+  writing, and later removal or unticking removes it.
 - A differing unmanaged entry is a conflict. Resolve it with `mcp import --replace` or
   an explicit per-entry replacement. Inspect conflicts with `skillshare mcp --json`.
 - Only the fields Skillshare writes are compared. Agent-only fields in an entry, such
