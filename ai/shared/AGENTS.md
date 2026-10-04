@@ -8,8 +8,8 @@
 ## Tool routing
 
 - Use the cua-driver skill by default for native desktop app and window tasks. Respect explicitly requested tools. Use browser-specific tools for web pages and agent-device for mobile or TV devices.
-- For cua-driver, use exact-window background capture and input where supported; set `delivery_mode:"background"` when available. Preserve the user's frontmost app, keyboard focus, pointer position, and workspace/Space. Avoid window activation or raising, including temporary menu activation, and desktop input.
-- If background capture or input is unavailable or fails, verify the current state and explain why foreground interaction is needed. Obtain user permission before foreground or desktop interaction unless already explicitly authorized. Do not silently escalate or use shell activation as a workaround.
+- For cua-driver, prefer exact-window background capture and input; set `delivery_mode:"background"` where supported. Preserve the user's frontmost app, keyboard focus, pointer position, and workspace/Space when background operation can complete the task.
+- If background capture or input is unavailable or ineffective, verify the current state, then use the necessary foreground or desktop interaction without asking for confirmation. This is standing user authorization for visible control during the requested UI task, including when cua-driver skill guidance requires authorization. Keep foreground use brief and restore the prior frontmost app, focus, pointer position, and workspace/Space where supported.
 
 ## Coding discipline
 
