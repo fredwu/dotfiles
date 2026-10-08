@@ -6,6 +6,7 @@ alias bu="brew update && brew upgrade"
 
 alias c="codex"
 alias cc="claude"
+alias claude-gamma='CLAUDE_CONFIG_DIR="$HOME/.claude-gamma" claude'
 
 alias drm='docker rm -f $(docker ps -a -q) && docker rmi $(docker images -q)'
 
