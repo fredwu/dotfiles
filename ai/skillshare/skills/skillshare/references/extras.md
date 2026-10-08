@@ -5,6 +5,7 @@ Manage non-skill resources (rules, commands, prompts) that sync to arbitrary dir
 | Command | What it does | Project? | `--json`? |
 |---------|-------------|:--------:|:---------:|
 | `extras init <name>` | Create a new extra | ✓ (auto) | ✗ |
+| `extras memory <command>` | Manage shared Markdown notes | ✓ (auto) | ✓ |
 | `extras list` | List all extras + sync status | ✓ (auto) | ✓ |
 | `extras remove <name>` | Remove an extra from config | ✓ (auto) | ✗ |
 | `extras collect <name>` | Collect target files into source | ✓ (auto) | ✗ |
@@ -13,19 +14,19 @@ Manage non-skill resources (rules, commands, prompts) that sync to arbitrary dir
 
 **Source directories:**
 - Global: `~/.config/skillshare/extras/<name>/`; `extras_source` and per-extra `source` can override it.
-- Project: `.skillshare/extras/<name>/`; per-extra `source` is ignored. Use top-level `sources.extras` to move all project extras.
+- Project: `.skillshare/extras/<name>/`; per-extra `source` is relative to the project root. Top-level `sources.extras` moves the default project extras parent.
 
 ## extras init
 
-Create a new extra resource type. Without arguments, launches an interactive TUI wizard.
+Create a new extra resource type. Without arguments, asks for each setting interactively.
 
 ```bash
 skillshare extras init rules --target ~/.claude/rules --target ~/.cursor/rules
 skillshare extras init commands --target ~/.claude/commands --mode copy
 skillshare extras init prompts --target .claude/prompts -p
 skillshare extras init pi-prompt --file system.md --as APPEND_SYSTEM.md --source ~/dotfiles/prompts --target ~/.pi/agent
-skillshare extras init                    # TUI wizard
-skillshare extras init rules --no-tui ... # Skip wizard
+skillshare extras init                    # Interactive prompts
+skillshare extras init rules --no-tui ... # Skip prompts
 ```
 
 | Flag | Description |
@@ -34,12 +35,12 @@ skillshare extras init rules --no-tui ... # Skip wizard
 | `--source <path>` | Custom source directory for this extra (relative to the project root in project mode) |
 | `--file <filename>` | Single-file extra: sync only this file from the source directory |
 | `--as <filename>` | File name at every target (default: `--file` name); requires `--file` |
-| `--mode <mode>` | Sync mode: `merge` (default), `copy`, `symlink`; `import` only with `--file` |
+| `--mode <mode>` | Sync mode: `merge` (default), `copy`, `symlink`; `import`, `prepend` or `append` only with `--file` |
 | `--flatten` | Sync subdirectory files into the target root; not with `symlink` or `--file` |
-| `--no-tui` | Skip interactive wizard |
+| `--no-tui` | Skip interactive prompts |
 | `-p` / `-g` | Force project / global mode |
 
-`extras init` writes config only: it does not create the source file or sync. The TUI wizard asks Folder or Single file after the name.
+`extras init` writes config only: it does not create the source file or sync. The interactive prompts ask Folder or Single file after the name.
 
 ## Existing extras
 
@@ -160,7 +161,9 @@ extras:
 
 A single-file extra syncs one file instead of the directory. `as` renames it per
 target; `import` mode (single-file only) keeps an `@<source file>` line in a
-managed block of the target file instead of replacing it:
+managed block of the target file instead of replacing it. For tools that do not
+follow `@` imports, `prepend` and `append` (single-file only) write the source's
+content into a managed block at the top or end of the target file instead:
 
 ```yaml
 extras:
@@ -171,12 +174,25 @@ extras:
       - path: ~/.claude
         as: CLAUDE.md
         mode: import         # CLAUDE.md keeps its content, imports the file
+      - path: ~/.gemini
+        as: GEMINI.md
+        mode: prepend        # GEMINI.md keeps its content, the file goes in a block on top
 ```
+
+A block sits between `<!-- skillshare:extra src="<source>" sha256=… -->` and
+`<!-- /skillshare:extra -->`; sync rewrites it in place when the source changes and
+never touches lines outside it. Several sources can share one target file this way.
+A block edited by hand shows as `modified` and sync stops for that target until the
+edit is copied back to the source or the block is removed; damaged markers stop
+sync, mode changes and restore until repaired. Switching modes removes what the
+previous mode wrote (block, `@` line, or copy), so the file never holds the source twice.
 
 The first sync records the target's attach-time state as its restore point
 (a file, a symlink, or no file), then replaces it. `extras remove` and
 `extras <name> --remove-target <path> --prune` put that state back; in `import`
-mode they only drop the managed line when the file has other content. Later edits
+mode they only drop the managed line when the file has other content, and in
+`prepend`/`append` mode only that source's block (an edited block is kept as a
+drift backup first). Later edits
 that sync, overwrite, or restore replace are kept as drift backups in
 `~/.local/state/skillshare/extras/backups/<id>/drift/` and are never restored.
 When replacing a user junction for a single-file extra, the warning includes its original destination; restore recreates the junction.
@@ -264,3 +280,69 @@ The `codex-agents` extension requires `name` and `description` frontmatter — f
 - Native agents targets (`agents: { path: ... }`) do **not** support `extension:` — extras only
 - If a Node.js extension fails because inherited `NODE_OPTIONS` references an unavailable
   preload module, clear that variable for the extension process: `run: ["env", "-u", "NODE_OPTIONS", "node", "convert.js"]`
+
+## Shared memory notes
+
+`skillshare extras memory init -g` registers a source-only `memory` folder and
+creates missing `INDEX.md` and `LEARNED.md` templates, preserving existing files. Use `-p` for project
+notes. Native automatic memory is separate.
+
+```bash
+skillshare extras memory list --search decisions --json -g
+skillshare extras memory show decisions.md --json -g
+skillshare extras memory write decisions.md --from ./note.md -g
+skillshare extras memory instructions -g
+skillshare extras memory instructions --update-mode active -g
+```
+
+A new write omits `--version`; updates require the hash from `show --json`.
+Stale versions are rejected and changed notes are backed up. `--from -` reads
+stdin. Delete with `extras memory delete <note.md> --version <hash>` using the
+version from `show --json`; deletion backs up the saved file and rejects stale
+versions. Recover with `backup files show <absolute-path>` and
+`backup files restore <absolute-path> <id>`. Update index links yourself.
+Writes accept relative `.md` paths only, UTF-8 up to 1 MiB; hidden files and nested
+links are excluded. Paths such as `wiki/architecture.md` create missing folders;
+listing and search include notes in subfolders. CLI users maintain `INDEX.md` links themselves.
+`LEARNED.md` provides date,
+context, conclusion, and evidence fields for durable lessons. `passive` guidance
+(the default) asks agents to update notes only on request; `active` guidance lets
+them save lasting facts, propose notes they are unsure of, and report what they
+saved. Templates do not enable automatic learning.
+
+The dashboard's Extras → Memory tab edits the same source. Use **Connect to
+agents**, select tools and a `passive` or `active` mode for each, **Review
+changes**, then **Apply changes**. Tools reading one file switch modes together. It appends or
+updates a scope/hash-marked block in the existing instruction file or shared
+source without changing other content, assignments, or connection modes.
+Existing files are backed up and a stale review must be repeated. Intact outdated
+blocks can be updated after review; modified or malformed blocks are preserved
+for manual repair. Unsynced or unreadable instructions are skipped.
+**Copy guidance** is the manual fallback; **Open AGENTS.md** edits instructions.
+CLI `instructions [--update-mode passive|active]` only prints the same block. Project sources inside the repo
+are relative to the project root, regardless of the instruction file's location;
+external overrides and global sources use absolute paths.
+
+A configured tool has the current guidance; this does not prove a read. Use a
+fresh session and **Copy verification prompt** to request `INDEX.md` and a relevant
+note, its full path, and a temporary verification value you added. Inspect the
+actual file read event manually. There is no guaranteed read telemetry.
+
+**New note** offers **Link from INDEX.md**, default checked with a readable index.
+It appends a link at EOF with a version check and backup; a failed link leaves
+the note created. **Add to INDEX** links an unindexed note. Broken links warn but
+are not removed automatically. CLI writes do not add links.
+
+A stale editor save keeps the draft and displays the latest saved content for
+comparison. Confirm **Save my draft** to replace it using the refreshed version
+and a backup. **History** and the post-delete restore link open **Backup Files**
+filtered to the absolute note path. Unsupported notes remain listed without
+blocking valid notes.
+
+**Move or rename** accepts a new relative Markdown path, creates missing folders,
+and preserves content and permissions. It requires the last-read version, rejects
+existing destinations, and backs up the source before removal. Markdown links and
+path-keyed backup history are not rewritten; keep the root `INDEX.md` in place
+because reading guidance references it. CLI commands and flags are unchanged.
+Automatic learning, native automatic memory, and Obsidian integration are not
+implemented.

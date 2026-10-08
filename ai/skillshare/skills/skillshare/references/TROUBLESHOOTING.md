@@ -56,5 +56,25 @@ source recovery; target backups do not replace source version control.
 - Copy targets contain separate files; inspect differences before collecting or overwriting.
 - Removing a symlink itself is different from traversing its destination. Use
   `target remove` for detaching targets and `uninstall` for removing source resources.
+- A symlink or junction placed directly under the skills source is ignored unless
+  `follow_source_links: true` is set; then it is followed one level under its link name,
+  `skillshare link <path> [--name <name>] [--enable]` creates one after the same safety
+  checks (a junction on Windows). `skillshare unlink <name>` or dashboard **Unlink**
+  moves only the link to trash. `uninstall <link>/<skill>` trashes the skill
+  from the real checkout, and an unavailable link target holds back pruning, including
+  read failures while traversing the target or its subdirectories, even after some
+  skills have been discovered. When the linked folder itself contains `SKILL.md`,
+  `uninstall <link>` is refused; use `unlink` or dashboard **Unlink** to keep the
+  checkout untouched.
+  Dashboard file lists include
+  `SKILL.md` and attachments even when the followed link itself is the skill root.
+  Git worktrees and submodules with a `.git` file have the same checkout guards:
+  `update --all` skips them and the dashboard refuses to update them.
+  Doctor identifies waiting target links by their stored destination, including
+  when `target_naming: standard` uses a frontmatter name.
 - Use [backup/restore](backup.md) for target snapshots and [MCP restore](mcp.md) for
   managed MCP entries. Choose the resource and scope before restoring.
+
+Replacing a skill behind a followed link keeps the old skill until the replacement succeeds; a copy failure restores it. Links in incoming staged content are copied as real files or directories, and dangling links are skipped.
+
+When dashboard target assignment writes frontmatter, it also uses this boundary: a nested `SKILL.md` link is refused without changing its target. Batch assignment reports the refusal for that skill and continues with regular skills.

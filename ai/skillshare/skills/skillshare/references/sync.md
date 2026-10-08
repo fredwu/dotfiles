@@ -15,12 +15,14 @@ Distribute skills from source to all targets using each target's sync mode (`mer
 
 ```bash
 skillshare sync                # Execute (auto-detects mode)
-skillshare sync --all          # Sync skills + agents + extras + MCP
+skillshare sync --all          # Sync skills + agents + extras + MCP + hooks
 skillshare sync --dry-run      # Preview
 skillshare sync --force        # Override conflicts
 skillshare sync --json         # JSON output
 skillshare sync -g             # Force global mode
 ```
+
+Sync runs every target. A target whose sync fails, or whose own settings are invalid (for example a skills path that is a file), is reported as failed and skipped; the rest still sync and the command exits non-zero. Config-wide problems (source, global `mode`/`target_naming`, `git_root`, extras) still stop sync before any target runs. Under `target_naming: standard`, a skill name must equal its directory name and use at most 64 lowercase letters (any script), digits and single hyphens, with no leading or trailing `-` and no underscores; other skills are warned and skipped.
 
 ### Sync modes (quick reference)
 
@@ -72,7 +74,7 @@ extras:
 
 Source: `~/.config/skillshare/extras/<name>/` (global) or `.skillshare/extras/<name>/` (project). Modes: `merge` (default, per-file symlinks), `copy`, `symlink`.
 
-`--json` returns a non-zero exit status when extras sync has errors. For single-file extras, `--dry-run` also reports edits that would be backed up before replacement.
+`--json` returns a non-zero exit status when extras sync has errors. `sync --all` also exits non-zero when an extras target fails, with or without `--json`. An extra whose source directory does not exist is skipped with a hint, not created. For single-file extras, `--dry-run` also reports edits that would be backed up before replacement.
 
 Identical local files are preserved and reported as `local preserved`; `sync extras` does not suggest `--force` for them. They remain local files, not managed links.
 
@@ -113,8 +115,17 @@ Git commit and push source to remote. **Global mode only.**
 ```bash
 skillshare push                # Default message
 skillshare push -m "message"   # Custom message
+skillshare push --pull         # Merge remote changes, push, then sync targets
 skillshare push --dry-run      # Preview
 ```
+
+At `git_root: root`, unpushed commits that add or modify `config.yaml` (including
+its directory tree) block push, `--pull`, and `--dry-run`. Unpushed means on no
+ref of the push remote (upstream remote, or `origin` before the first push);
+push always sends only the current branch there. Remove the file from the listed
+commits with the `git rebase -i <commit>` shown in the error and amend them
+before retrying; skillshare never rewrites history automatically. A later
+removal does not erase earlier contents. Removal-only commits remain pushable.
 
 **Project mode:** Use `git push` directly on the project repo.
 
@@ -138,6 +149,10 @@ the source; editing a copy target does not. Inspect `diff` before collecting cop
 
 **Import local changes:** `collect <target>` → `sync`
 
-**Cross-machine sync (global):** Machine A: `push` → Machine B: `pull`
+**Cross-machine sync (global):** Machine A: `push` → Machine B: `pull`. `pull` syncs
+only what `git_root` holds. Plugins, hooks and MCP live in `config.yaml`, which no
+scope tracks: run `sync --all` and `sync plugins` after `pull`, re-add plugins from an
+HTTPS source on each machine (imports are not portable), and keep MCP in a
+`sources.mcp` file inside a `root`-scope repository to version it.
 
 **Team sharing (project):** Edit `.skillshare/skills/` → `git commit && git push` → Team: `git pull && skillshare install -p && skillshare sync`

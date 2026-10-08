@@ -74,7 +74,9 @@ skillshare search <query> -n 10     # Limit results (default: 20)
 
 ## doctor
 
-Diagnose configuration and environment issues. Also checks for sync drift.
+Diagnose configuration and environment issues. Also checks sync drift for skills, agents and extras, plus MCP servers, hooks and plugins (offline; `mcp check --live` and `plugin check` go further).
+
+In global and project mode, each first-level symlink or Windows junction in the skills source gets a line. With `follow_source_links` off (default) it is info: discovery does not follow it, so its contents are invisible to skillshare; set `follow_source_links: true` in the global or project config to follow such links one level. With it on, the line says `followed as a directory`, or warns `not followed: <reason>` (target missing, source root, or sync target overlap); target links behind an unavailable link are reported as kept, not as broken links to prune. With no such links, it adds no output. In `doctor --json`, each link is an `undeclared_source_links` check with status `info` or `warning`.
 
 ```bash
 skillshare doctor
@@ -90,6 +92,11 @@ Use `--no-tui` for plain terminal output.
 
 Upgrade CLI binary and/or built-in skillshare skill.
 
+The macOS/Linux install script defaults to `~/.local/bin`, so normal updates do not
+need `sudo`. Keep that directory first in PATH; the installer warns if an older
+binary takes precedence. Existing installations stay in place, and updates to a
+protected custom directory can still require `sudo`.
+
 ```bash
 skillshare upgrade              # Both CLI + skill
 skillshare upgrade --cli        # CLI only
@@ -103,3 +110,7 @@ skillshare upgrade --dry-run    # Preview
 is requested. `init --skill` also opts in explicitly.
 
 **After upgrading skill:** `skillshare sync`
+
+`list` and `status` warn when an enabled `follow_source_links` policy skips an unavailable first-level source link; healthy skills remain in the inventory. With `--json`, warnings go to stderr so stdout stays valid JSON.
+
+The dashboard Updates tab lists followed Git checkouts as information only, with the link name and target path. It does not check, update, or force-retry them; manage them yourself or use `skillshare update <link>` explicitly.

@@ -83,6 +83,8 @@ skillshare install user/repo --skip-audit             # Skip security scan
 
 **Fuzzy subdirectory resolution:** When a monorepo has nested skill directories, you can specify just the skill name — e.g., `user/repo/vue-best-practices` finds `skills/vue-best-practices/` automatically. Fails with an error if multiple matches exist.
 
+**Git submodules:** skillshare does not fetch submodules. A path that is, or lies inside, a submodule fails with an error naming its upstream URL; install from that upstream instead. Whole-repo browsing, `--track` and `update` warn about each submodule they skip.
+
 **Tracked repos:** Prefixed with `_`, nested with `__` (e.g., `_team__frontend__ui`).
 Tracked custom names must not contain path separators (`/`, `\`) or `..`.
 
@@ -116,6 +118,9 @@ skillshare check -p          # Check project skills
 - **Remote skills:** Compares installed version with remote HEAD
 - **Local skills:** Shown as "local source"
 - **Targets validation:** Warns about unknown target names in skill-level `targets` field
+
+With `follow_source_links: true`, check a followed Git checkout by its link name:
+`skillshare check _dev-skills`.
 
 ## update
 
@@ -153,7 +158,10 @@ skillshare update _repo --force -p  # Discard local changes
 | `--json` | JSON output |
 | `--diff` | Show file-level change summary after update |
 
-**Safety:** Tracked repos with uncommitted changes are skipped. Use `--force` to override.
+With `follow_source_links: true`, `update --all` skips followed Git checkouts,
+even with `--force`; update them by name instead.
+
+**Safety:** Tracked repos with uncommitted changes are skipped, and repos whose git status cannot be read fail. Use `--force` to override both.
 
 **Security:** Updates roll back when findings reach the configured block threshold.
 `--audit-threshold` / `--threshold` / `-T` overrides the threshold for the run.
@@ -189,6 +197,10 @@ skillshare uninstall --group frontend --dry-run
 # Global JSON output (skips confirmation; dirty tracked repos still require --force)
 skillshare uninstall my-skill --json
 ```
+
+**Tracked repo names:** `uninstall org/team` accepts the shorthand for `org/_team` installed with `--into org`. An existing skill or folder at the typed path wins; use `org/_team` to explicitly remove the repo. Ambiguous short names require the full path.
+
+**Safety:** Tracked repos with uncommitted changes are skipped, and repos whose git status cannot be read fail. Use `--force` to override both.
 
 **Group auto-detection:** When uninstalling a directory that contains sub-skills, the confirmation prompt shows `Uninstalling group (N skills)` with a list of contained skills.
 
