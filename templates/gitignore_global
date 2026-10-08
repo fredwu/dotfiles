@@ -39,4 +39,5 @@ Thumbs.db
 .elixir_ls/
 
 /CLAUDE.local.md
+.claude
 .claude/settings.local.json

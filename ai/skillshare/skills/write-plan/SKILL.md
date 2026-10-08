@@ -7,9 +7,15 @@ description: Investigate a repository or workflow read-only and save an evidence
 
 Save a self-contained executable plan. Only create or edit that plan; keep implementation and external state unchanged.
 
+## Original planning
+
+Before investigation, exclude all other plans in the repository. Do not discover, read, search, compare, or reuse them, or derive requirements, decisions, structure, sequencing, or findings from them. Exclude plan files and directories from broad content searches. Destination path and existence checks are allowed to prevent collisions, without reading existing plan contents.
+
+Apply this exclusion to delegated research and review, and to plan content in summaries, memory, or already-loaded context. Ground the original plan in current user requirements, repository instructions, actual implementation and tests, and relevant non-plan documentation. Other plans and plan-derived material are not evidence, even when they describe the same task.
+
 ## Requirement and destination
 
-Read and apply [Resolve plan requirements](references/requirements.md) for new plans and revisions. Start with concise `## User requirements`, then `## TL;DR` immediately after the requirements and any update subsection. Capture current intent and source, not a transcript of the chat.
+Read and apply [Resolve plan requirements](references/requirements.md) within these source exclusions; its fallback to stored requirements or digests must not use other plans or plan-derived material. Start with concise `## User requirements`, then `## TL;DR` immediately after the requirements and any update subsection. Capture current intent and source, not a transcript of the chat.
 
 Honor an explicit output path. Otherwise use `.local/<topic>-plan-<agent>.md`, with a concise kebab-case topic and runtime-derived `claude`, `codex`, `grok`, or `agent`. For collisions, insert the first available number before the agent suffix. Never overwrite an unrelated plan; report explicit-path conflicts.
 
