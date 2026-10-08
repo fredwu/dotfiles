@@ -1,6 +1,6 @@
 interface:
   display_name: "Grok Review"
-  short_description: "Run one external Grok review"
-  default_prompt: "Use $grok-review to run one read-only external Grok review of the current change."
+  short_description: "Run one external Grok ACP review"
+  default_prompt: "Use $grok-review to run one read-only external Grok ACP review of the current change."
 policy:
   allow_implicit_invocation: false

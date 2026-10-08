@@ -1,0 +1,6 @@
+interface:
+  display_name: "Claude Review Loop"
+  short_description: "Iterate with bounded external Claude ACP reviews"
+  default_prompt: "Use $claude-review-loop to review and remediate the current change through bounded Claude ACP rounds."
+policy:
+  allow_implicit_invocation: false

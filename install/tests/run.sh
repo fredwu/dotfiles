@@ -872,8 +872,9 @@ test_skillshare_real_cli_accepts_generated_config_when_available() {
     return
   fi
   version=$("$binary" --version | sed -nE 's/.*v([0-9]+\.[0-9]+\.[0-9]+).*/\1/p')
-  if [[ "$version" != 0.20.25 ]]; then
-    finish_test "real Skillshare config validation skipped because v0.20.25 is unavailable"
+  [[ -n "$version" ]] || fail "cannot determine the installed Skillshare version"
+  if ! version_at_least "$version" 0.20.25; then
+    finish_test "real Skillshare config validation skipped because v$version is below v0.20.25"
     return
   fi
 
@@ -891,10 +892,10 @@ test_skillshare_real_cli_accepts_generated_config_when_available() {
     "$config" "$TEST_ROOT/ai/skillshare/agents" "$HOME/.claude/agents" \
     "$HOME/.codex/agents" "$config_home/skillshare/agents" >/dev/null
   HOME="$HOME" XDG_CONFIG_HOME="$config_home" "$binary" status --json -g > "$status"
-  assert_true "real Skillshare should parse the generated config" grep -Fq '"version": "0.20.25"' "$status"
+  assert_true "real Skillshare should parse the generated config" grep -Fq "\"version\": \"$version\"" "$status"
   assert_true "real Skillshare should see an empty native agent source" grep -Fq '"count": 0' "$status"
   assert_true "real Skillshare should report no native agent drift" grep -Fq '"drift": false' "$status"
-  finish_test "real Skillshare v0.20.25 accepts generated config when available"
+  finish_test "real Skillshare v$version accepts generated config when available"
 }
 
 test_shared_agents_are_provider_neutral() {
@@ -925,14 +926,25 @@ test_shared_agents_are_provider_neutral() {
     "$TEST_ROOT/ai/skillshare/extensions/dotfiles-codex-agents/convert.js" \
     < "$agent_file" > "$codex_output"
 
-  assert_true "Claude generation should use the model map" \
-    grep -Fxq 'model: "opus"' "$claude_output"
-  assert_true "Claude generation should use the mapped effort" \
-    grep -Fxq 'effort: "medium"' "$claude_output"
-  assert_true "Codex generation should use the model map" \
-    grep -Fxq 'model = "gpt-5.6-sol"' "$codex_output"
-  assert_true "Codex generation should use the mapped reasoning effort" \
-    grep -Fxq 'model_reasoning_effort = "medium"' "$codex_output"
+  env -u NODE_OPTIONS node - "$TEST_ROOT/ai/skillshare/agent-models.json" \
+    "$claude_output" "$codex_output" <<'NODE'
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const [mapPath, claudePath, codexPath] = process.argv.slice(2);
+const expected = JSON.parse(fs.readFileSync(mapPath, "utf8")).fastworker;
+for (const [provider, outputPath, separator] of [
+  ["claude", claudePath, ": "],
+  ["codex", codexPath, " = "],
+]) {
+  const lines = fs.readFileSync(outputPath, "utf8").split("\n");
+  for (const [field, value] of Object.entries(expected[provider])) {
+    assert.ok(
+      lines.includes(`${field}${separator}${JSON.stringify(value)}`),
+      `${provider} generation should use the mapped ${field}`,
+    );
+  }
+}
+NODE
   assert_false "generated agents should not include a service tier" \
     grep -q 'service_tier' "$codex_output"
   finish_test "neutral agents generate provider-specific model settings"

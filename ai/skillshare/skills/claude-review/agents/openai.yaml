@@ -1,0 +1,6 @@
+interface:
+  display_name: "Claude Review"
+  short_description: "Run one external Claude ACP review"
+  default_prompt: "Use $claude-review to run one read-only external Claude ACP review of the current change."
+policy:
+  allow_implicit_invocation: false

@@ -1,11 +1,11 @@
 ---
-name: codex-review
-description: Run one read-only external Codex review over ACP and assess its findings. Use only when explicitly invoked or requested by name, including from another skill. Use codex-review-loop for iterative remediation.
+name: claude-review
+description: Run one read-only external Claude review over ACP and assess its findings. Use only when explicitly invoked or requested by name, including from another skill. Use claude-review-loop for iterative remediation.
 ---
 
-# Codex Review
+# Claude Review
 
-Run exactly one model-bearing ACP prompt in one fresh Codex session. Protocol and authentication preflight do not count. Do not edit, remediate, publish, retry, follow up, or invoke another review. The caller owns scope and assessment.
+Run exactly one model-bearing ACP prompt in one fresh Claude session. Protocol and authentication preflight do not count. Do not edit, remediate, publish, retry, follow up, or invoke another review. The caller owns scope and assessment.
 
 Read [code-review](../code-review/SKILL.md) for the frozen target, review lenses, confidence threshold, priorities, and output contract. Read [the shared ACP runtime](../code-review/references/acp-runtime.md) before preparing or sending the request. Explicit invocation authorizes only the minimum non-secret transfer; exclude credentials, unrelated data, the conversation, prior reviews, and hidden conclusions.
 
@@ -21,7 +21,7 @@ Require exactly one terminal JSON object conforming to the external schema, with
 
 ## Assess and return
 
-Run the shared ACP client with `--agent codex`. Apply its preflight, isolation, deadline, protocol, completion, mutation, and cleanup checks. A failed or incomplete call never establishes a clean result. Assess only valid completed output; do not salvage partial stream fragments or retry through a CLI.
+Run the shared ACP client with `--agent claude`. Apply its preflight, isolation, deadline, protocol, completion, mutation, and cleanup checks. A failed or incomplete call never establishes a clean result. Assess only valid completed output; do not salvage partial stream fragments or retry through a CLI.
 
 Independently verify valid findings and normalize to [the canonical schema](../code-review/references/review-result.schema.json) with `assessment: accept | partial | decline` and `assessment_rationale`. This assessment is not another review round.
 
