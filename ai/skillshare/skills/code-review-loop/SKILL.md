@@ -15,6 +15,14 @@ Track findings in context: stable ID, evidence, assessment (`accept`, `partial`,
 
 Apply `code-review`'s shared lenses and the assessment and remediation policy below to all authorized repairs, including residual work after the bounded loop.
 
+## Coordinate agents
+
+Consider subagents for independent inspection, coherent repairs, or verification when callable, permitted capabilities can improve speed, coverage, or scrutiny enough to justify coordination. The agent decides; delegation and fixed agent counts are not required. Direct work is appropriate for small or tightly coupled tasks, or when delegation is unavailable. Prefer `worker` for complex or uncertain review, remediation, and verification, and `fastworker` for simple bounded evidence, documentation, or checks; use the closest available capabilities when these roles are absent. The coordinator owns decomposition, holistic assessment, finding status, integration, and remaining work.
+
+Consider a reviewer separate from the implementer when independent scrutiny adds value. Delegated reviewers and their inspectors must receive only the permitted round inputs below in fresh context; do not use a full-history fork or reused repair agent context that carries excluded findings, repair narrative, output, or conclusions. The coordinator may review directly. Report independence accurately. Parallel read-only inspections form one review and yield one terminal `REVIEW_RESULT`; they do not consume or add rounds. Keep the reviewed state unchanged until all inspection finishes.
+
+After holistic assessment, give repair and check agents the shared remediation plan, affected invariants, exact ownership, dependencies, acceptance checks, exclusions, and authority limits. Use disjoint edit ownership where possible; serialize overlapping edits and checks sharing mutable services, databases, fixtures, or generated outputs. Continue useful non-overlapping work and reuse suitable repair agents and valid evidence without carrying their history into fresh reviewer context. Request changed paths, source or failure evidence, exact check results, and residuals. Await assignments, inspect and reconcile their results, and verify the integrated repair before the next review. Delegated agents cannot close findings or establish clean loop completion.
+
 ## Assess and remediate holistically
 
 Before any remediation edit, assess the complete round result together with all open accepted findings. Independently validate each claim against source, reachable behavior, and the original requirements. Treat proposed remedies as suggestions; reject unsupported claims with evidence and assess valid parts separately.
@@ -25,13 +33,13 @@ Make a proportionate remediation and verification plan in context before editing
 
 Include directly necessary refactors and their affected tests, configuration, and documentation in the task-attributable surface and explain the scope change. Original authorization and exclusions remain binding; record a concrete blocker if the coherent correction requires work outside them. Complete independent authorized work.
 
-Resolve related findings together and sequence dependent repairs. Give delegated workers the shared plan and affected invariants, coordinate shared files, and reconcile the integrated result before the next review. Reassess the cause and revise the plan when a finding repeats, a repair regresses behavior, or checks expose conflicting assumptions; do not accumulate symptom patches.
+Resolve related findings together and sequence dependent repairs. Reassess the cause and revise the plan when a finding repeats, a repair regresses behavior, or checks expose conflicting assumptions; do not accumulate symptom patches.
 
 Verify the original failure and surviving behavior across affected consumers and integrated paths. Add focused regression coverage when practical, run required checks, perform warranted cleanup, and inspect the combined diff for unintended behavior and architectural regressions. During the active bounded loop, record repair and check evidence while findings await review; mark them `fixed` only after the integrated correction passes verification and a fresh review covers the repairs and newly affected refactor paths. Individual finding checks alone do not close the related set. Post-loop residual closure follows the recovery rules below.
 
 ## Run bounded rounds
 
-Keep rounds and fixes sequential. Use `code-review`'s parallel inspection policy within a round; read-only workers do not consume rounds. Delegate fixes and checks under applicable routing and reconcile results before the next review. The coordinator owns finding status and remaining work.
+Keep review rounds and remediation stages sequential. Use `code-review`'s optional parallel inspection policy within a round and coordinate independent repairs within the following remediation stage. Do not overlap review with edits, start a second loop, or advance while assigned work remains unreconciled.
 
 For each reached round, run one fresh `code-review` invocation in embedded mode. Pass only:
 
