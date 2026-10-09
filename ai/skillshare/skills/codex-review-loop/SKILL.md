@@ -7,6 +7,8 @@ description: Review and remediate code through bounded external Codex ACP rounds
 
 Read [code-review-loop](../code-review-loop/SKILL.md) and [codex-review](../codex-review/SKILL.md), including their required references. Inherit the canonical loop, including early broad clean completion, mandatory fresh review after every remediation (also after round 3), focused continuation and broad closing reviews in rounds 4-9, sequential review counting, and the final broad read-only audit if round 10 is reached; substitute only the reviewer and runtime below.
 
+Apply the canonical [holistic assessment and remediation policy](../code-review-loop/SKILL.md#assess-and-remediate-holistically) to the complete round result and open accepted findings, including warranted refactors, integrated verification, and authorized residual work. The caller owns this policy; keep its plans and assessment history out of isolated reviewer prompts.
+
 Explicit invocation authorizes reached Codex prompts and minimum non-secret transfer only. It does not authorize unrelated data transfer, remote writes, or expanded remediation.
 
 ## Substitute the reviewer

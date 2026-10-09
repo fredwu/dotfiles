@@ -13,7 +13,21 @@ Read the complete request, applicable repository instructions, and `../code-revi
 
 Track findings in context: stable ID, evidence, assessment (`accept`, `partial`, `decline`), disposition (`fixed`, `rejected`, `blocked`, `unresolved`), and verification. File-based ledgers follow the temporary-file rules below. Mark missing authority, input, or external-state change as `blocked`, with what is needed. Mark accepted findings without a concrete blocker remaining at a terminal audit or stop as `unresolved`, with reason and next action. Do not defer authorized work.
 
-Apply `code-review`'s cleanup and durable-correction guidance; fix accepted, authorized findings and verify surviving behavior.
+Apply `code-review`'s shared lenses and the assessment and remediation policy below to all authorized repairs, including residual work after the bounded loop.
+
+## Assess and remediate holistically
+
+Before any remediation edit, assess the complete round result together with all open accepted findings. Independently validate each claim against source, reachable behavior, and the original requirements. Treat proposed remedies as suggestions; reject unsupported claims with evidence and assess valid parts separately.
+
+Group related findings by root cause and affected behavior. Identify dependencies, conflicting remedies, and repairs that can change another finding's assumptions. Trace affected ownership, module boundaries, call sites, data flow, and invariants before choosing a correction. Check required behavior across consumers, including paths the reported reproduction does not exercise.
+
+Make a proportionate remediation and verification plan in context before editing. Map each accepted finding and the valid portion of each partial assessment to the shared causes, intended behavior, related repairs, dependency order, and checks for regression risk. Choose the smallest coherent, durable correction with clean code, clear architecture, and maintainability in mind. Refactor when local patches would duplicate rules, obscure ownership, increase coupling, or leave the root cause in place. Simplify the responsible boundaries and dependencies; do not add flags, special cases, fallback paths, or compatibility layers merely to conceal the defect. Preserve required behavior and explicit compatibility. Avoid unrelated redesign.
+
+Include directly necessary refactors and their affected tests, configuration, and documentation in the task-attributable surface and explain the scope change. Original authorization and exclusions remain binding; record a concrete blocker if the coherent correction requires work outside them. Complete independent authorized work.
+
+Resolve related findings together and sequence dependent repairs. Give delegated workers the shared plan and affected invariants, coordinate shared files, and reconcile the integrated result before the next review. Reassess the cause and revise the plan when a finding repeats, a repair regresses behavior, or checks expose conflicting assumptions; do not accumulate symptom patches.
+
+Verify the original failure and surviving behavior across affected consumers and integrated paths. Add focused regression coverage when practical, run required checks, perform warranted cleanup, and inspect the combined diff for unintended behavior and architectural regressions. During the active bounded loop, record repair and check evidence while findings await review; mark them `fixed` only after the integrated correction passes verification and a fresh review covers the repairs and newly affected refactor paths. Individual finding checks alone do not close the related set. Post-loop residual closure follows the recovery rules below.
 
 ## Run bounded rounds
 
@@ -31,9 +45,9 @@ Do not pass finding history, remediation narrative, earlier output, or prior con
 
 Snapshot relevant state immediately before and after every review. Reviewers must not mutate the tree. If one does, reverse only its exact delta when safe; otherwise stop and ask the user. On malformed or incomplete output, stop the invocation as incomplete; do not invent findings, retry, or advance to another round.
 
-After every completed review, independently assess findings, fix accepted or valid partial findings, perform warranted cleanup, run applicable required checks, and update the task-attributable surface, except during the final read-only audit. Every task edit after a review, including cleanup or a repair for a failed check, invalidates that review as evidence of clean completion. Run the next available fresh review on the resulting state; passing checks or marking findings fixed does not replace it. Do not stop at round 3 or hand off to `final-pass` while this required follow-up remains available.
+After every completed review, apply the shared assessment and remediation policy, fix accepted or valid partial findings, and update the task-attributable surface, except during the final read-only audit. Every task edit after a review, including cleanup or a repair for a failed check, invalidates that review as evidence of clean completion. Run the next available fresh review on the resulting state; passing checks or marking findings fixed does not replace it. Do not stop at round 3 or hand off to `final-pass` while this required follow-up remains available.
 
-Keep previously accepted findings open until their repairs have been reviewed and verified, regardless of their original priority. A narrower phase never discards known P2/P3 work. Reject unsupported findings with evidence; if an accepted issue cannot be resolved within scope and authority, record the concrete blocker. Repeated advice or lack of progress calls for reassessment and root-cause work, not an automatic early stop.
+Keep previously accepted findings open until their repairs have been reviewed and verified, regardless of their original priority. A narrower phase never discards known P2/P3 work. If an accepted issue cannot be resolved within scope and authority, record the concrete blocker. Lack of progress calls for reassessment and root-cause work, not an automatic early stop.
 
 ### Rounds 1-3: broad
 
@@ -61,11 +75,15 @@ This is the final review: perform no remediation during it or afterward within t
 
 ## Finish
 
-When used during plan execution, follow [Completion and review checkpoints](../execute-plan/SKILL.md#completion-and-review-checkpoints). After the final audit or a genuinely incomplete invocation, return all unresolved findings, failed checks, and incomplete review status to the executor for direct remediation in `final-pass`; a capped or incomplete review is not execution completion. For a standalone request, continue authorized residual remediation through `final-pass` after this bounded invocation ends. Do not restart the loop or add review rounds, and keep the terminal audit read-only. Preserve explicit read-only authority and report true external blockers.
+When used during plan execution, follow [Completion and review checkpoints](../execute-plan/SKILL.md#completion-and-review-checkpoints). After the final audit or a genuinely incomplete invocation, return all unresolved findings, failed checks, incomplete review status, and the current grouped remediation plan to the executor for direct remediation in `final-pass`; a capped or incomplete review is not execution completion. For a standalone request, continue authorized residual remediation through `final-pass` after this bounded invocation ends. Preserve the shared holistic assessment and remediation policy during residual work. Do not restart the loop or add review rounds, and keep the terminal audit read-only. Preserve explicit read-only authority and report true external blockers.
+
+After the loop ends, mark residual findings `fixed` only when `final-pass`'s direct inspection of missing review coverage and required checks establish evidence for the integrated repair. Report this closure as verified without a fresh review; preserve the original capped or incomplete loop status. Recovery cannot establish a clean loop or replace an available required round.
+
+For an agent caller, use one handoff containing the unchanged terminal `REVIEW_RESULT`, when available, and a separate caller-owned ledger section for independently assessed prior accepted or unresolved findings, material assessment disputes, and the grouped remediation plan. Preserve shared finding fields and independent source or check evidence in the ledger. An incomplete `REVIEW_RESULT` retains `findings: []`; never insert ledger entries into it or use malformed output or partial progress to establish findings or closure. Report missing terminal output as a review limit. External variants inherit this handoff; keep the ledger and history out of reviewer prompts.
 
 Independently inspect the final diff and dirty state, confirm unrelated work is intact, and report the exact checks run.
 
-Lead with remaining findings, then fixes, reached rounds/phases, exact checks, and material limits. Use short, plain prose; skip stock headings and repeated summaries. Say `No findings.` only after a completed review with none remaining; distinguish verified fixes from changes not reviewed again. Incomplete output or failed checks cannot establish clean completion. For an agent caller, preserve shared finding fields for unresolved items and material assessment disputes. Use one handoff format. Save user reports or include reviewer transcripts only if requested.
+Lead with remaining findings, then fixes, reached rounds/phases, exact checks, and material limits. Use short, plain prose; skip stock headings and repeated summaries. Say `No findings.` only after a completed review with none remaining; distinguish verified fixes from changes not reviewed again. Incomplete output or failed checks cannot establish clean completion. Save user reports or include reviewer transcripts only if requested.
 
 ## Temporary files
 
