@@ -21,7 +21,7 @@ Require exactly one terminal JSON object conforming to the external schema, with
 
 ## Assess and return
 
-Run the shared ACP client with `--agent claude`. Apply its preflight, isolation, deadline, protocol, completion, mutation, and cleanup checks. A failed or incomplete call never establishes a clean result. Assess only valid completed output; do not salvage partial stream fragments or retry through a CLI.
+Choose the budget under [the shared review time-budget policy](../code-review/SKILL.md#choose-the-review-time-budget), then run the shared ACP client with `--agent claude` and explicit `--timeout-seconds "$REVIEW_TIMEOUT_SECONDS"`, where the variable contains the caller-selected positive finite seconds. Apply its preflight, isolation, deadline, protocol, completion, mutation, and cleanup checks. A failed or incomplete call never establishes a clean result. Assess only valid completed output; do not salvage partial stream fragments or retry through a CLI.
 
 Independently verify valid findings and normalize to [the canonical schema](../code-review/references/review-result.schema.json) with `assessment: accept | partial | decline` and `assessment_rationale`. This assessment is not another review round.
 

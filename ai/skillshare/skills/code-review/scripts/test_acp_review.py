@@ -926,6 +926,8 @@ acp_review.AcpReview.handle_client_request = growing_handle
                 "codex",
                 "--request",
                 str(request),
+                "--timeout-seconds",
+                "5",
                 "--output",
                 str(output),
                 *(["--snapshot", str(snapshot)] if snapshot is not None else []),
@@ -1054,7 +1056,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
         self.assertNotIn(b"Future exception was never retrieved", process.stderr)
 
     def test_send_failure_removes_owned_pending_requests(self):
-        runner = review.AcpReview([], cwd=self.cwd)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2)
 
         async def failed_send(_):
             runner.fail("Peer input closed.")
@@ -1067,7 +1069,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
         self.assertEqual(runner.pending_methods, {})
 
     def test_cancellation_during_send_settles_owned_future(self):
-        runner = review.AcpReview([], cwd=self.cwd)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2)
 
         async def blocked_send(_):
             await asyncio.sleep(60)
@@ -1430,7 +1432,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
     def test_active_file_read_size_is_bounded_if_source_grows_after_stat(self):
         source = self.snapshot_file()
         source.write_bytes(b"first\n")
-        runner = review.AcpReview([], cwd=self.cwd, tool_access=True)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2, tool_access=True)
         runner.session_id = "root"
         runner.prompt_started = True
         replies, sizes = [], []
@@ -1470,7 +1472,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
         source = self.snapshot_file()
         source.write_bytes(b"first\n")
         before = source.read_bytes()
-        runner = review.AcpReview([], cwd=self.cwd, tool_access=True)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2, tool_access=True)
         runner.session_id = "root"
         runner.prompt_started = True
         replies, observed = [], []
@@ -1824,7 +1826,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
             self.capability_reply()["result"]["outcome"],
             {"outcome": "selected", "optionId": "decline"},
         )
-        runner = review.AcpReview([], cwd=self.cwd, provider="codex")
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2, provider="codex")
         self.assertIsNone(
             runner.permission_rejection(
                 {"options": [{"kind": "reject_once", "optionId": "cancel"}]}
@@ -1858,7 +1860,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
         )
 
     def test_agent_input_prompt_applies_only_to_agent_tool_provider(self):
-        runner = review.AcpReview([], cwd=self.cwd, tool_access=True)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2, tool_access=True)
         for agent_tools in (False, True):
             prompt = review.make_prompt(
                 "Frozen snapshot",
@@ -2019,7 +2021,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
                             field=field, child=child, kind=kind, path=path
                         ):
                             runner = review.AcpReview(
-                                [], cwd=self.cwd, tool_access=True
+                                [], cwd=self.cwd, timeout=2, tool_access=True
                             )
                             runner.session_id = "root"
                             runner.prompt_started = True
@@ -2150,7 +2152,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
         )
 
     def test_tool_cache_retains_only_permission_fields(self):
-        runner = review.AcpReview([], cwd=self.cwd, tool_access=True)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2, tool_access=True)
         runner.session_id = "root"
         runner.prompt_started = True
         fields = {
@@ -2220,7 +2222,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
 
     def test_tool_metadata_and_identifiers_have_a_bounded_total(self):
         self.snapshot_file()
-        runner = review.AcpReview([], cwd=self.cwd, tool_access=True)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2, tool_access=True)
         runner.session_id = "root"
         runner.prompt_started = True
         with (
@@ -2342,7 +2344,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
 
     def test_reader_preserves_mutation_and_programming_error_boundaries(self):
         async def inspect(error):
-            runner = review.AcpReview([], cwd=self.cwd)
+            runner = review.AcpReview([], cwd=self.cwd, timeout=2)
             stream = asyncio.StreamReader()
             stream.feed_data(b'{"jsonrpc":"2.0","method":"_test"}\n')
             stream.feed_eof()
@@ -2429,7 +2431,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
 
     def test_unclassified_tool_paths_and_cached_nullable_updates_remain_scoped(self):
         self.snapshot_file()
-        runner = review.AcpReview([], cwd=self.cwd, tool_access=True)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2, tool_access=True)
         runner.session_id = "root"
         runner.prompt_started = True
         runner.record_tool(
@@ -2460,7 +2462,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
 
     def test_default_other_metadata_does_not_grant_read_permissions(self):
         self.snapshot_file()
-        runner = review.AcpReview([], cwd=self.cwd, tool_access=True)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2, tool_access=True)
         runner.session_id = "root"
         runner.prompt_started = True
         runner.record_tool(
@@ -2515,7 +2517,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
         self.snapshot_file()
         (self.cwd / "current/src/cwd-alias").mkdir()
         runner = review.AcpReview(
-            [], cwd=self.cwd, tool_access=True, allow_subagents=True
+            [], cwd=self.cwd, timeout=2, tool_access=True, allow_subagents=True
         )
         runner.session_id = "root"
         runner.child_sessions["child"] = "root"
@@ -2642,7 +2644,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
                     {"outcome": "cancelled"},
                 )
         runner = review.AcpReview(
-            [], cwd=self.cwd, tool_access=True, allow_subagents=True
+            [], cwd=self.cwd, timeout=2, tool_access=True, allow_subagents=True
         )
         runner.session_id = "root"
         runner.prompt_started = True
@@ -2750,7 +2752,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
                     self.capability_reply().get("result", {}).get("outcome"),
                     {"outcome": "selected", "optionId": "read-once"},
                 )
-        runner = review.AcpReview([], cwd=self.cwd, tool_access=True)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2, tool_access=True)
         for path in (
             "~",
             "~/current/source.py",
@@ -2770,7 +2772,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
 
     def test_native_updates_recheck_cached_paths_for_symlinks(self):
         self.snapshot_file()
-        runner = review.AcpReview([], cwd=self.cwd, tool_access=True)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2, tool_access=True)
         runner.session_id = "root"
         runner.prompt_started = True
         runner.record_tool(
@@ -2841,7 +2843,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
             self.assertEqual(self.run_peer("output_metadata_empty"), CLEAN)
 
     def test_empty_chunks_do_not_accumulate_or_recount_retained_identifiers(self):
-        runner = review.AcpReview([], cwd=self.cwd)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2)
         update = {"messageId": "message", "content": {"type": "text", "text": ""}}
         with patch.object(review, "MAX_TEXT_BYTES", 64):
             runner.record_message(update)
@@ -2855,7 +2857,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
         )
 
     def test_nonempty_fragments_charge_bookkeeping_before_retention(self):
-        runner = review.AcpReview([], cwd=self.cwd)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2)
         update = {"content": {"type": "text", "text": "x"}}
         with patch.object(review, "MAX_TEXT_BYTES", 64):
             runner.record_message(update)
@@ -3045,7 +3047,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
 
     def test_nonempty_working_directory_fails_before_start(self):
         (self.cwd / "ambient.txt").write_text("ambient")
-        runner = review.AcpReview(["/absent/peer"], cwd=self.cwd)
+        runner = review.AcpReview(["/absent/peer"], cwd=self.cwd, timeout=2)
         result = asyncio.run(runner.run("Snapshot", SCHEMA))
         self.assertIn("empty private working directory", result["residual_risk"])
         self.assertIsNone(runner.process)
@@ -3057,14 +3059,61 @@ acp_review.AcpReview.handle_client_request = growing_handle
         self.assertEqual([m["method"] for m in self.messages()], ["initialize"])
         self.assertEqual(self.transport_status(result)["stage"], "initialize")
 
+    def test_total_deadline_is_required_and_finite_positive_for_direct_callers(self):
+        with self.assertRaises(TypeError):
+            review.AcpReview([], cwd=self.cwd)
+        for timeout in (None, True, "7200", 0, -1, float("inf"), float("nan")):
+            with self.subTest(timeout=timeout), self.assertRaises(ValueError):
+                review.AcpReview([], cwd=self.cwd, timeout=timeout)
+        self.assertFalse(self.log.exists())
+
+    def test_cli_requires_valid_explicit_deadline_before_preflight_or_launch(self):
+        request = self.root / "deadline-request.txt"
+        output = self.root / "deadline-result.json"
+        request.write_text("Frozen snapshot")
+        for agent in ("codex", "claude", "grok"):
+            for value in (None, "0", "-1", "inf", "-inf", "nan", "invalid"):
+                arguments = [
+                    "acp_review.py",
+                    "--agent",
+                    agent,
+                    "--request",
+                    str(request),
+                    "--output",
+                    str(output),
+                ]
+                if value is not None:
+                    arguments.append(f"--timeout-seconds={value}")
+                errors = io.StringIO()
+                with (
+                    self.subTest(agent=agent, value=value),
+                    patch.object(sys, "argv", arguments),
+                    patch.object(review, "provider_launch") as launch,
+                    patch.object(review, "AtomicResult") as stage,
+                    contextlib.redirect_stderr(errors),
+                    self.assertRaises(SystemExit) as stopped,
+                ):
+                    review.main()
+                self.assertEqual(stopped.exception.code, 2)
+                self.assertIn("--timeout-seconds", errors.getvalue())
+                launch.assert_not_called()
+                stage.assert_not_called()
+                self.assertFalse(output.exists())
+        self.assertFalse(self.log.exists())
+
+    def test_scope_selected_budget_above_old_default_is_applied_to_transport(self):
+        with patch.object(review.asyncio, "wait", wraps=asyncio.wait) as wait:
+            self.assertEqual(self.run_peer(timeout=7200), CLEAN)
+        self.assertEqual(wait.await_args.kwargs["timeout"], 7200)
+
     def test_default_idle_policy_allows_silent_completion(self):
-        self.assertIsNone(review.AcpReview([], cwd=self.cwd).idle_timeout)
+        self.assertIsNone(review.AcpReview([], cwd=self.cwd, timeout=2).idle_timeout)
         self.assertEqual(self.run_peer("silent_valid", idle_timeout=None), CLEAN)
         result = self.run_peer("silent_valid", idle_timeout=0.05)
         self.assertIn("idle deadline", result["residual_risk"])
         self.assertEqual(self.transport_status(result)["stage"], "prompt")
 
-    def test_cli_default_does_not_enable_an_idle_cutoff(self):
+    def test_cli_passes_scope_selected_deadline_without_default_idle_cutoff(self):
         request = self.root / "default-idle-request.txt"
         output = self.root / "default-idle-result.json"
         request.write_text("Frozen snapshot")
@@ -3080,27 +3129,36 @@ acp_review.AcpReview.handle_client_request = growing_handle
 
         def checked_constructor(*args, **kwargs):
             self.assertIsNone(kwargs["idle_timeout"])
+            self.assertEqual(kwargs["timeout"], 7200)
             return constructor(*args, **kwargs)
 
-        with (
-            patch.object(
-                sys,
-                "argv",
-                [
-                    "acp_review.py",
-                    "--agent",
-                    "codex",
-                    "--request",
-                    str(request),
-                    "--output",
-                    str(output),
-                ],
-            ),
-            patch.object(review, "provider_launch", return_value=(command, None, None)),
-            patch.object(review, "AcpReview", side_effect=checked_constructor),
-        ):
-            self.assertEqual(review.main(), 0)
-        self.assertEqual(json.loads(output.read_text()), CLEAN)
+        for agent in ("codex", "claude", "grok"):
+            output.unlink(missing_ok=True)
+            with (
+                self.subTest(agent=agent),
+                patch.object(
+                    sys,
+                    "argv",
+                    [
+                        "acp_review.py",
+                        "--agent",
+                        agent,
+                        "--request",
+                        str(request),
+                        "--timeout-seconds",
+                        "7200",
+                        "--output",
+                        str(output),
+                    ],
+                ),
+                patch.object(
+                    review, "provider_launch", return_value=(command, None, None)
+                ) as launch,
+                patch.object(review, "AcpReview", side_effect=checked_constructor),
+            ):
+                self.assertEqual(review.main(), 0)
+            self.assertEqual(json.loads(output.read_text()), CLEAN)
+            self.assertEqual(launch.call_args.args[0], agent)
 
     def test_failure_status_records_observed_exit_before_owned_signals(self):
         for mode, stage, code in (
@@ -3142,7 +3200,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
         self.assertNotIn("private", json.dumps(result))
         self.assertNotIn(str(self.root), json.dumps(result))
         self.assertLess(len(json.dumps(status)), 1024)
-        runner = review.AcpReview([], cwd=self.cwd)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2)
         runner.started_at = time.monotonic() - review.MAX_DIAGNOSTIC_VALUE
         runner.stage = "initialize"
         runner.count_transport("frames", review.MAX_DIAGNOSTIC_VALUE + 100)
@@ -3218,7 +3276,9 @@ acp_review.AcpReview.handle_client_request = growing_handle
             for operation in ("client_read", "native_tool", "permission"):
                 for child in (False, True):
                     with self.subTest(reason=reason, operation=operation, child=child):
-                        runner = review.AcpReview([], cwd=self.cwd, tool_access=True)
+                        runner = review.AcpReview(
+                            [], cwd=self.cwd, timeout=2, tool_access=True
+                        )
                         runner.session_id = "private-root-id"
                         runner.prompt_started = True
                         runner.started_at = runner.last_activity = time.monotonic()
@@ -3328,7 +3388,9 @@ acp_review.AcpReview.handle_client_request = growing_handle
             ):
                 for child in (False, True):
                     with self.subTest(operation=operation, field=field, child=child):
-                        runner = review.AcpReview([], cwd=self.cwd, tool_access=True)
+                        runner = review.AcpReview(
+                            [], cwd=self.cwd, timeout=2, tool_access=True
+                        )
                         runner.session_id = "root"
                         runner.prompt_started = True
                         session = "child" if child else "root"
@@ -3392,7 +3454,7 @@ acp_review.AcpReview.handle_client_request = growing_handle
                         )
 
     def test_prelaunch_failures_do_not_invent_transport_diagnostics(self):
-        runner = review.AcpReview(["/absent/peer"], cwd=self.cwd)
+        runner = review.AcpReview(["/absent/peer"], cwd=self.cwd, timeout=2)
         result = asyncio.run(runner.run("Frozen snapshot", SCHEMA))
         self.assertNotIn("Transport status", result["residual_risk"])
         self.assertIsNone(runner.failure_context)
@@ -3484,6 +3546,8 @@ acp_review.AcpReview.handle_client_request = growing_handle
                 "codex",
                 "--request",
                 str(request),
+                "--timeout-seconds",
+                "5",
                 "--output",
                 str(output),
             ],
@@ -3559,6 +3623,8 @@ sys.exit(acp_review.main())
                         "codex",
                         "--request",
                         str(request),
+                        "--timeout-seconds",
+                        "5",
                         "--output",
                         str(output),
                         "--idle-timeout-seconds",
@@ -3630,7 +3696,7 @@ sys.exit(acp_review.main())
             json.dumps(CLEAN),
         ]
         runner = review.AcpReview(
-            command, cwd=self.cwd, idle_timeout=0.03, cancel_grace=0.04
+            command, cwd=self.cwd, timeout=2, idle_timeout=0.03, cancel_grace=0.04
         )
 
         async def exercise():
@@ -3656,7 +3722,7 @@ sys.exit(acp_review.main())
             json.dumps(CLEAN),
         ]
         runner = review.AcpReview(
-            command, cwd=self.cwd, idle_timeout=0.03, cancel_grace=0.05
+            command, cwd=self.cwd, timeout=2, idle_timeout=0.03, cancel_grace=0.05
         )
 
         async def interrupted_cleanup():
@@ -3683,14 +3749,14 @@ sys.exit(acp_review.main())
         self.assertNotIn("_meta", self.messages()[2]["params"])
 
     def test_failed_launch_is_incomplete(self):
-        runner = review.AcpReview(["/absent/acp-peer"], cwd=self.cwd)
+        runner = review.AcpReview(["/absent/acp-peer"], cwd=self.cwd, timeout=2)
         result = asyncio.run(runner.run("Frozen snapshot", SCHEMA))
         self.assertEqual(result["verdict"], "incomplete")
         self.assertIn("could not start", result["residual_risk"])
         self.assertEqual(result["inspected_surface"], "No review prompt was sent.")
 
     def test_prompt_not_counted_when_a_failure_prevents_send(self):
-        runner = review.AcpReview([], cwd=self.cwd)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2)
         runner.failure = "Setup failed before submission."
         with self.assertRaises(review.ReviewError):
             asyncio.run(
@@ -3801,6 +3867,8 @@ sys.exit(acp_review.main())
                         "codex",
                         "--request",
                         str(request),
+                        "--timeout-seconds",
+                        "5",
                         "--output",
                         str(output),
                     ],
@@ -3845,6 +3913,8 @@ sys.exit(acp_review.main())
                 "codex",
                 "--request",
                 str(request),
+                "--timeout-seconds",
+                "5",
                 "--output",
                 str(output),
             ],
@@ -3874,6 +3944,8 @@ sys.exit(acp_review.main())
                 "codex",
                 "--request",
                 str(request),
+                "--timeout-seconds",
+                "5",
                 "--output",
                 str(output),
             ],
@@ -3913,6 +3985,8 @@ sys.exit(acp_review.main())
                 "claude",
                 "--request",
                 str(request),
+                "--timeout-seconds",
+                "5",
                 "--output",
                 str(output),
             ],
@@ -3969,7 +4043,7 @@ class BoundaryTests(unittest.TestCase):
 
     def configure_runner(self):
         self.runner = review.AcpReview(
-            [], cwd=self.cwd, tool_access=True, allow_subagents=True
+            [], cwd=self.cwd, timeout=2, tool_access=True, allow_subagents=True
         )
         self.runner.session_id = "root"
         self.runner.child_sessions["child"] = "root"
@@ -5271,6 +5345,8 @@ class SnapshotTests(unittest.TestCase):
                     str(request),
                     "--snapshot",
                     str(self.bundle),
+                    "--timeout-seconds",
+                    "5",
                     "--output",
                     str(output),
                 ],
@@ -5305,7 +5381,7 @@ class SnapshotTests(unittest.TestCase):
         ]
         self.write_bundle({"files": entries})
         review.materialize_snapshot(self.bundle, self.cwd)
-        runner = review.AcpReview([], cwd=self.cwd, tool_access=True)
+        runner = review.AcpReview([], cwd=self.cwd, timeout=2, tool_access=True)
         self.assertIsNone(runner.boundary_error)
         for entry in entries:
             with runner.boundary.access(entry["path"], read=True) as (descriptor, _):

@@ -756,7 +756,7 @@ class AcpReview:
         *,
         cwd,
         env=None,
-        timeout=1800,
+        timeout,
         idle_timeout=None,
         setup_timeout=90,
         cancel_grace=2,
@@ -765,6 +765,10 @@ class AcpReview:
         allow_subagents=False,
         provider=None,
     ):
+        if type(timeout) not in (int, float) or not 0 < timeout < float("inf"):
+            raise ValueError(
+                "Review timeout must be a finite positive number of seconds."
+            )
         self.command = command
         self.cwd = cwd
         self.boundary = None
@@ -1986,7 +1990,13 @@ def main():
         type=Path,
         help="Authorized UTF-8 source bundle with path/content/sha256 entries.",
     )
-    parser.add_argument("--timeout-seconds", type=positive_number, default=1800)
+    parser.add_argument(
+        "--timeout-seconds",
+        type=positive_number,
+        required=True,
+        help="Required finite positive total deadline, chosen by the caller "
+        "for this review scope.",
+    )
     parser.add_argument(
         "--idle-timeout-seconds",
         type=positive_number,
