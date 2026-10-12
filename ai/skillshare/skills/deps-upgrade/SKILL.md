@@ -11,7 +11,7 @@ Upgrade every discovered dependency within compatibility constraints. Preserve u
 
 Read repository instructions and inspect status/diffs. Find manifests, locks, workspaces, umbrella apps, Phoenix assets, and extension packages, including nested locations. Identify outdated direct/transitive dependencies, coupled packages, constraints, and applicable checks. Check Tailwind's npm package, Hex wrapper, and configured standalone binary independently.
 
-Delegate independent applications/ecosystems when useful. Keep shared locks, generated outputs, and coupled packages under one owner. Reconcile worker changes and verification before integration.
+Delegate independent applications/ecosystems when useful. Before delegating, apply [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md) to select a configured child role without repeating its model or effort settings, or changing scope or context restrictions. Keep shared locks, generated outputs, and coupled packages under one owner. Reconcile worker changes and verification before integration.
 
 ## Upgrade
 

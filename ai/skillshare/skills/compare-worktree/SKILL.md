@@ -21,7 +21,7 @@ Recover the original request, updates, and referenced plans from available read-
 
 Inspect each worktree's committed changes from the verified base, staged changes (`git diff --cached`), unstaged changes (`git diff`), and relevant untracked files (`git status --short --untracked-files=all`). Assess the combined effective implementation while retaining layer provenance.
 
-Start with status and diff names/stats, then focused patches and complete files as needed. Account for deletions, renames, modes, submodules, generated files, and tests. Treat inaccessible content as an evidence limit and avoid exposing secrets. Delegate independent read-only scopes when useful after establishing shared bases and requirements; reconcile results without losing layer coverage.
+Start with status and diff names/stats, then focused patches and complete files as needed. Account for deletions, renames, modes, submodules, generated files, and tests. Treat inaccessible content as an evidence limit and avoid exposing secrets. Delegate independent read-only scopes when useful after establishing shared bases and requirements; reconcile results without losing layer coverage. Before delegating, apply [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md) to select a configured child role without repeating its model or effort settings, or changing scope or context restrictions.
 
 Recommend only material requirement, correctness, security, compatibility, UX, performance, maintainability, or validation gains. Prefer the smallest useful change, preserve required behavior, and omit equivalent alternatives or style churn. Include confirmed obsolete or unnecessary code removal only within the changed/directly affected scope; do not invent cleanup.
 

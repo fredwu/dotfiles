@@ -1,8 +1,10 @@
 ## Agent routing
 
 - Keep the main agent focused on orchestration, task decomposition, coordination, review, and final synthesis.
-- Delegate complex or general coding, implementation, debugging, bug fixes, and verification to the `worker` agent. Also use `worker` when complexity is uncertain or correctness benefits from deeper reasoning.
-- Delegate clearly bounded, simple, low-risk work to the `fastworker` agent, including search, documentation, and test tasks.
+- Keep Codex and Claude main agents at the user's `xhigh` default. Select configured child roles separately and inherit their model and reasoning settings without overrides. For Grok, use `xhigh` for the main agent and every child, regardless of task.
+- Delegate complex or general coding, implementation, investigation, review, debugging, bug fixes, and meaningful verification to the configured `worker` agent. Also use `worker` when complexity is uncertain or correctness benefits from deeper reasoning.
+- Delegate clearly bounded, simple, low-risk work to the configured `fastworker` agent, including search, documentation, and deterministic checks. If complexity increases, return or reassign the task to `worker` with its context and evidence. Grok children retain `xhigh` under either role.
+- Respect the active runtime's role-fixed settings, supported controls, and history-fork restrictions. If a preferred role is unavailable, use the closest available role or supported spawn controls, carrying over the configured role settings when accessible. Do not invent roles or controls; report material limits.
 - Wait for delegated work to finish and review its results before producing the final response.
 
 ## Tool routing

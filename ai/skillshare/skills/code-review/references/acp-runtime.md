@@ -4,12 +4,14 @@ This runtime applies to Codex, Grok, and Claude single reviews and every externa
 
 ## Reviewer tools and delegation
 
+Apply [Subagent roles and reasoning](../../execute-plan/references/subagent-reasoning.md) to permitted native children using the executing provider. Provider launch controls own actual model and effort settings; the review prompt alone cannot set them. Configured roles supply those settings without per-task overrides. The main-agent `xhigh` preference does not prove that a fresh external root has that effort; verify the launch controls before reporting it. Preserve the permitted roles and tools below, including Grok's child prohibition.
+
 The complete text snapshot is the default review surface and remains useful without tools. When file inspection would improve coverage or speed, the caller can supply `--snapshot` to enable the provider's permitted read-only tools over prepared frozen files. Let the reviewer choose whether and how to use those tools. Encourage supported native workers when bounded parallel inspection or independent checking adds value; do not require tool use or an agent count. Each worker receives a distinct read-only assignment, the same scope and exclusions, and an evidence path mapping. The root reviewer joins results, resolves conflicts and coverage gaps, and owns one complete terminal answer. Workers cannot expand scope, invoke review skills, or launch another top-level external review.
 
 | Provider | Prepared-snapshot tools | Native workers |
 | --- | --- | --- |
 | Codex | Native command tools under the read-only sandbox, with network disabled. | Optional native workers under the same read-only review limits. |
-| Claude | `Read`, `Grep`, `Glob`, and `Agent`; no Bash, edits, web, hooks, MCP, persistence, or approval bypass. | A reviewer child restricted to `Read`, `Grep`, and `Glob`, with `omitClaudeMd`; no nested workers. |
+| Claude | `Read`, `Grep`, `Glob`, and `Agent`; no Bash, edits, web, hooks, MCP, persistence, or approval bypass. | A restricted `reviewer` child that inherits the configured Claude `worker` model and effort, with `Read`, `Grep`, `Glob`, and `omitClaudeMd`; no nested workers or per-call role/model/effort overrides. |
 | Grok | Curated `read_file`, `list_dir`, and `grep`; no Bash, edits, web, or Agent. | Disabled because inheritance of the required restrictions is unverified. |
 
 Without `--snapshot`, retain text-only mode: no reviewer tools or workers. Tool events permitted by prepared-snapshot mode do not make a review incomplete. Recognized native child announcements register child sessions; their progress and evidence never become the root terminal answer. There is exactly one top-level root ACP session and prompt per review round. Supported native child sessions do not add loop rounds or permit follow-up root prompts.

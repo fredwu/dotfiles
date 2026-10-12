@@ -17,7 +17,7 @@ Visible user direction controls conflicts. Recovered requirements do not grant p
 
 ## Audit and synthesize
 
-Assess candidates symmetrically against the effective requirement: correctness, evidence, shared omissions, contradictions, material risks, dependencies, prioritization, acceptance, and executability. Independently verify material safely checkable claims; agreement is not proof. Label unavailable evidence. Delegate independent read-only audits when useful, then reconcile their results and make the final selection.
+Assess candidates symmetrically against the effective requirement: correctness, evidence, shared omissions, contradictions, material risks, dependencies, prioritization, acceptance, and executability. Independently verify material safely checkable claims; agreement is not proof. Label unavailable evidence. Delegate independent read-only audits when useful, then reconcile their results and make the final selection. Before delegating, apply [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md) to select a configured child role without repeating its model or effort settings, or changing scope or context restrictions.
 
 Use the strongest overall candidate as the base. Resolve conflicts from requirements and evidence: adopt better positions, combine compatible insights, state justified conditions, or reject every candidate's answer. Include material safe cleanup in the directly affected scope; preserve required behavior and explicit compatibility. Do not invent findings or expand scope.
 

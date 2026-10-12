@@ -54,6 +54,27 @@ def _binary(name):
     return binary
 
 
+def _claude_worker_settings():
+    path = Path(__file__).resolve().parents[3] / "agent-models.json"
+    try:
+        mappings = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        raise ProviderError(
+            "Cannot read canonical worker settings from agent-models.json."
+        ) from None
+    worker = mappings.get("worker") if isinstance(mappings, dict) else None
+    settings = worker.get("claude") if isinstance(worker, dict) else None
+    if not isinstance(settings, dict):
+        raise ProviderError("Missing worker.claude settings in agent-models.json.")
+    for field in ("model", "effort"):
+        value = settings.get(field)
+        if not isinstance(value, str) or not value.strip():
+            raise ProviderError(
+                f"worker.claude.{field} must be a non-empty string in agent-models.json."
+            )
+    return {field: settings[field] for field in ("model", "effort")}
+
+
 def _grok_macos_readonly_profile(grok_home, user_home, caller_home):
     # Grok's automatic socket resolver rejects Docker Desktop symlinks. Explicit
     # deny rules retain its stock candidates and resolve raw/canonical aliases.
@@ -206,6 +227,7 @@ def provider_launch(agent, scratch, workspace=None):
             "persistSession": False,
         }
         if native_review:
+            worker_settings = _claude_worker_settings()
             readonly_tools = ["Read", "Grep", "Glob"]
             options["tools"] = [*readonly_tools, "Agent"]
             options["allowedTools"] = readonly_tools
@@ -220,7 +242,7 @@ def provider_launch(agent, scratch, workspace=None):
                         "to the parent reviewer without changing files or external state."
                     ),
                     "tools": readonly_tools,
-                    "model": "inherit",
+                    **worker_settings,
                     "omitClaudeMd": True,
                 }
             }

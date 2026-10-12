@@ -30,6 +30,7 @@ class ProviderLaunchTests(unittest.TestCase):
             "NODE_OPTIONS": "--require /untrusted/plugin.js",
             "GROK_CONFIG": "untrusted override",
             "CLAUDE_CODE_EXECUTABLE": "/untrusted/claude",
+            "CLAUDE_CODE_EFFORT_LEVEL": "xhigh",
             "MODEL_PROVIDER": "untrusted provider",
             "DEFAULT_AUTH_REQUEST": "secret-custom-route",
             "UNRELATED_SECRET": "never-inherit",
@@ -187,8 +188,19 @@ class ProviderLaunchTests(unittest.TestCase):
         self.assertEqual(
             set(options["agents"]["reviewer"]["tools"]), {"Read", "Grep", "Glob"}
         )
-        self.assertEqual(options["agents"]["reviewer"]["model"], "inherit")
+        mappings = json.loads(
+            (
+                Path(acp_providers.__file__).resolve().parents[3] / "agent-models.json"
+            ).read_text(encoding="utf-8")
+        )
+        for field in ("model", "effort"):
+            self.assertEqual(
+                options["agents"]["reviewer"][field],
+                mappings["worker"]["claude"][field],
+            )
         self.assertTrue(options["agents"]["reviewer"]["omitClaudeMd"])
+        self.assertNotIn("CLAUDE_CODE_EFFORT_LEVEL", env)
+        self.assertEqual(os.environ["CLAUDE_CODE_EFFORT_LEVEL"], "xhigh")
         self.assertNotIn("CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH", env)
         self.assertNotIn("CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS", env)
         self.assertEqual(options["settingSources"], [])
@@ -196,6 +208,134 @@ class ProviderLaunchTests(unittest.TestCase):
         self.assertTrue(options["settings"]["disableAllHooks"])
         self.assertFalse(options["allowDangerouslySkipPermissions"])
         self.assertFalse(options["persistSession"])
+
+    def worker_mapping_source(self):
+        source = (
+            self.root
+            / "source"
+            / "skills"
+            / "code-review"
+            / "scripts"
+            / "acp_providers.py"
+        )
+        source.parent.mkdir(parents=True)
+        source.touch()
+        return source, source.parents[3] / "agent-models.json"
+
+    def test_native_claude_follows_worker_settings_through_skill_symlink(self):
+        source, mappings_path = self.worker_mapping_source()
+        linked_skill = self.root / "synced-skill"
+        linked_skill.symlink_to(source.parents[1], target_is_directory=True)
+        workspace = self.root / "cwd"
+        workspace.mkdir()
+        with patch.object(
+            acp_providers, "__file__", str(linked_skill / "scripts" / source.name)
+        ):
+            for settings in (
+                {"model": "custom-worker-model", "effort": "medium"},
+                {"model": "another-worker-model", "effort": "max"},
+            ):
+                with self.subTest(settings=settings):
+                    mappings_path.write_text(
+                        json.dumps(
+                            {
+                                "worker": {"claude": settings, "codex": None},
+                                "fastworker": None,
+                            }
+                        )
+                    )
+                    _, _, metadata = acp_providers.provider_launch(
+                        "claude", self.root, workspace=workspace
+                    )
+                    options = metadata["claudeCode"]["options"]
+                    self.assertEqual(set(options["agents"]), {"reviewer"})
+                    reviewer = options["agents"]["reviewer"]
+                    for field in ("model", "effort"):
+                        self.assertEqual(reviewer[field], settings[field])
+                    self.assertEqual(set(reviewer["tools"]), {"Read", "Grep", "Glob"})
+                    self.assertTrue(reviewer["omitClaudeMd"])
+                    self.assertEqual(
+                        options["settings"]["permissions"], {"ask": ["Agent"]}
+                    )
+
+    def test_native_claude_rejects_missing_or_invalid_worker_settings(self):
+        source, mappings_path = self.worker_mapping_source()
+        workspace = self.root / "cwd"
+        workspace.mkdir()
+        invalid_mappings = (
+            [],
+            {},
+            {"worker": []},
+            {"worker": {"claude": None}},
+            {"worker": {"claude": {"model": "model"}}},
+            {"worker": {"claude": {"effort": "effort"}}},
+            {"worker": {"claude": {"model": " ", "effort": "effort"}}},
+            {"worker": {"claude": {"model": "model", "effort": 1}}},
+            {"worker": {"claude": {"model": None, "effort": "effort"}}},
+            {"worker": {"claude": {"model": "model", "effort": "\n"}}},
+        )
+        with patch.object(acp_providers, "__file__", str(source)):
+            for mapping in invalid_mappings:
+                with self.subTest(mapping=mapping):
+                    mappings_path.write_text(json.dumps(mapping))
+                    with self.assertRaisesRegex(
+                        acp_providers.ProviderError, "agent-models.json"
+                    ):
+                        acp_providers.provider_launch(
+                            "claude", self.root, workspace=workspace
+                        )
+
+    def test_worker_mapping_read_errors_do_not_disclose_contents(self):
+        source, mappings_path = self.worker_mapping_source()
+        workspace = self.root / "cwd"
+        workspace.mkdir()
+        with patch.object(acp_providers, "__file__", str(source)):
+            for content in (
+                None,
+                b'{"private_key":"secret-token", "worker":',
+                b"\xffsecret-token",
+            ):
+                with self.subTest(content=content):
+                    if content is not None:
+                        mappings_path.write_bytes(content)
+                    output = io.StringIO()
+                    with (
+                        contextlib.redirect_stdout(output),
+                        contextlib.redirect_stderr(output),
+                        self.assertRaisesRegex(
+                            acp_providers.ProviderError, "agent-models.json"
+                        ) as result,
+                    ):
+                        acp_providers.provider_launch(
+                            "claude", self.root, workspace=workspace
+                        )
+                    self.assertNotIn(
+                        "secret-token", str(result.exception) + output.getvalue()
+                    )
+
+    def test_worker_mapping_is_not_required_outside_native_claude(self):
+        with patch.object(
+            acp_providers,
+            "_claude_worker_settings",
+            side_effect=AssertionError("unexpected settings read"),
+        ):
+            for index, (agent, native_review) in enumerate(
+                (
+                    ("claude", False),
+                    ("codex", False),
+                    ("codex", True),
+                    ("grok", False),
+                    ("grok", True),
+                )
+            ):
+                with self.subTest(agent=agent, native_review=native_review):
+                    scratch = self.root / f"case-{index}"
+                    scratch.mkdir()
+                    workspace = scratch / "cwd"
+                    workspace.mkdir()
+                    acp_providers.provider_launch(
+                        agent, scratch, workspace=workspace if native_review else None
+                    )
 
     def test_native_grok_keeps_write_shell_web_and_unverified_workers_unavailable(self):
         workspace = self.root / "cwd"

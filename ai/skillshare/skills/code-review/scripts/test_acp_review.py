@@ -1877,6 +1877,57 @@ acp_review.AcpReview.handle_client_request = growing_handle
             if agent_tools:
                 self.assertIn("Do not set model, isolation, or other options.", prompt)
 
+    def test_configured_role_policy_applies_only_to_native_codex_workers(self):
+        cases = (
+            (False, False, False),
+            (True, False, False),
+            (True, True, True),
+            (True, True, False),
+        )
+        for tool_access, allow_subagents, agent_tools in cases:
+            with self.subTest(
+                tool_access=tool_access,
+                allow_subagents=allow_subagents,
+                agent_tools=agent_tools,
+            ):
+                prompt = review.make_prompt(
+                    "Frozen snapshot",
+                    SCHEMA,
+                    tool_access=tool_access,
+                    allow_subagents=allow_subagents,
+                    agent_tools=agent_tools,
+                    prepared_paths={"": "directory"} if tool_access else None,
+                )
+                routed = tool_access and allow_subagents and not agent_tools
+                self.assertEqual("Use the configured worker role" in prompt, routed)
+                self.assertNotIn("high child reasoning effort", prompt)
+                self.assertNotIn("worker (high) or fastworker (medium)", prompt)
+                if routed:
+                    self.assertIn("complex or uncertain inspection", prompt)
+                    self.assertIn("simple bounded lookups or checks", prompt)
+                    self.assertIn("omit model and effort overrides", prompt)
+                    self.assertIn(
+                        "settings exposed by the runtime or supplied in this request",
+                        prompt,
+                    )
+                    self.assertIn("only if the spawn tool supports them", prompt)
+                    self.assertIn("history mode permits overrides", prompt)
+                    self.assertIn("Do not read ambient configuration files", prompt)
+                    self.assertIn("Task wording alone does not set", prompt)
+                    self.assertIn(
+                        "If those settings are unavailable, inspect directly", prompt
+                    )
+                    self.assertIn("routing limitation in residual_risk", prompt)
+                elif not tool_access:
+                    self.assertIn("spawn agents, or load instructions", prompt)
+                elif not allow_subagents:
+                    self.assertIn("no enabled read-only worker support", prompt)
+                else:
+                    self.assertIn("set subagent_type to reviewer", prompt)
+                    self.assertIn(
+                        "Do not set model, isolation, or other options.", prompt
+                    )
+
     def test_native_prompt_binds_exact_sealed_paths_before_unchanged_request(self):
         source = self.snapshot_file()
         extra = self.cwd / "base/src/line\n雪.py"
