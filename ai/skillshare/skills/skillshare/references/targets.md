@@ -77,7 +77,7 @@ a folder an enabled target also writes to is left alone. `sync`/`diff`/`status`/
 skip the target's skills. `--skills` cannot be combined with include/exclude flags in one
 command. Works with `-p`.
 
-When `sync` warns that two targets "sync skills to <folder> with different filters, so each
+When `sync` warns that two targets "sync skills to <folder> with different settings, so each
 sync undoes the other", run the `skillshare target <name> --skills=false` it prints.
 
 ## Project Targets (`-p`)
@@ -178,6 +178,7 @@ skillshare target claude --mode merge         # Per-skill symlinks (default)
 skillshare target claude --mode copy          # Real-file copies with manifest tracking
 skillshare target claude --mode symlink       # Entire dir symlinked
 skillshare target claude --mode copy -p       # Project target mode
+skillshare target claude --mode copy --target-naming prefixed  # Several settings are checked together and saved once
 ```
 
 | Mode | Description | Local Skills |
