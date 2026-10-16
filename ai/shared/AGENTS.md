@@ -6,6 +6,7 @@
 - Delegate clearly bounded, simple, low-risk work to the configured `fastworker` agent, including search, documentation, and deterministic checks. If complexity increases, return or reassign the task to `worker` with its context and evidence. Grok children retain `xhigh` under either role.
 - Respect the active runtime's role-fixed settings, supported controls, and history-fork restrictions. If a preferred role is unavailable, use the closest available role or supported spawn controls, carrying over the configured role settings when accessible. Do not invent roles or controls; report material limits.
 - Wait for delegated work to finish and review its results before producing the final response.
+- Never treat silence from delegated or background work as progress. While such work is pending, keep a watchdog that wakes the main agent at least every 20 minutes; on each wake, verify real activity (live processes, recent file changes, new output). If there is none, or an agent reports that it waits on sub-agents, intervene at once (resume it with the missing input, or reassign the work) and tell the user how long the work was stalled.
 
 ## Tool routing
 

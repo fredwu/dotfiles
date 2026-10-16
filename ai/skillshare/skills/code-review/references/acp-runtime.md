@@ -1,6 +1,6 @@
 # External review ACP runtime
 
-This runtime applies to Codex, Grok, and Claude single reviews and every external loop round. Use the shared client instead of CLI prompts, CLI output envelopes, or provider-specific result schemas. ACP uses JSON-RPC control messages; it does not guarantee the model's answer format. The client validates the complete terminal answer against [the external result contract](external-review-result.schema.json).
+This reference governs the ACP branch of the [shared external runtime](external-runtime.md) for Codex, Grok, and Claude single reviews and loop rounds. Use the shared ACP client instead of CLI prompts, CLI output envelopes, or provider-specific result schemas. ACP uses JSON-RPC control messages; it does not guarantee the model's answer format. The client validates the complete terminal answer against [the external result contract](external-review-result.schema.json).
 
 ## Reviewer tools and delegation
 

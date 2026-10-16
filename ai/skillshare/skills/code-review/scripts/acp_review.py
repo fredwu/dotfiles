@@ -647,6 +647,14 @@ def strict_json(text):
     )
 
 
+def validate_review_result(result, schema):
+    validate_schema(result, schema)
+    if len({finding["id"] for finding in result["findings"]}) != len(
+        result["findings"]
+    ):
+        raise ReviewError("ACP review contains duplicate finding identifiers.")
+
+
 def valid_rpc_id(value):
     return (
         isinstance(value, str)
@@ -1751,13 +1759,7 @@ class AcpReview:
                 if self.failure:
                     raise ReviewError(self.failure)
                 self.stage = "result_validation"
-                validate_schema(result, schema)
-                if len({finding["id"] for finding in result["findings"]}) != len(
-                    result["findings"]
-                ):
-                    raise ReviewError(
-                        "ACP review contains duplicate finding identifiers."
-                    )
+                validate_review_result(result, schema)
                 return result
             finally:
                 for task in tasks:
