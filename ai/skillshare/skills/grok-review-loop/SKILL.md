@@ -7,7 +7,7 @@ description: Review and remediate code through bounded external Grok rounds, pre
 
 Read [code-review-loop](../code-review-loop/SKILL.md) and [grok-review](../grok-review/SKILL.md), including the selected runtime's reference. Inherit the canonical loop: early broad clean completion, fresh review after every remediation (also after round 3), focused continuation and broad closing reviews in rounds 4-9, sequential review counting, and a final broad read-only audit if round 10 is reached. Substitute only the reviewer and runtime below.
 
-Apply the canonical [holistic assessment and remediation policy](../code-review-loop/SKILL.md#assess-and-remediate-holistically) to the complete round result and open accepted findings. The caller owns its remediation plan, verification, and finding status. Explicit invocation authorizes reached Grok prompts and minimum non-secret transfer only; it does not authorize unrelated data transfer, remote writes, or expanded remediation.
+Apply the canonical [holistic assessment and remediation policy](../code-review-loop/SKILL.md#assess-and-remediate-holistically) to the complete round result and open accepted findings, including the [persistent-findings checkpoint](../code-review-loop/SKILL.md#escalate-persistent-findings). The caller owns its finding history, systematic reassessment, coherent repair or refactor plan, verification, and finding status. Explicit invocation authorizes reached Grok prompts and minimum non-secret transfer only; it does not authorize unrelated data transfer, remote writes, or expanded remediation.
 
 ## Substitute the reviewer
 
