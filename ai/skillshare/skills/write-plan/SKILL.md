@@ -1,11 +1,11 @@
 ---
 name: write-plan
-description: Investigate a repository or workflow read-only and save an evidence-backed, executable plan for implementation, audit, architecture, or remediation.
+description: Investigate a repository or workflow read-only and save an evidence-backed architectural plan with outcome-based phases and acceptance criteria.
 ---
 
 # Write Plan
 
-Save a self-contained executable plan. Only create or edit that plan; keep implementation and external state unchanged.
+Save a self-contained plan that defines the architecture, intended outcomes, and acceptance criteria. Leave routine implementation decisions to execution. Only create or edit that plan; keep implementation and external state unchanged.
 
 ## Original planning
 
@@ -33,19 +33,21 @@ Consider a separate read-only challenge of the current draft when independent sc
 
 Read repository instructions and worktree state. Use read-only inspection and non-mutating checks. Starting services, using production, incurring cost, or making external calls requires explicit authorization. Put checks needing additional writes or authority in the plan instead.
 
-Trace relevant behavior, data flow, persistence, integrations, failure paths, and tests. Verify material claims; distinguish facts, inferences, gaps, and recommendations with precise citations. Inspect the directly affected scope once for confirmed obsolete, duplicate, dead, or unnecessary compatibility code and plan safe removal. Do not invent findings or expand scope.
+Inspect system responsibilities, boundaries and contracts, data flow, persistence, integrations, failure modes, and existing tests only far enough to justify architectural decisions and feasibility. Verify material claims; distinguish facts, inferences, gaps, and recommendations with precise citations. Identify material, evidenced cleanup in the directly affected scope and plan safe removal; leave exhaustive removal tracing to execution. Do not invent findings or expand scope.
+
+Preserve user-specified technical constraints. Include concrete technical detail when needed to establish an architectural invariant, material risk, feasibility, or an explicit user requirement. Otherwise defer function/file-by-file edits, algorithms, exact schemas or code, exhaustive call traces, and detailed test mechanics to execution agents, who must investigate them independently.
 
 Prefer proportionate clean-slate solutions. Add compatibility, migration, deprecation, or dual operation only when explicitly required. Treat security boundaries and data guarantees as provisional invariants; existing behavior and future use cases do not automatically become requirements.
 
 Resolve decisions and risks with the best-supported recommendation, including high-risk, destructive, expensive, or difficult-to-reverse choices. Risk alone is not a reason to defer to the user. With incomplete evidence, state assumptions, a conditional recommendation, and a decisive check or fallback. Include mitigation, residual risk, and applicable recovery steps. Recommendations do not authorize execution; retain required authorization before affected actions and continue independent planning when essential input is unavailable.
 
-For each material finding, explain the evidence, requirement impact, target behavior, relevant tradeoffs, dependencies, and uncertainty. Prioritize and deduplicate. Stop when evidence supports an executable plan with explicit conditions for any remaining gaps.
+For each material finding, explain the evidence, requirement impact, target behavior, relevant tradeoffs, dependencies, and uncertainty. Prioritize and deduplicate. Stop when evidence supports the chosen architecture and feasible outcome-based phases, with explicit conditions for remaining gaps.
 
 ## Plan and verify
 
 State that the plan completes in one autonomous execution session unless the user explicitly requests otherwise. Include implementation, cleanup, and verification, and apply [Completion and review checkpoints](../execute-plan/SKILL.md#completion-and-review-checkpoints): resolve discovered task-relevant issues within execution and require `code-review-loop` followed by `final-pass` after each phase for long or complex work, or once after all implementation for short, simple work. Phases, milestones, checkpoints, size, complexity, risk, and copied schedules do not justify session breaks or routine confirmation handoffs. Preserve concrete blockers and required authorization for affected actions; keep independent work executable.
 
-Choose a structure proportionate to the task. After the requirements and TL;DR, cover scope and assumptions, relevant current behavior, prioritized findings and chosen direction, concrete ordered changes and likely locations, dependencies, acceptance checks, and material risks or blockers. Carry recommendations into the steps; reserve open items for essential unavailable input or required execution authorization, with a recommended path and conditions wherever possible. Avoid repeated checklists, exhaustive alternatives, and speculative detail.
+Choose a structure proportionate to the task. After the requirements and TL;DR, cover scope and non-goals, constraints and assumptions, relevant current behavior, chosen architecture with evidence and rationale, system responsibilities and boundary contracts, coherent outcome-based phases and dependencies, observable acceptance criteria, and material risks or blockers. Carry recommendations into phase outcomes; reserve open items for essential unavailable input or required execution authorization, with a recommended path and conditions wherever possible. Avoid repeated checklists, exhaustive alternatives, and speculative detail.
 
 Where useful, identify independently assignable steps, ownership boundaries, prerequisites, shared files or resources needing serialization, and review or integration opportunities. Explain what must be complete before dependent work starts. Give the executor enough context to choose delegation at runtime; do not prescribe a fixed agent topology or assume unavailable roles or tools.
 

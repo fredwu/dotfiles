@@ -5,7 +5,7 @@ description: Execute the full supplied or complete same-session plan, including 
 
 # Execute Plan
 
-Complete the full plan in one autonomous session unless the plan explicitly specifies multiple sessions or a session boundary, subject to user direction. Verify it against the originating request; adapt stale steps with evidence without dropping requirements or acceptance checks.
+Complete the full plan in one autonomous session unless the plan explicitly specifies multiple sessions or a session boundary, subject to user direction. Verify it against the originating request; adapt stale implementation suggestions with evidence while preserving the agreed architecture, contracts, technical constraints, scope, and acceptance criteria. Autonomy over implementation does not authorize changes to these commitments; resolve conflicts with governing requirements and user direction before affected edits, and continue independent work.
 
 ## Resolve scope
 
@@ -25,7 +25,9 @@ Assign disjoint edit ownership where possible. Serialize overlapping edits and o
 
 ## Implement and verify
 
-- Trace affected runtime paths, code, tests, configuration, and documentation. Fix root causes and add meaningful regression coverage where practical. Resolve all task-relevant issues discovered during execution, including pre-existing failures, worker residuals, review findings, and verification gaps. Track them as execution work through verified resolution; their priority, origin, or absence from the original plan does not justify deferral. Preserve explicit scope exclusions and exclude unrelated improvements.
+Before editing, each implementer, including delegated workers, must independently inspect the current affected code, runtime paths, tests, configuration, and documentation and derive and verify the implementation approach within the plan's commitments. Work out file/function changes, algorithms, schemas, and test mechanics from current evidence. Verify any concrete implementation suggestions in the plan; missing routine detail is execution work, not an incomplete plan.
+
+- Fix root causes and add meaningful regression coverage where practical. Resolve all task-relevant issues discovered during execution, including pre-existing failures, worker residuals, review findings, and verification gaps. Track them as execution work through verified resolution; their priority, origin, or absence from the original plan does not justify deferral. Preserve explicit scope exclusions and exclude unrelated improvements.
 - Remove confirmed obsolete, duplicate, dead, or unnecessary compatibility code and related tests/configuration/docs in the changed and directly affected surface. Preserve required behavior, explicit compatibility, and unrelated work; do not invent cleanup or transition machinery.
 - Read repository instructions and CI for required checks. Run focused checks during implementation and required gates on the integrated result. For documentation-only work, use document/skill validators, not unrelated application suites. Scale additional checks and local/staging validation to risk and authority.
 - Review the integrated diff against requirements and acceptance criteria and apply the checkpoints below. Reuse passing checks for unchanged relevant code and environment; rerun checks affected by subsequent changes.
