@@ -1,0 +1,4 @@
+interface:
+  display_name: "Execute Plan with External Reviewer"
+  short_description: "Complete all phases, then run one external review loop"
+  default_prompt: "Use $execute-plan-with-external-reviewer <reviewer> to complete the full plan, with final-pass after every phase, one selected external review loop over all implementation, and final-pass again. Require my explicit codex, claude, or grok argument before edits."
