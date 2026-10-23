@@ -1,4 +1,4 @@
 interface:
   display_name: "Execute Plan"
-  short_description: "Execute the full plan; default to one autonomous session"
-  default_prompt: "Use $execute-plan to independently investigate implementation details and complete the full plan within its architecture, scope, constraints, and acceptance criteria, including discovered issues, code-review-loop then final-pass at each required checkpoint, and required checks, in one autonomous session unless the plan explicitly specifies otherwise; respect concrete blockers and my instructions."
+  short_description: "Complete all phases, then run one internal review loop"
+  default_prompt: "Use $execute-plan to independently investigate implementation details and complete the full plan within its architecture, scope, constraints, and acceptance criteria, with final-pass after every phase, one code-review-loop over all implementation, and final-pass again; resolve discovered issues and required checks in one autonomous session unless the plan explicitly specifies otherwise, and respect concrete blockers and my instructions."
