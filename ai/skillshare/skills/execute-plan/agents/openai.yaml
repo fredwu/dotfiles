@@ -1,4 +1,4 @@
 interface:
   display_name: "Execute Plan"
-  short_description: "Complete all phases, then run one internal review loop"
-  default_prompt: "Use $execute-plan to independently investigate implementation details and complete the full plan within its architecture, scope, constraints, and acceptance criteria, with final-pass after every phase, one code-review-loop over all implementation, and final-pass again; resolve discovered issues and required checks in one autonomous session unless the plan explicitly specifies otherwise, and respect concrete blockers and my instructions."
+  short_description: "Complete plans with internal, external, or both review loops"
+  default_prompt: "Use $execute-plan to complete the full plan with final-pass after every phase, internal review by default or my requested external reviewer or both (internal first), then a final final-pass, while preserving the plan's commitments and resolving task-relevant issues and required checks."
