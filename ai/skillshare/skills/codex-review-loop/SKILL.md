@@ -1,20 +1,14 @@
 ---
 name: codex-review-loop
-description: Review and remediate code through bounded external Codex rounds, preferring T3 Code with ACP available elsewhere. Use only when explicitly invoked or requested by name, including from another skill.
+description: Review and remediate code through bounded external Codex rounds, using T3 Code inside T3 and direct ACP in other harnesses. Use only when explicitly requested.
 ---
 
 # Codex Review Loop
 
-Read [code-review-loop](../code-review-loop/SKILL.md) and [codex-review](../codex-review/SKILL.md), including the selected runtime's reference. Inherit the canonical loop: early broad clean completion, fresh review after every remediation (also after round 3), focused continuation and broad closing reviews in rounds 4-9, sequential review counting, and a final broad read-only audit if round 10 is reached. Substitute only the reviewer and runtime below.
+Read [code-review-loop](../code-review-loop/SKILL.md), [codex-review](../codex-review/SKILL.md), and the applicable shared runtime reference. Inherit the shared assessment, holistic remediation, verification, round limits, recovery, and completion rules. Substitute only the requested reviewer.
 
-Apply the canonical [holistic assessment and remediation policy](../code-review-loop/SKILL.md#assess-and-remediate-holistically) to the complete round result and open accepted findings, including the [persistent-findings checkpoint](../code-review-loop/SKILL.md#escalate-persistent-findings). The caller owns its finding history, systematic reassessment, coherent repair or refactor plan, verification, and finding status. Explicit invocation authorizes reached Codex prompts and minimum non-secret transfer only; it does not authorize unrelated data transfer, remote writes, or expanded remediation.
+Inside T3 Code, use a fresh T3 delegated task for every round. Outside T3, use a fresh Codex ACP session. Keep prompts minimal: requirements, repository/target, read-only scope, and material exclusions, plus concise prior findings/responses/objections when T3 requires them. The agent discovers and inspects changes itself. Do not send diffs, source dumps, snapshots, or manifests.
 
-## Substitute the reviewer
+Read and assess the review content directly; prose and Markdown are valid handoffs. Do not fail or repeat a completed review solely because of output formatting or absent schema fields. Preserve useful findings from partial inspection and disclose real gaps. Do not create duplicate active calls, resume a failed prompt, or silently substitute a provider or transport.
 
-Replace each reached internal review with one fresh Codex root task or ACP session and exactly one model-bearing review prompt under `codex-review`'s embedded result contract. Never resume its reviewer context, send another review to its child thread, substitute providers, invoke nested review skills, or add review prompts. Permitted inspector children remain within the root round.
-
-Prepare a fresh complete authorized snapshot each round. ACP receives only the canonical permitted round inputs and keeps its private snapshot and context restrictions. T3 follows the explicit [history-informed context exception](../code-review/references/external-runtime.md#prepare-the-frozen-request): supply the original brief, prior findings, caller responses, and unresolved objections in each fresh `delegate_task`. Broad rounds still inspect the complete target with all lenses; prior claims are unverified context. Describe T3 coverage accurately and do not claim fresh independent review.
-
-Choose the budget for every reached round and follow the selected runtime's task management, terminal validation, before/after state checks, and cleanup rules. Apply the canonical [failure recovery policy](../code-review-loop/SKILL.md#recover-failed-attempts): failed model-bearing attempts consume their round; verified pre-prompt setup failures do not. Diagnose and verify a correction before the next fresh launch within the existing cap. Never launch a fallback or duplicate for an active, lost, or unknown task; never retry a model prompt in the same round. Failed or malformed output is incomplete and supplies no findings.
-
-Keep the current request and exact result until assessed. Return the canonical handoff with reached rounds/phases, runtime and context/access limits, completion failures, and the separate caller-owned finding ledger. Clean task-owned files after assessment, including failure or abandonment. Preserve canonical schemas, requested deliverables, provider and app history, and unrelated files.
+Join review work before edits, repair accepted findings coherently, and verify the result. Use the next available fresh review after task edits and stop early after a complete broad clean result with checks passing. Preserve any real capped/incomplete status and finish authorized residual work through the shared final-pass rules. Report reached rounds, findings/fixes, checks, and material limits; remove only task-owned scratch.
