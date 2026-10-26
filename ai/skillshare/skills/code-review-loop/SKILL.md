@@ -9,7 +9,7 @@ Own assessment, repairs, verification, and completion. Read [code-review](../cod
 
 ## Coordinate review
 
-Give reviewers the requirements, repository/target, important limits, and [code-review](../code-review/SKILL.md) instructions. They inspect Git and source themselves; do not send diffs, source dumps, snapshots, or manifests. Inside T3 Code, follow [T3 coordination](../code-review/references/t3-runtime.md) and use a fresh `delegate_task` per round. Outside T3, use native controls and a fresh reviewer when independent scrutiny is useful. Apply [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md) when delegating. Keep ownership clear and join assigned work before advancing.
+Give reviewers the requirements, repository/target, important limits, and [code-review](../code-review/SKILL.md) instructions. They discover changes with Git and inspect source themselves; do not send diffs, source dumps, snapshots, or manifests. When delegating, prefer T3's orchestrator when available and fall back to ACP under the [shared runtime policy](../code-review/references/external-runtime.md). Each round uses a fresh T3 task or ACP session. Independent internal review remains optional when T3 is unavailable. Apply [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md) when delegating. Keep ownership clear and join assigned work before advancing.
 
 Report independence accurately. T3 rounds include concise prior findings, responses, and unresolved objections required by the host; these are claims to verify, not an expected verdict. Omit unrelated repair history. Reviewers and repair agents must reason from requirements and current evidence, rather than defer to each other's conclusions.
 
@@ -45,7 +45,7 @@ For a model-capacity, rate-limit, API, launch, transport, timeout, authenticatio
 
 Use up to three attempts per round unless the user specifies otherwise. For transient failures, honor retry-after guidance or use increasing delays within the chosen budget. For configuration or access failures, correct the cause before retrying; stop as incomplete if required input or access is unavailable. A user-directed cancellation stops work. Do not duplicate active calls or silently switch providers. If retries or the round budget are exhausted, report the failed round and blocker without advancing it or claiming the review-round cap was reached.
 
-Track round and attempt separately. In T3, retry an uncertain launch with its existing `clientRequestId`; inspect the retained task before assuming failure. Once the task is confirmed failed or stopped, use a fresh `delegate_task` and launch key for its replacement attempt in the same round. Outside T3, use a fresh reviewer/session after a confirmed failure.
+Track round and attempt separately. With T3, retry an uncertain launch with its existing `clientRequestId`; inspect the retained task before assuming failure. Once the task is confirmed failed or stopped, use a fresh `delegate_task` and launch key for its replacement attempt in the same round. With ACP, use a fresh session after a confirmed failure. A permitted transport fallback remains in the same round and attempt budget.
 
 ## Finish
 

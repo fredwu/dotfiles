@@ -1,6 +1,6 @@
 # T3 Code review coordination
 
-Use T3's app-owned delegation for reviews and other agent work when running inside T3 Code. The agents share repository access; task prompts do not need to contain the source.
+Use T3's app-owned delegation for reviews whenever available. Agents inspect the repository directly; prompts describe the target without containing its source. If orchestration is unavailable, use the [ACP fallback policy](external-runtime.md#select-the-runtime).
 
 ## Select and launch
 
@@ -26,4 +26,4 @@ T3 uses normal provider/project tools and context. Read-only scope is an assignm
 
 If tools are not listed, try the known capabilities tool once. When tools are hidden, use the supported T3 bridge supplied by the host if available. Do not build a replacement client.
 
-The bridge calls T3 tools; it is not a direct ACP review. If T3 still cannot run the selected task, report that constraint instead of starting a different transport or provider.
+The bridge calls T3 tools; it is not a direct ACP review. If T3 orchestration remains unavailable, use the existing ACP client under the [fallback policy](external-runtime.md#select-the-runtime). Preserve the reviewer and target, avoid duplicate active work, and report the fallback reason. Provider/model errors use same-round retries rather than triggering transport fallback.
