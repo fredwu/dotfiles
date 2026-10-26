@@ -5,8 +5,8 @@ description: Run one read-only external Claude review through T3 Code inside T3,
 
 # Claude Review
 
-Run one advisory Claude review. Read [code-review](../code-review/SKILL.md) for scope and review lenses, then the [shared external runtime](../code-review/references/external-runtime.md) and the applicable transport reference.
+Run one read-only Claude review. Apply [code-review](../code-review/SKILL.md) for requirements, scope, evidence standards, and output, and the [external runtime](../code-review/references/external-runtime.md) for transport and handoff. Pass the shared review instructions to the reviewer.
 
-Inside T3 Code, coordinate through T3 delegation. Outside T3, use the Claude ACP peer. Keep the handoff to requirements, repository/target, read-only scope, and important exclusions. Let the reviewer discover changes with Git and read source itself. Do not send diffs, source dumps, snapshots, or manifests, or substitute another provider.
+Use T3 delegation inside T3 Code and the Claude ACP peer elsewhere. Preserve the requested provider and explicit model/options. Do not substitute another provider.
 
-Accept ordinary review text or structured output. Assess findings against source, retain useful partial findings, and state substantive limits. Formatting, missing bookkeeping fields, and Markdown do not fail a review. Do not edit or start another review within this single invocation. Do not commit, push, publish comments, or make remote writes without authorization. Clean task-owned scratch after assessment and report findings and limits concisely.
+Return the review and material limits without repairs or another review invocation. Treat findings as advisory claims; the caller evaluates them against requirements and source.

@@ -6,9 +6,11 @@ Use T3's app-owned delegation for reviews and other agent work when running insi
 
 Call `orchestrator_capabilities` for live provider/model IDs, options, and constraints. Respect the requested reviewer and configured role settings through supported `target.options`; do not change the main session or ambient configuration. Use [Subagent roles and reasoning](../../execute-plan/references/subagent-reasoning.md). `role: "review"` describes purpose, not a configured model role.
 
-Use `delegate_task` with a short requirement-only brief, `role: "review"`, the chosen target, `interactionMode: "default"`, and normally `isolation: "shared"`. Let the reviewer inspect Git status, diffs, source and tests directly. Do not inline source, attach patches, serialize snapshots, or require a coverage manifest. Worktree isolation is useful only when it preserves the actual review target; it does not copy dirty edits.
+Use `delegate_task` with requirements, repository/target, exclusions, a reference to [code-review](../SKILL.md), `role: "review"`, the chosen target, `interactionMode: "default"`, and normally `isolation: "shared"`. The reviewer inspects Git and source directly. Do not attach source, patches, snapshots, or manifests. Worktree isolation is useful only when it preserves the actual target; it does not copy dirty edits.
 
-Include concise prior findings, responses, and unresolved objections for loop rounds. Use a fresh `delegate_task` for every round, with a distinct `clientRequestId` stable across transport retries of that launch. Retain its `taskId`. Do not use top-level thread tools or send another review prompt to its backing `childThreadId`.
+Include concise prior findings, responses, and unresolved objections for loop rounds, as claims to verify independently. Use a fresh `delegate_task` per round with a distinct `clientRequestId` stable across retries of that launch. Retain its `taskId`. Do not use top-level thread tools or send another review prompt to its backing `childThreadId`.
+
+A confirmed failed attempt is retried within the same numbered round under the [loop recovery policy](../../code-review-loop/SKILL.md#recover-failed-attempts). Reuse the launch key for an uncertain tool response; a replacement for a confirmed terminal task needs a fresh task and launch key. Preserve both round and attempt identities to avoid duplicate work.
 
 ## Wait and assess
 
@@ -16,7 +18,7 @@ Use async completion delivery, or a yielding wait on the same task. `task_status
 
 Resolve child questions from existing authority and scope. The caller handles real missing information; do not add routine approval handoffs. A task waiting for children is still active.
 
-Read the original task's completed `summary`; do not substitute progress or a later unrelated run. Assess the content directly. Plain prose and Markdown are valid review handoffs; do not run a schema/manifest validator or insist on exact JSON. Preserve useful partial findings and report substantive coverage limits. T3 task completion alone does not prove the code is clean.
+Read the original task's completed `summary`; do not substitute progress or a later unrelated run. Assess content under [code-review](../SKILL.md), retaining partial findings and coverage limits. Do not impose schema or manifest validators. T3 task completion alone does not prove the target is clean.
 
 T3 uses normal provider/project tools and context. Read-only scope is an assignment, not an extra filesystem sandbox. Report independence and limitations accurately without turning normal context into an automatic review failure.
 
