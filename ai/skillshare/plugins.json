@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "plugins": [
+    {
+      "name": "context7",
+      "target": "claude",
+      "nativeId": "context7@claude-plugins-official",
+      "classification": "portable",
+      "source": "https://github.com/anthropics/claude-plugins-official.git",
+      "sourceRef": "58267944f92187b7d6a1c822165c96c81c864806",
+      "plugin": "context7"
+    },
+    {
+      "name": "frontend-design",
+      "target": "claude",
+      "nativeId": "frontend-design@claude-plugins-official",
+      "classification": "portable",
+      "source": "https://github.com/anthropics/claude-plugins-official.git",
+      "sourceRef": "58267944f92187b7d6a1c822165c96c81c864806",
+      "plugin": "frontend-design"
+    },
+    {
+      "name": "code-review",
+      "target": "claude",
+      "nativeId": "code-review@claude-plugins-official",
+      "classification": "local",
+      "reason": "Native plugin is disabled; preserve it locally because add does not preserve disabled state"
+    },
+    {
+      "name": "code-simplifier",
+      "target": "claude",
+      "nativeId": "code-simplifier@claude-plugins-official",
+      "classification": "local",
+      "reason": "Native plugin is disabled; preserve it locally because add does not preserve disabled state"
+    },
+    {
+      "name": "skill-creator",
+      "target": "claude",
+      "nativeId": "skill-creator@claude-plugins-official",
+      "classification": "portable",
+      "source": "https://github.com/anthropics/claude-plugins-official.git",
+      "sourceRef": "58267944f92187b7d6a1c822165c96c81c864806",
+      "plugin": "skill-creator"
+    },
+    {
+      "name": "feature-dev",
+      "target": "claude",
+      "nativeId": "feature-dev@claude-plugins-official",
+      "classification": "local",
+      "reason": "Native plugin is disabled; preserve it locally because add does not preserve disabled state"
+    },
+    {
+      "name": "claude-md-management",
+      "target": "claude",
+      "nativeId": "claude-md-management@claude-plugins-official",
+      "classification": "local",
+      "reason": "Native plugin is disabled; preserve it locally because add does not preserve disabled state"
+    },
+    {
+      "name": "ralph-loop",
+      "target": "claude",
+      "nativeId": "ralph-loop@claude-plugins-official",
+      "classification": "local",
+      "reason": "Native plugin is disabled; preserve it locally because add does not preserve disabled state"
+    },
+    {
+      "name": "security-guidance",
+      "target": "claude",
+      "nativeId": "security-guidance@claude-plugins-official",
+      "classification": "portable",
+      "source": "https://github.com/anthropics/claude-plugins-official.git",
+      "sourceRef": "af59ee3a1051a29dda4a2e7a2af221aa457ae08b",
+      "plugin": "security-guidance"
+    },
+    {
+      "name": "claude-code-setup",
+      "target": "claude",
+      "nativeId": "claude-code-setup@claude-plugins-official",
+      "classification": "local",
+      "reason": "Native plugin is disabled; preserve it locally because add does not preserve disabled state"
+    },
+    {
+      "name": "elixir-phoenix",
+      "target": "claude",
+      "nativeId": "elixir-phoenix@oliver-kriska",
+      "classification": "portable",
+      "source": "https://github.com/oliver-kriska/claude-elixir-phoenix.git",
+      "sourceRef": "268ac494838f97e2f1809b0674688d6efdc96719",
+      "plugin": "elixir-phoenix"
+    },
+    {
+      "name": "pr-review-toolkit",
+      "target": "claude",
+      "nativeId": "pr-review-toolkit@claude-plugins-official",
+      "classification": "portable",
+      "source": "https://github.com/anthropics/claude-plugins-official.git",
+      "sourceRef": "58267944f92187b7d6a1c822165c96c81c864806",
+      "plugin": "pr-review-toolkit"
+    },
+    {
+      "name": "claude-code-wakatime",
+      "target": "claude",
+      "nativeId": "claude-code-wakatime@wakatime",
+      "classification": "portable",
+      "source": "https://github.com/wakatime/claude-code-wakatime.git",
+      "sourceRef": "3915f4ec19d4fedf2a1a2a644f1138cd72e956da",
+      "plugin": "claude-code-wakatime"
+    },
+    {
+      "name": "expo",
+      "target": "claude",
+      "nativeId": "expo@claude-plugins-official",
+      "classification": "local",
+      "reason": "Native marketplace does not prove a unique in-repository plugin source"
+    },
+    {
+      "name": "ecto",
+      "target": "claude",
+      "nativeId": "ecto@oliver-kriska",
+      "classification": "local",
+      "reason": "Native automatic dependency is not a deliberate shared selection"
+    },
+    {
+      "name": "lv",
+      "target": "claude",
+      "nativeId": "lv@oliver-kriska",
+      "classification": "local",
+      "reason": "Native automatic dependency is not a deliberate shared selection"
+    },
+    {
+      "name": "elixir-phoenix",
+      "target": "codex",
+      "nativeId": "elixir-phoenix@oliver-kriska",
+      "classification": "local",
+      "reason": "Codex marketplace revisions do not prove the installed plugin ref; exact installed provenance is unavailable"
+    },
+    {
+      "name": "codex-cli-wakatime",
+      "target": "codex",
+      "nativeId": "codex-cli-wakatime@wakatime",
+      "classification": "local",
+      "reason": "Codex marketplace revisions do not prove the installed plugin ref; exact installed provenance is unavailable"
+    }
+  ]
+}

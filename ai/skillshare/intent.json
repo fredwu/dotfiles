@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "config": {
+    "sources": {
+      "skills": "${root}/ai/skillshare/skills",
+      "agents": "${root}/ai/skillshare/agents",
+      "mcp": "${mcpFile}"
+    },
+    "mode": "merge",
+    "follow_source_links": true,
+    "ignore": [".DS_Store", ".git/", "__pycache__/", ".system/", ".trash/", "synced/"],
+    "targets": {
+      "Mimo": {
+        "skills": {"path": "${home}/.config/mimocode/skills", "mode": "merge"},
+        "agents": {"exclude": ["*"]}
+      },
+      "claude": {
+        "skills": {"path": "${home}/.claude/skills", "mode": "merge"},
+        "agents": {"path": "${home}/.claude/agents", "mode": "copy", "extension": "${root}/ai/skillshare/extensions/dotfiles-claude-agents"}
+      },
+      "claude-gamma": {
+        "agent": "claude",
+        "config_dir": "${home}/.claude-gamma",
+        "skills": {"path": "${home}/.claude-gamma/skills", "mode": "merge"},
+        "agents": {"path": "${home}/.claude-gamma/agents", "mode": "copy", "extension": "${root}/ai/skillshare/extensions/dotfiles-claude-agents"}
+      },
+      "codex": {
+        "skills": {"path": "${home}/.codex/skills", "mode": "merge", "enabled": false},
+        "agents": {"path": "${home}/.codex/agents", "mode": "copy", "extension": "${root}/ai/skillshare/extensions/dotfiles-codex-agents"}
+      },
+      "grok": {
+        "skills": {"path": "${home}/.grok/skills", "mode": "merge", "enabled": false},
+        "agents": {"exclude": ["*"]}
+      },
+      "universal": {
+        "skills": {"path": "${home}/.agents/skills", "mode": "merge"},
+        "agents": {"exclude": ["*"]}
+      }
+    },
+    "mcp": {"targets": ["claude", "codex", "opencode", "grok", "claude-desktop"]}
+  },
+  "executables": {"uvx": "uvx", "npx": "npx", "docker": "docker"},
+  "external": [
+    {"name": "godot-ai", "kind": "mcp", "from": "claude", "path": "${home}/.claude.json"}
+  ]
+}

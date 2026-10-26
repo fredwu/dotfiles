@@ -4,7 +4,7 @@ NEOVIM_MIN_VERSION=0.12.0
 NEOVIM_FALLBACK_VERSION=0.12.4
 MISE_VERSION=2026.7.6
 TREE_SITTER_VERSION=0.26.11
-SKILLSHARE_VERSION=0.20.25
+SKILLSHARE_VERSION=0.26.4
 
 ensure_homebrew() {
   local brew_binary
@@ -42,6 +42,8 @@ install_macos_packages() {
 
   log "Reconciling Homebrew formulae"
   brew install "${formulae[@]}"
+  require_command node
+  require_command npm
   log "Reconciling Homebrew casks"
   brew install --cask "${casks[@]}"
 }
@@ -58,7 +60,7 @@ install_apt_packages() {
   packages=()
   candidates=(
     build-essential ca-certificates curl direnv fd-find fontconfig fzf git gnupg
-    gzip libffi-dev libssl-dev libyaml-dev neovim nodejs ripgrep tar unzip xz-utils
+    gzip libffi-dev libssl-dev libyaml-dev neovim nodejs npm ripgrep tar unzip xz-utils
     zlib1g-dev zoxide zsh
   )
 
@@ -82,14 +84,14 @@ install_apt_packages() {
 install_dnf_packages() {
   as_root dnf install -y \
     ca-certificates curl direnv fd-find fontconfig fzf gcc gcc-c++ git gnupg2 \
-    gzip libffi-devel libyaml-devel make neovim nodejs openssl-devel ripgrep tar unzip \
+    gzip libffi-devel libyaml-devel make neovim nodejs npm openssl-devel ripgrep tar unzip \
     xz zlib-devel zoxide zsh
 }
 
 install_pacman_packages() {
   as_root pacman -S --needed --noconfirm \
     base-devel ca-certificates curl direnv fd fontconfig fzf git gnupg gzip \
-    libffi libyaml neovim nodejs openssl ripgrep tar unzip xz zlib zoxide zsh
+    libffi libyaml neovim nodejs npm openssl ripgrep tar unzip xz zlib zoxide zsh
 }
 
 ensure_mise_on_linux() {
@@ -215,11 +217,11 @@ ensure_skillshare_on_linux() {
   case "$arch" in
     x86_64)
       asset="skillshare_${SKILLSHARE_VERSION}_linux_amd64.tar.gz"
-      checksum=23235a9b1a673294d0b4336e70cb4a6369a7c9697b557dd095bcc7fa654686b5
+      checksum=53e81febc1c1b2c4ed1fd8ecea948de28b9aef60a17c259c35ac44fb20224847
       ;;
     arm64)
       asset="skillshare_${SKILLSHARE_VERSION}_linux_arm64.tar.gz"
-      checksum=7a1dc19bdfe676c475eb2a5ff5cb6cbac1b763b1c57e4d88a24166ef88daa70a
+      checksum=45086dfda6e0a158fcc3a342cba60df61780db429c115e11a5b6ea18d288ced4
       ;;
   esac
 

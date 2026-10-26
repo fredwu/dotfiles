@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "servers": {
+    "chrome-devtools": {
+      "transport": "stdio",
+      "command": {
+        "executable": "npx"
+      },
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@1.12.0"
+      ]
+    },
+    "context7": {
+      "command": {
+        "executable": "npx"
+      },
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@4.4.4"
+      ],
+      "transport": "stdio"
+    },
+    "firefox-devtools": {
+      "transport": "stdio",
+      "command": {
+        "executable": "npx"
+      },
+      "args": [
+        "-y",
+        "@mozilla/firefox-devtools-mcp@0.10.6"
+      ]
+    },
+    "godot-ai": {
+      "transport": "stdio",
+      "command": {
+        "executable": "uvx"
+      },
+      "args": [
+        "--isolated",
+        "--no-config",
+        "--no-env-file",
+        "--no-sources",
+        "--no-build",
+        "--index-strategy",
+        "first-index",
+        "--keyring-provider",
+        "disabled",
+        "--index",
+        "https://pypi.org/simple",
+        "--default-index",
+        "https://pypi.org/simple",
+        "--find-links",
+        "https://pypi.org/simple/godot-ai/",
+        "--link-mode",
+        "copy",
+        "--from",
+        "godot-ai==4.3.0",
+        "godot-ai",
+        "attach",
+        "--port",
+        "8001",
+        "--ws-port",
+        "9501"
+      ]
+    },
+    "playwright": {
+      "transport": "stdio",
+      "command": {
+        "executable": "npx"
+      },
+      "args": [
+        "-y",
+        "@playwright/mcp@0.0.83"
+      ]
+    },
+    "terraform": {
+      "transport": "stdio",
+      "command": {
+        "executable": "docker"
+      },
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "hashicorp/terraform-mcp-server@sha256:11dd418bba6003dd5777e9d0979b68de59929a155b355f338f407947e00e9d80"
+      ]
+    }
+  }
+}

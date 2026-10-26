@@ -1,0 +1,12 @@
+{
+  "name": "dotfiles-skillshare-bootstrap",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Locked YAML parser for the dotfiles Skillshare configuration helper",
+  "dependencies": {
+    "yaml": "2.9.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
