@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ship Plan"
+  short_description: "Review a plan or session scope, then execute it"
+  default_prompt: "Use $ship-plan to review and refine my plan or current session scope, run final-pass, then execute-plan with the same reviewer preferences."

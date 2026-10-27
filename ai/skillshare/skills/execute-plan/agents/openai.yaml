@@ -1,4 +1,4 @@
 interface:
   display_name: "Execute Plan"
-  short_description: "Complete plans with internal, external, or both review loops"
-  default_prompt: "Use $execute-plan to complete the full plan with final-pass after every phase, internal review by default or my requested external reviewer or both (internal first), then a final final-pass, while preserving the plan's commitments and resolving task-relevant issues and required checks."
+  short_description: "Execute plans or session scope with selected review loops"
+  default_prompt: "Use $execute-plan to complete my supplied plan or work resolved from session context with final-pass after every phase, internal review by default or my requested external reviewer or both (internal first), then a final final-pass, while preserving agreed commitments and resolving task-relevant issues and required checks."

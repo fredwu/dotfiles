@@ -1,16 +1,16 @@
 ---
 name: execute-plan
-description: Execute a full supplied or complete same-session plan with final-pass after every phase, then internal review by default, a requested Codex/Claude/Grok review, or both in that order, followed by a final final-pass. Interpret reviewer preferences from freeform user language.
+description: Execute a supplied plan or work resolved from session context with final-pass after every phase, then internal review by default, a requested Codex/Claude/Grok review, or both in that order, followed by a final final-pass. Interpret reviewer preferences from freeform user language.
 ---
 
 # Execute Plan
 
-Complete the full plan in one autonomous session unless the plan explicitly specifies multiple sessions or a session boundary, subject to user direction. Verify it against the originating request; adapt stale implementation suggestions with evidence while preserving the agreed architecture, contracts, technical constraints, scope, and acceptance criteria. Autonomy over implementation does not authorize changes to these commitments; resolve conflicts with governing requirements and user direction before affected edits, and continue independent work.
+Complete the full plan or resolved session scope in one autonomous session unless the agreed scope explicitly specifies multiple sessions or a session boundary, subject to user direction. Verify it against the originating request; adapt stale implementation suggestions with evidence while preserving the agreed architecture, contracts, technical constraints, scope, and acceptance criteria. Autonomy over implementation does not authorize changes to these commitments; resolve conflicts with governing requirements and user direction before affected edits, and continue independent work.
 
 ## Resolve scope
 
-- Use the supplied plan text, path, or attachment; otherwise use the most recent complete user-visible plan for this request. Ask only if no complete plan is identifiable or competing sources materially change execution.
-- Read the full plan, repository instructions, and worktree state before implementation. Read and apply [Resolve plan requirements](../write-plan/references/requirements.md) to interpret current requirements, accepted or delegated agent contributions, and digests without treating chat noise as scope. Later user instructions control conflicts. Resolve material gaps before affected work.
+- Use the supplied plan text, path, or attachment; otherwise resolve the current task from session context, using the latest applicable user-visible plan and later updates when available. If no complete plan exists, derive an actionable scope and coherent phases from the user's requirements and accepted decisions. State that scope briefly before implementation; do not require a saved plan or ask for one solely because it is absent. Ask only when missing information or competing sources materially change scope, acceptance, or authority and cannot be resolved from context.
+- Read the full supplied or applicable plan when present, repository instructions, and worktree state before implementation. Read and apply [Resolve plan requirements](../write-plan/references/requirements.md) to interpret current requirements, accepted or delegated agent contributions, and digests without treating chat noise as scope. Later user instructions control conflicts. Resolve material gaps before affected work. References below to the plan and its items also cover the resolved session scope and its phases; the same acceptance and completion rules apply.
 - Track requirements, deviations, acceptance evidence, and remaining work in context; files follow the temporary-file rules below. Do not duplicate requirements for bookkeeping. If revising the saved plan, keep its current requirements, provenance, and immediately following TL;DR accurate; a missing heading alone does not block execution.
 
 ## Select the review sequence
@@ -31,7 +31,7 @@ Keep end-to-end reasoning, dependencies, integration, review assessment, and com
 
 Choose assignments with clear context and ownership boundaries and few dependencies on other active work. Continue useful non-overlapping work while agents run, and reuse relevant agents and evidence rather than repeating completed work.
 
-Keep handoffs short: give the plan path, assigned outcome and ownership, essential constraints, and acceptance criteria. Agents read the plan and inspect source and Git themselves; do not inline plans, diffs, file contents, or full conversation history. Inside T3 Code, coordinate agents through T3 delegation; outside T3, use the harness's native controls. Require compact findings or results with check evidence and real blockers. Follow the selected review skill without steering its verdict.
+Keep handoffs short: give the plan path when available, assigned outcome and ownership, essential constraints, and acceptance criteria. For session-only work, provide a concise scope and requirements brief. Agents read any referenced plan and inspect source and Git themselves; do not inline plans, diffs, file contents, or full conversation history. Inside T3 Code, coordinate agents through T3 delegation; outside T3, use the harness's native controls. Require compact findings or results with check evidence and real blockers. Follow the selected review skill without steering its verdict.
 
 Assign disjoint edit ownership where possible. Serialize overlapping edits and operations that share mutable state, such as services, databases, fixtures, or generated outputs. Start dependent work only after its prerequisites are integrated and verified. Await assigned work, inspect and reconcile each agent's changes, evidence, check coverage, and residuals, then verify the combined result. The coordinator owns unfinished or failed assignments; an agent's completion claim does not establish plan completion.
 
