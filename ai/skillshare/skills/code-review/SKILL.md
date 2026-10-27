@@ -15,7 +15,7 @@ Read the requirements, acceptance criteria, applicable repository instructions, 
 
 Keep delegated handoffs short: requirements, repository/target, exclusions, and a reference to these review instructions. Describe the target, such as “the current uncommitted changes, including relevant untracked files, in /path/to/repo.” Do not attach diffs, source dumps, snapshots, manifests, or full conversation history. Reviewers discover and inspect the changes themselves. Prefer T3's orchestrator when available, with ACP fallback under the [shared runtime policy](references/external-runtime.md). Apply [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md) when delegating.
 
-Choose a reasonable review budget from scope and complexity. A short tool wait or silence does not prove a hang. Keep the target unchanged during inspection, join assigned work, and report actual coverage and limitations.
+Before reviewing or launching a reviewer, apply [Reviewer model and effort](references/reviewer-settings.md): Codex and Claude use medium or high; Grok uses xhigh. Choose a reasonable review budget from scope and complexity. A short tool wait or silence does not prove a hang. Keep the target unchanged during inspection, join assigned work, and report actual coverage and limitations.
 
 ## Inspect and assess
 

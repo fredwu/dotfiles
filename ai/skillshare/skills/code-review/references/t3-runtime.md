@@ -4,7 +4,7 @@ Use T3's app-owned delegation for reviews whenever available. Agents inspect the
 
 ## Select and launch
 
-Call `orchestrator_capabilities` for live provider/model IDs, options, and constraints. Respect the requested reviewer and configured role settings through supported `target.options`; do not change the main session or ambient configuration. Use [Subagent roles and reasoning](../../execute-plan/references/subagent-reasoning.md). `role: "review"` describes purpose, not a configured model role.
+Call `orchestrator_capabilities` for live provider/model IDs, options, and constraints. Resolve the model from the requested reviewer or configured role, then choose effort under [Reviewer model and effort](reviewer-settings.md). Explicitly pass it in `target.options` and verify the returned selection before accepting the review. Use [Subagent roles and reasoning](../../execute-plan/references/subagent-reasoning.md) without changing the main session or ambient configuration. `role: "review"` describes purpose, not a configured model role.
 
 Use `delegate_task` with requirements, repository/target, exclusions, a reference to [code-review](../SKILL.md), `role: "review"`, the chosen target, `interactionMode: "default"`, and normally `isolation: "shared"`. The reviewer inspects Git and source directly. Do not attach source, patches, snapshots, or manifests. Worktree isolation is useful only when it preserves the actual target; it does not copy dirty edits.
 

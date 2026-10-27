@@ -2,6 +2,8 @@
 
 Use this policy for delegated reviews, including Codex, Claude, and Grok reviews and loops. [code-review](../SKILL.md) defines the review standard; [code-review-loop](../../code-review-loop/SKILL.md) owns assessment, remediation, rounds, and completion.
 
+For every launch, apply [Reviewer model and effort](reviewer-settings.md). The coordinator chooses Codex/Claude effort from medium or high by complexity; Grok always uses xhigh. Apply and verify actual runtime settings rather than relying on role labels or provider defaults.
+
 ## Select the runtime
 
 Prefer [T3's orchestrator](t3-runtime.md) whenever available. Missing tools alone do not prove it is unavailable: try the known capabilities tool and any supported host bridge as described in that reference.
