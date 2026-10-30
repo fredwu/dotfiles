@@ -17,7 +17,7 @@ Apply this exclusion to delegated research and review, and to plan content in su
 
 Read and apply [Resolve plan requirements](references/requirements.md) within these source exclusions; its fallback to stored requirements or digests must not use other plans or plan-derived material. Start with concise `## User requirements`, then `## TL;DR` immediately after the requirements and any update subsection. Capture current intent and source, not a transcript of the chat.
 
-Honor an explicit output path. Otherwise use `.local/<topic>-plan-<agent>.md`, with a concise kebab-case topic and runtime-derived `claude`, `codex`, `grok`, or `agent`. For collisions, insert the first available number before the agent suffix. Never overwrite an unrelated plan; report explicit-path conflicts.
+Honor an explicit output path. Otherwise use `.local/YYMMDD-<topic>-plan-<agent>.md`, replacing `YYMMDD` with the current local date at creation (for example, `261031` for 2026-10-31), with a concise kebab-case topic and runtime-derived `claude`, `codex`, `grok`, or `agent`. For collisions, insert the first available number before the agent suffix, keeping the date prefix. Never overwrite an unrelated plan; report explicit-path conflicts.
 
 ## Coordinate agents
 

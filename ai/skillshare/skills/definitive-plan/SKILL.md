@@ -33,7 +33,7 @@ Resolve risks and decisions with the best-supported recommendation, including hi
 
 ## Save and verify
 
-Use runtime-derived `claude`, `codex`, or `grok` as the agent suffix; ask if unknown. An explicit output path must be under `.local/`. Normalize its stem to exactly `<base>-definitive-plan-<agent>.md`, completing a partial `-definitive` or `-definitive-plan` suffix or replacing another agent suffix. Otherwise use a concise safe topic as the base.
+Use runtime-derived `claude`, `codex`, or `grok` as the agent suffix; ask if unknown. An explicit output path must be under `.local/`. Normalize its stem to exactly `<base>-definitive-plan-<agent>.md`, completing a partial `-definitive` or `-definitive-plan` suffix or replacing another agent suffix. Otherwise use `.local/YYMMDD-<topic>-definitive-plan-<agent>.md`, replacing `YYMMDD` with the current local date at creation (for example, `261031` for 2026-10-31) and choosing a concise safe topic. Keep the date prefix when resolving collisions.
 
 Never overwrite an existing file. Insert the first free `-v2`, `-v3`, etc. before the agent suffix for collisions. Read back the saved plan and check requirement accuracy and provenance, TL;DR accuracy, coverage, evidence, consistency, and executability. Keep working state in context without scratch files, reports, rankings, or ledgers. Preserve the saved plan, including in `.local/`. Temporary-file steps need a concrete agent purpose, clear ownership, and removal after use, including failure or abandonment; preserve unrelated files and durable deliverables.
 
