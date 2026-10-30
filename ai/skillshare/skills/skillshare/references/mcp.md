@@ -129,7 +129,8 @@ mcp:
 
 Client IDs: `claude`, `codex`, `cursor`, `vscode`, `opencode`, `kilocode`, `grok`,
 `antigravity`, `amp`, `claude-desktop`, `cline`, `copilot`, `factory`, `gemini`, `goose`,
-`junie`, `kiro`, `lmstudio`, `warp`, `windsurf`, `pi`, `omp`. Scope and transport support vary by
+`junie`, `kiro`, `lmstudio`, `warp`, `windsurf`, `pi`, `omp`. `--target` and `--from` also take `agy` and
+`antigravity-cli` as `antigravity`. Scope and transport support vary by
 client; the website's MCP command reference lists every native destination and limit.
 Names such as `company-docs` (letters, digits, hyphens) work across all clients.
 
