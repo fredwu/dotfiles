@@ -51,6 +51,10 @@ Choose a structure proportionate to the task. After the requirements and TL;DR, 
 
 Where useful, identify independently assignable steps, ownership boundaries, prerequisites, shared files or resources needing serialization, and review or integration opportunities. Explain what must be complete before dependent work starts. Give the executor enough context to choose delegation at runtime; do not prescribe a fixed agent topology or assume unavailable roles or tools.
 
-Read back the saved plan; check requirement coverage and provenance, TL;DR accuracy, evidence, dependencies, validation, and scope, and remove contradictions and duplication. Link the plan in chat and briefly state material verification limits, high-risk recommendations with reasons, mitigations and residual risks, and essential missing input or required execution authorization. Use plain language; omit praise, process narration, and routine approval requests. Do not execute the plan.
+Read back the saved plan; check requirement coverage and provenance, TL;DR accuracy, phase numbering and effort shares, evidence, dependencies, validation, and scope, and remove contradictions and duplication. Link the plan in chat and briefly state material verification limits, high-risk recommendations with reasons, mitigations and residual risks, and essential missing input or required execution authorization. Use plain language; omit praise, process narration, and routine approval requests. Do not execute the plan.
 
 Keep working state in context; create no scratch files, reports, ledgers, or supporting artifacts. Preserve the saved plan, including in `.local/`. For execution steps needing temporary files, require a concrete agent purpose, clear task ownership, and removal after use, including failure or abandonment; preserve unrelated files and durable deliverables.
+
+## Phase structure
+
+Number implementation phases consecutively from `Phase 1` in their headings, so the executor can report `Phase N/T` progress directly. Do not number checkpoints, review loops, or pre-execution actions as phases. Give each phase an approximate effort share as a rounded percentage of implementation effort, with all phases totaling 100%, and a few words on its basis when it is not obvious. State the phase count in the TL;DR. These shares are estimates for progress reporting, not commitments or schedules.
