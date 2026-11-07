@@ -98,138 +98,56 @@ test_package_dispatch_without_package_manager() {
   local marker="$HOME/dispatched"
 
   (
-    install_apt_packages() { printf 'apt\n' > "$marker"; }
-    ensure_mise_on_linux() { :; }
-    ensure_neovim_on_linux() { :; }
-    ensure_skillshare_on_linux() { :; }
-    ensure_tree_sitter_on_linux() { :; }
+    install_apt_packages() { printf 'apt\n' >> "$marker"; }
+    retire_linux_release_installs() { printf 'retire\n' >> "$marker"; }
+    install_homebrew_packages() { printf 'homebrew\n' >> "$marker"; }
     PLATFORM=linux
     PACKAGE_MANAGER=apt
     install_packages
   )
-  assert_eq apt "$(cat "$marker")" "Linux package dispatch should call apt implementation"
+  assert_eq $'apt\nretire\nhomebrew' "$(cat "$marker")" \
+    "Linux should install the base system, retire release builds, then use Homebrew"
   finish_test "package dispatch uses stubs and no network or root"
 }
 
-test_mise_release_selection() {
-  local marker="$HOME/mise-release"
-  local name version asset checksum url executable
+test_homebrew_formulae_are_shared() {
+  local marker="$HOME/brew"
+  local PLATFORM
+  local formula
 
-  (
-    have() { return 1; }
-    linux_architecture() { printf 'arm64\n'; }
-    install_linux_tarball() { printf '%s\n' "$*" > "$marker"; }
-    ensure_mise_on_linux
-  )
-
-  read -r name version asset checksum url executable < "$marker"
-  assert_eq mise "$name" "mise should select the mise installer"
-  assert_eq "$MISE_VERSION" "$version" "mise should select the configured version"
-  assert_eq "mise-v$MISE_VERSION-linux-arm64.tar.gz" "$asset" \
-    "mise should select the ARM64 asset"
-  [[ "$checksum" =~ ^[[:xdigit:]]{64}$ ]] || fail "mise should require a SHA-256 checksum"
-  assert_eq \
-    "https://github.com/jdx/mise/releases/download/v$MISE_VERSION/$asset" \
-    "$url" "mise should construct the configured release URL"
-  assert_eq bin/mise "$executable" "mise should select the executable within the archive"
-  finish_test "mise release selection is pinned and architecture-aware"
+  for PLATFORM in linux macos; do
+    (
+      ensure_homebrew() { :; }
+      brew() { printf '%s\n' "$*" >> "$marker.$PLATFORM"; }
+      install_homebrew_packages > /dev/null
+    )
+  done
+  assert_eq "install ${HOMEBREW_FORMULAE[*]}" "$(cat "$marker.linux")" \
+    "Linux should install the shared formulae without casks"
+  assert_eq "install ${HOMEBREW_FORMULAE[*]}"$'\n'"install --cask ${HOMEBREW_CASKS[*]}" \
+    "$(cat "$marker.macos")" "macOS should install the shared formulae and casks"
+  for formula in skillshare mise tree-sitter-cli neovim node; do
+    [[ " ${HOMEBREW_FORMULAE[*]} " == *" $formula "* ]] || \
+      fail "Homebrew formulae should include $formula"
+  done
+  finish_test "Homebrew installs the same formulae on macOS and Linux"
 }
 
-test_linux_tarball_install() {
-  local fixture="$HOME/fixture"
-  local fixture_archive="$HOME/fixture.tar.gz"
+test_retired_linux_release_installs() {
+  mkdir -p "$HOME/.local/bin" "$HOME/.local/opt/skillshare/0.26.4" "$HOME/elsewhere"
+  printf '#!/bin/sh\n' > "$HOME/.local/opt/skillshare/0.26.4/skillshare"
+  ln -s "$HOME/.local/opt/skillshare/0.26.4/skillshare" "$HOME/.local/bin/skillshare"
+  ln -s "$HOME/elsewhere" "$HOME/.local/bin/other"
 
-  mkdir -p "$fixture/mise/bin"
-  printf '#!/bin/sh\nprintf "fixture\\n"\n' > "$fixture/mise/bin/mise"
-  chmod +x "$fixture/mise/bin/mise"
-  tar -czf "$fixture_archive" -C "$fixture" mise
+  retire_linux_release_installs > /dev/null
+  retire_linux_release_installs > /dev/null
 
-  (
-    download_checked() { cp "$fixture_archive" "$3"; }
-    install_linux_tarball mise 1.2.3 fixture.tar.gz unused https://example.invalid/fixture bin/mise
-    install_linux_tarball mise 1.2.3 fixture.tar.gz unused https://example.invalid/fixture bin/mise
-  )
-
-  assert_eq fixture "$("$HOME/.local/bin/mise")" "installed tarball executable should run"
-  assert_eq "$HOME/.local/opt/mise/1.2.3/bin/mise" "$(readlink "$HOME/.local/bin/mise")" \
-    "tarball executable should be linked from the local bin directory"
-  assert_false "repeat tarball install should create no backup" test -e "$DOTFILES_BACKUP_ROOT"
-  finish_test "pinned Linux tarballs install idempotently"
-}
-
-# Simulates GitHub's latest-release redirect and the release's published checksums.
-skillshare_release_curl() {
-  local latest=9.8.7
-  case "$*" in
-    *'%{url_effective}'*"$SKILLSHARE_REPOSITORY/releases/latest")
-      printf '%s/releases/tag/v%s' "$SKILLSHARE_REPOSITORY" "$latest" ;;
-    *"$SKILLSHARE_REPOSITORY/releases/download/v$latest/checksums.txt")
-      printf '%s  skillshare_%s_linux_amd64.tar.gz\n' "$(printf 'b%.0s' {1..64})" "$latest"
-      [[ -n "${OMIT_ARM64_CHECKSUM:-}" ]] || \
-        printf '%s  skillshare_%s_linux_arm64.tar.gz\n' "$(printf 'a%.0s' {1..64})" "$latest" ;;
-    *) return 22 ;;
-  esac
-}
-
-test_skillshare_release_selection() {
-  local marker="$HOME/skillshare-release"
-  local name version asset checksum url executable
-
-  (
-    curl() { skillshare_release_curl "$@"; }
-    linux_architecture() { printf 'arm64\n'; }
-    install_linux_flat_tarball() { printf '%s\n' "$*" > "$marker"; }
-    ensure_skillshare_on_linux
-  )
-
-  read -r name version asset checksum url executable < "$marker"
-  assert_eq skillshare "$name" "Skillshare should select the Skillshare installer"
-  assert_eq 9.8.7 "$version" "Skillshare should select the latest release"
-  assert_eq skillshare_9.8.7_linux_arm64.tar.gz "$asset" \
-    "Skillshare should select the ARM64 asset"
-  assert_eq "$(printf 'a%.0s' {1..64})" "$checksum" \
-    "Skillshare should use the asset's published SHA-256 checksum"
-  assert_eq "$SKILLSHARE_REPOSITORY/releases/download/v9.8.7/$asset" "$url" \
-    "Skillshare should construct the latest release URL"
-  assert_eq skillshare "$executable" \
-    "Skillshare should select the executable within the archive"
-
-  if (
-    curl() { OMIT_ARM64_CHECKSUM=1 skillshare_release_curl "$@"; }
-    linux_architecture() { printf 'arm64\n'; }
-    install_linux_flat_tarball() { :; }
-    ensure_skillshare_on_linux
-  ) > "$HOME/output" 2>&1; then
-    fail "Skillshare should not install an asset without a published checksum"
-  fi
-  finish_test "Skillshare installs the latest release with its published checksum"
-}
-
-test_linux_flat_tarball_install() {
-  local fixture="$HOME/fixture"
-  local fixture_archive="$HOME/fixture.tar.gz"
-
-  mkdir -p "$fixture"
-  printf '#!/bin/sh\nprintf "fixture\\n"\n' > "$fixture/skillshare"
-  chmod +x "$fixture/skillshare"
-  tar -czf "$fixture_archive" -C "$fixture" skillshare
-
-  (
-    download_checked() { cp "$fixture_archive" "$3"; }
-    install_linux_flat_tarball \
-      skillshare 1.2.3 fixture.tar.gz unused https://example.invalid/fixture skillshare
-    install_linux_flat_tarball \
-      skillshare 1.2.3 fixture.tar.gz unused https://example.invalid/fixture skillshare
-  )
-
-  assert_eq fixture "$("$HOME/.local/bin/skillshare")" \
-    "installed flat-tarball executable should run"
-  assert_eq "$HOME/.local/opt/skillshare/1.2.3/skillshare" \
-    "$(readlink "$HOME/.local/bin/skillshare")" \
-    "flat-tarball executable should be linked from the local bin directory"
-  assert_false "repeat flat-tarball install should create no backup" \
-    test -e "$DOTFILES_BACKUP_ROOT"
-  finish_test "Linux flat tarballs install idempotently"
+  assert_false "retired release link should be removed" test -L "$HOME/.local/bin/skillshare"
+  assert_false "retired release build should be archived" test -e "$HOME/.local/opt/skillshare"
+  assert_true "retired release build should be preserved in the backup" \
+    test -f "$DOTFILES_BACKUP_ROOT"/*/.local/opt/skillshare/0.26.4/skillshare
+  assert_true "unrelated links should remain" test -L "$HOME/.local/bin/other"
+  finish_test "retired Linux release builds are archived once"
 }
 
 test_apt_missing_required_package_fails() {
@@ -777,10 +695,8 @@ rm -rf "$HOME"
 
 new_home; test_platform_detection
 new_home; test_package_dispatch_without_package_manager
-new_home; test_mise_release_selection
-new_home; test_linux_tarball_install
-new_home; test_skillshare_release_selection
-new_home; test_linux_flat_tarball_install
+new_home; test_homebrew_formulae_are_shared
+new_home; test_retired_linux_release_installs
 new_home; test_apt_missing_required_package_fails
 new_home; test_idempotent_links
 new_home; test_dangling_link

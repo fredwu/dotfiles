@@ -39,21 +39,8 @@ JS
   install_apt_packages
   install_dnf_packages
   install_pacman_packages
-  [[ $(rg -c '(^| )npm( |$)' "$fixture/packages") == 3 ]]
-)
-
-# Verify the x86_64 asset mapping for the latest release.
-(
-  curl() {
-    case "$*" in
-      *'%{url_effective}'*) printf '%s/releases/tag/v1.2.3' "$SKILLSHARE_REPOSITORY" ;;
-      *checksums.txt) printf '%s  skillshare_1.2.3_linux_amd64.tar.gz\n' "$(printf 'c%.0s' {1..64})" ;;
-      *) return 22 ;;
-    esac
-  }
-  install_linux_flat_tarball() { printf '%s\n' "$3 $4"; }
-  linux_architecture() { printf 'x86_64\n'; }
-  [[ $(ensure_skillshare_on_linux) == "skillshare_1.2.3_linux_amd64.tar.gz $(printf 'c%.0s' {1..64})" ]]
+  [[ $(rg -c '(^| )zsh( |$)' "$fixture/packages") == 3 ]]
+  [[ " ${HOMEBREW_FORMULAE[*]} " == *' node '* && " ${HOMEBREW_FORMULAE[*]} " == *' skillshare '* ]]
 )
 
 # Missing Node or npm must stop before dependency/configuration directories exist.

@@ -1,9 +1,13 @@
 unsetopt correct
 unsetopt correct_all
 
-if command -v /opt/homebrew/bin/brew >/dev/null; then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
+for brew_binary in /opt/homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin/brew; do
+  if [[ -x "$brew_binary" ]]; then
+    eval "$("$brew_binary" shellenv)"
+    break
+  fi
+done
+unset brew_binary
 
 if command -v direnv >/dev/null; then
   eval "$(direnv hook zsh)"

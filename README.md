@@ -26,7 +26,9 @@ cd ~/.dotfiles
 ```
 
 Run the installer as your regular user, not with `sudo`; it requests elevated
-permissions only for system package and login-shell changes.
+permissions only for system package, Homebrew setup, and login-shell changes.
+Root-only environments, such as containers without a regular user, are not
+supported.
 
 It is safe to run `./install.sh` again. Existing files at managed paths are
 moved to a timestamped directory under `~/.dotfiles-backups` before links are
@@ -36,10 +38,8 @@ checkouts are left alone.
 Claude Code, Codex, and Grok keep real configuration directories at
 `~/.claude`, `~/.codex`, and `~/.grok`. Their instruction files link to
 `ai/shared`. [Skillshare](https://skillshare.runkids.cc/) 0.29.1 or newer manages
-shared resources from `ai/skillshare`. Each install run brings Skillshare to its
-latest release: Homebrew upgrades the formula, and Linux installs the latest
-GitHub release after it verifies the archive against the release's published
-SHA-256 checksums. Bootstrap provisions a locked, private YAML
+shared resources from `ai/skillshare`; Homebrew installs it and keeps it at
+the latest release. Bootstrap provisions a locked, private YAML
 parser under `.local/skillshare-node` with `npm ci --ignore-scripts`.
 Install the MCP launchers selected in intent too: currently `npx`, `uvx`, and
 the Docker CLI. Preparation checks required launchers before configuration
@@ -197,10 +197,12 @@ repeatable and then performs the normal install.
 - Skillshare, with shared skills and agents stored in this repository
 - Shared instructions for Claude Code, Codex, and Grok
 
-On Linux, official pinned Neovim, mise, Skillshare, and Tree-sitter builds are
-installed under `~/.local/opt` as needed. The pinned Neovim is used when the
-distribution package is older than the version required by the locked LazyVim
-configuration.
+Homebrew installs the same command-line formulae on macOS and Linux, under
+`/home/linuxbrew/.linuxbrew` on Linux. Each install run upgrades them to their
+latest release. On Linux, the distribution package manager provides only the
+base system: the build toolchain, libraries, Zsh, and Homebrew's prerequisites.
+Release builds that earlier installers placed under `~/.local/opt` are archived
+to the backup directory so they no longer shadow the Homebrew versions.
 
 ## Custom configuration
 

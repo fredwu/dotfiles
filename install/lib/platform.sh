@@ -26,11 +26,3 @@ detect_platform() {
 
   export PLATFORM PACKAGE_MANAGER
 }
-
-linux_architecture() {
-  case "$(uname -m)" in
-    x86_64|amd64) printf 'x86_64\n' ;;
-    aarch64|arm64) printf 'arm64\n' ;;
-    *) die "unsupported Linux architecture: $(uname -m)" ;;
-  esac
-}

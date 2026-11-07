@@ -1,5 +1,6 @@
 #!/bin/bash
 
+NEOVIM_MIN_VERSION=0.12.0
 HACK_NERD_FONT_VERSION=3.4.0
 HACK_NERD_FONT_SHA256=8ca33a60c791392d872b80d26c42f2bfa914a480f9eb2d7516d9f84373c36897
 
@@ -31,6 +32,10 @@ install_hack_nerd_font() {
   fi
   mv "$staging" "$font_dir"
   fc-cache -f "$font_root"
+}
+
+nvim_version() {
+  nvim --version 2>/dev/null | awk 'NR == 1 { sub(/^v/, "", $2); print $2 }'
 }
 
 sync_neovim_plugins() {
