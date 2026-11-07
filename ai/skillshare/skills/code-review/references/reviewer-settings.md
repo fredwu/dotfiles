@@ -1,18 +1,18 @@
 # Reviewer model and effort
 
-Apply this policy to every internal and external review, including loop rounds. Preserve the main session's user-selected settings; delegate when a direct review would use a disallowed effort.
+Apply this policy to every review, internal or external, including each loop round. It sets review settings only. It does not change the main session's user-selected settings or non-review assignments. If a direct review in the main session would use an effort this policy does not allow, delegate the review.
 
-Preserve a requested model; otherwise use the configured role model from runtime settings or `ai/skillshare/agent-models.json`. If the provider has no role mapping, resolve its model through the runtime's available selection controls and disclose material limits. Choose review effort separately from role defaults:
+## Select
 
-- **Codex and Claude:** choose `medium` or `high` only. Use medium for a narrow, well-understood target with limited interactions. Use high for broad coverage, uncertain behaviour, or consequential security, concurrency, data-integrity, and architectural interactions. Judge risk and uncertainty, not file count alone. Use high when uncertain.
-- **Grok:** always use `xhigh`, regardless of target size or role defaults.
+- **Model:** use the requested model. Otherwise use the provider's configured `worker` role model, from its generated agent definition or the dotfiles `ai/skillshare/agent-models.json`. If the provider has no role mapping, such as Grok, choose from the live model list and state material limits.
+- **Codex and Claude effort:** `medium` or `high` only. Use `medium` for a narrow, well-understood target with limited interactions. Use `high` for broad coverage, uncertain behavior, or consequential security, concurrency, data-integrity, or architectural interactions. Judge risk and uncertainty, not file count. If unsure, use `high`.
+- **Grok effort:** always `xhigh`.
 
-Record the selection and a short reason in coordinator context. A new round can reassess complexity; retries preserve the round's selected model and effort. These review rules override role-default effort, not the main session's settings or unrelated worker assignments.
+Record the selection and a short reason in context. A new round can reassess complexity; retries keep the round's model and effort.
 
 ## Apply and verify
 
-Resolve settings for every launch. With T3, read the live model descriptors and explicitly set `target.model` and `target.options`: Codex and Grok use `reasoningEffort`; Claude uses `effort`. `role: "review"` is a purpose label and does not load worker configuration. Parent effort does not carry across different providers or models.
+- **T3:** read the live descriptors from `orchestrator_capabilities`, and set `target.model` and the effort in `target.options` explicitly. Codex and Grok use `reasoningEffort`; Claude uses `effort`. Provider defaults differ and parent effort does not carry across providers or models, so never omit the option.
+- **ACP or native controls:** apply effort through supported settings and verify the effective value. A native role with a fixed effort must satisfy this policy; otherwise use another supported control.
 
-Check the returned provider, model, and effort against the selection. Empty or mismatched options do not verify the required effort. Stop and join an incorrectly configured task before replacing it, using the same-round retry rules. Do not accept its result as a correctly configured review.
-
-With ACP or native controls, apply the selected effort through supported settings and verify the effective configuration. A native role with fixed effort must satisfy this policy; use another supported control when it cannot. If a runtime cannot apply or verify the selection, report the limitation rather than silently accepting defaults, substituting another effort, or changing ambient configuration. Prompt wording alone does not set effort.
+Check the returned provider, model, and effort against the selection. Empty or mismatched options do not verify effort. Stop and join a wrongly configured task, replace it under the same-round retry rules, and do not accept its result. If a runtime cannot apply or verify the selection, report that limit. Do not accept defaults silently, substitute another effort, or change ambient configuration. Prompt wording does not set effort.

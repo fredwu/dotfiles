@@ -1,6 +1,8 @@
 ---
 name: claude-review
 description: Run one read-only Claude review through T3's orchestrator when available, with ACP fallback. Use only when explicitly requested. Use claude-review-loop for review and remediation.
+metadata:
+  origin: custom
 ---
 
 # Claude Review

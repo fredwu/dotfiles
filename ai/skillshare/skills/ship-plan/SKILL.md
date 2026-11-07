@@ -1,35 +1,37 @@
 ---
 name: ship-plan
 description: Review and refine a supplied plan or session scope, run final-pass, then execute-plan with the same optional reviewer preferences.
+metadata:
+  origin: custom
 ---
 
 # Ship Plan
 
-Run the following stages sequentially: one review loop over the plan or session scope, [final-pass](../final-pass/SKILL.md), then [execute-plan](../execute-plan/SKILL.md). Complete each stage before starting the next. This shortcut preserves each skill's authority, checks, recovery, and completion rules; it does not authorize commits, pushes, or deployment.
+Run three stages in order, and finish each before the next: one review loop over the plan or session scope, [final-pass](../final-pass/SKILL.md), then [execute-plan](../execute-plan/SKILL.md). Each skill keeps its own authority, checks, recovery, and completion rules. This shortcut does not authorize commits, pushes, or deployment.
 
 ## Resolve input and reviewers
 
-Use the supplied plan text, path, or attachment. Otherwise use the current task's session context, including its latest applicable plan and later user updates. Apply `execute-plan`'s scope resolution and [Resolve plan requirements](../write-plan/references/requirements.md). Identify the outcome, scope, constraints, and acceptance criteria in context; no saved or previously complete plan is required. Ask only about material ambiguity that available context cannot resolve.
+Use the supplied plan text, path, or attachment. Otherwise use the current task's session context, including its latest applicable plan and later user updates. Apply `execute-plan`'s scope resolution and [Resolve plan requirements](../write-plan/references/requirements.md), and identify the outcome, scope, constraints, and acceptance criteria. No saved or complete plan is required. Ask only about material ambiguity that context cannot resolve.
 
-Interpret optional reviewer preferences exactly as `execute-plan` does, including freeform language and explicit model/options. Preserve those preferences for execution. Provider names in paths, implementation requirements, or background context are not reviewer selections. Never infer a reviewer from the executing provider or silently substitute another.
+Read reviewer preferences exactly as `execute-plan` does, including freeform language and explicit model or options, and keep them for execution. Provider names in paths, implementation requirements, or background context are not reviewer selections. Never infer a reviewer from the provider that runs this session, and never substitute one.
 
-Select exactly one initial loop:
+Select exactly one plan-review loop:
 
 - Codex requested: [codex-review-loop](../codex-review-loop/SKILL.md).
 - Claude requested: [claude-review-loop](../claude-review-loop/SKILL.md).
 - Grok requested: [grok-review-loop](../grok-review-loop/SKILL.md).
-- No external reviewer requested, including internal-only: [code-review-loop](../code-review-loop/SKILL.md).
+- No external reviewer, including internal only: [code-review-loop](../code-review-loop/SKILL.md).
 
-An additional internal preference does not add an initial loop. Resolve competing external providers or an unspecified external reviewer before launching review. Confirm selected dependencies exist and state the initial loop and execution review sequence briefly.
+An additional internal preference does not add a plan-review loop. Resolve competing external providers or an unnamed external reviewer before review starts. Confirm that the selected skills exist, and briefly state the plan-review loop and the execution review sequence.
 
-## Run the shortcut
+## Run the stages
 
-1. Apply the selected loop to the plan or resolved session scope as a planning target. Review requirements, architectural commitments, feasibility against the current repository, boundaries, omissions, and acceptance criteria. Assess findings and refine the plan or in-context scope within existing authority. Keep implementation changes for `execute-plan`; no implementation diff is required for this review. For a saved plan, give the reviewer its path; for session-only scope, supply a concise requirements and acceptance brief rather than full conversation history. Preserve the loop's review mechanics, fresh rounds, cap, failure recovery, and honest coverage reporting. Planning checks establish readiness, not implementation verification.
-2. After that loop returns, always run `final-pass` over the resulting planning target, including after a capped or incomplete loop. Use its documentation-only checks and recovery rules to resolve planning residuals; preserve the loop's actual status. Do not invoke `execute-plan`'s implementation checkpoints at this stage. A concrete blocker or incomplete required final-pass prevents dependent execution; finish independent authorized work and report what is missing.
-3. Invoke `execute-plan` with the refined plan or resolved session scope and the same reviewer preferences and explicit options passed to `ship-plan`. With no preference, preserve its internal default. Its implementation, phase final passes, selected implementation review loops, and closing final-pass all remain required. The initial planning review cannot satisfy or replace any implementation review.
+1. **Plan review.** Apply the selected loop to the plan or resolved scope as a planning target. Review requirements, architectural commitments, feasibility against the current repository, boundaries, omissions, and acceptance criteria. Assess findings, and refine the plan or in-context scope within existing authority. Leave implementation to `execute-plan`; this review needs no implementation diff. For a saved plan, give the reviewer its path; for session-only scope, give a concise requirements and acceptance brief, not the conversation history. Keep the loop's mechanics, fresh rounds, cap, failure recovery, and honest coverage reporting. Planning checks establish readiness, not implementation verification.
+2. **Plan final-pass.** After the loop returns, also after a capped or incomplete loop, run `final-pass` as a standalone checkpoint over the planning target, with its documentation-only checks. Keep the loop's actual status. Do not run `execute-plan`'s implementation checkpoints yet. A concrete blocker or an incomplete required final-pass stops dependent execution; finish independent authorized work and report what is missing.
+3. **Execution.** Run `execute-plan` with the refined plan or scope and the same reviewer preferences and explicit options. With no preference, it uses its internal default. Its phases, phase final passes, review loops, and closing final-pass all stay required; the plan review cannot replace any implementation review.
 
-Apply `execute-plan`'s [Report progress](../execute-plan/SKILL.md#report-progress) rules from the first message of this shortcut, with one overall estimate across all three stages. Before execution, use `Plan review: <loop name> · ~P% overall` and `Plan final-pass · ~P% overall`; reserve most of the estimate for execution.
+Apply `execute-plan`'s [Report progress](../execute-plan/SKILL.md#report-progress) rules from the first message, with one overall estimate across all three stages. Before execution, use `Plan review: <loop name> · ~P% overall` and `Plan final-pass · ~P% overall`, and reserve most of the estimate for execution.
 
-Continue between stages without a routine confirmation or handoff. Report the result concisely, distinguishing planning review status from implementation review status and identifying material blockers or verification limits.
+Continue between stages without routine confirmation or handoff. Report the result concisely, keep plan-review status separate from implementation review status, and name material blockers or verification limits.
 
-Examples: `$ship-plan codex` runs `codex-review-loop`, `final-pass`, then `execute-plan codex`. `$ship-plan internal and claude` runs `claude-review-loop`, `final-pass`, then `execute-plan internal and claude`. `$ship-plan` runs `code-review-loop`, `final-pass`, then `execute-plan` with its default internal review. These examples apply with a supplied plan or session context.
+Examples, with a supplied plan or session context: `/ship-plan codex` runs `codex-review-loop`, `final-pass`, then `execute-plan codex`. `/ship-plan internal and claude` runs `claude-review-loop`, `final-pass`, then `execute-plan internal and claude`. `/ship-plan` runs `code-review-loop`, `final-pass`, then `execute-plan` with its internal default.

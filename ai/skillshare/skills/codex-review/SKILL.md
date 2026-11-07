@@ -1,6 +1,8 @@
 ---
 name: codex-review
 description: Run one read-only Codex review through T3's orchestrator when available, with ACP fallback. Use only when explicitly requested. Use codex-review-loop for review and remediation.
+metadata:
+  origin: custom
 ---
 
 # Codex Review

@@ -1,11 +1,13 @@
 ---
 name: upstream-merge
 description: Merge upstream into main while preserving intentional project customizations and incorporating compatible upstream changes.
+metadata:
+  origin: custom
 ---
 
 # Upstream Merge
 
-1. Inspect repository instructions, status, refs, remotes, ancestry, and divergence. Preserve dirty/untracked work; use an isolated worktree when useful, or stop if the merge would risk it.
+1. Inspect repository instructions, status, refs, remotes, ancestry, and divergence. Resolve which ref `upstream` names (a local branch or a remote-tracking branch); for a remote-tracking branch, fetch first so the merge uses the current upstream. Preserve dirty/untracked work; use an isolated worktree when useful, or stop if the merge would risk it.
 2. Compare `main` and `upstream`. Identify intentional project behavior from history, diffs, documentation, and tests, not names alone.
 3. Safely check out `main` and merge `upstream` with the repository's normal strategy, deferring the commit until review. Never use a global ours/theirs strategy. Push only if explicitly authorized.
 4. Resolve conflicts semantically: preserve intentional customizations while incorporating compatible improvements. Regenerate locks and derived files with canonical tooling; repair merge-caused issues.
@@ -14,4 +16,4 @@ description: Merge upstream into main while preserving intentional project custo
 
 ## Temporary files
 
-Keep scratch in context unless files serve a concrete agent need; never create them solely for user presentation. Track task-owned paths; remove them after use, including failure or abandonment, and verify cleanup before returning. Retain files only for active agent continuation with a cleanup owner and removal point; report retained paths or cleanup failures. Preserve requested deliverables (including `.local/` plans), pre-existing files, and unrelated work; never delete shared directories wholesale.
+Keep scratch notes in context. Create a temporary file only when an agent needs it; track it, delete it after use (also after failure or abandonment), and verify the deletion. If a file must stay for continuing agent work, name its cleanup owner and report its path. Never delete requested deliverables (including `.local/` plans), pre-existing files, unrelated work, or shared directories.

@@ -1,25 +1,25 @@
 # Check evidence and reuse
 
-Apply this policy during implementation, review-loop verification, and every `final-pass` checkpoint. Required gate coverage stays the same. A checkpoint can use a passing result from an earlier checkpoint in the same task when the evidence still applies to the current state.
+Apply this policy to implementation checks, review-loop verification, and every final-pass checkpoint. It never reduces the required gates. A later checkpoint in the same task can reuse a passing result when that result still applies to the current state.
 
-## Record evidence
+## Record
 
-Keep a concise record in task context for each gate:
+For each gate, keep a short record in context: the exact command, options, and working directory; the result; the checkpoint or run that produced it; and the state it checked. Identify the state so that later changes are detectable, for example the commit plus the dirty and untracked files, or content hashes. A commit ID alone is not enough when relevant files are dirty or untracked. Note relevant runtime, tool, service, fixture, or data versions when they can change. Record only non-secret values, never credentials. Logs follow the calling skill's temporary-file rules.
 
-- the exact command, options, working directory, result, and originating checkpoint or run;
-- the checked source, tests, generated files, configuration, dependencies, and relevant transitive inputs, identified by content hashes or another reliable state comparison;
-- the runtime and tool versions and relevant environment, services, fixtures, and input data state.
+## Reuse or rerun
 
-Record relevant environment identities or non-secret values only. Do not store credentials. A commit ID alone is insufficient when relevant dirty or untracked files exist. Logs and file-based evidence follow the calling skill's temporary-file rules.
+Reuse a passing result only when its command and every relevant input are unchanged and you know what the check depends on. A read-only review does not invalidate check evidence. A source edit invalidates the checks that depend on it; unaffected checks stay valid.
 
-## Decide whether to reuse
+Rerun when:
 
-Reuse only a passing result whose required command and all relevant inputs remain unchanged, with a known dependency boundary. A read-only review that leaves those inputs unchanged does not invalidate test evidence. A source edit invalidates the checks that depend on it; unaffected checks can remain valid. Rerun a full gate when its dependency boundary cannot be established safely.
+- the evidence or input identity is missing, or the dependency boundary is unclear;
+- a relevant tool, dependency, environment, service, fixture, or data state changed;
+- the check depends on time or mutable state that you cannot show to be equivalent;
+- the check is flaky or otherwise unreliable;
+- the user asks for a fresh run.
 
-Rerun when evidence or input identity is missing, a relevant tool, dependency, environment, service, fixture, or data state changes, or the check depends on time or mutable state whose equivalence cannot be established. Rerun flaky or otherwise unreliable checks. Follow an explicit instruction to execute a fresh check. A required full suite still needs a full-suite passing result; targeted results cannot stand in for it.
+Targeted results never stand in for a required full suite. Failed, blocked, partial, or unknown results are never reusable passes. Recheck applicability at each checkpoint and after repairs. Report reused evidence as `reused` with its original run, never as newly executed or skipped, and keep the reason and authorization boundary of any real skip or blocker.
 
-Recheck applicability at the current checkpoint and after repairs. Treat reused evidence as passing coverage with its original run identity; report it as `reused`, never newly executed or skipped. Failed, blocked, partial, or unknown results cannot be reused as passing evidence. Preserve the reason and authorization boundary for an actual skip or blocker.
+## Review status is separate
 
-## Keep review status separate
-
-Check evidence does not establish review coverage. Any task edit after a review invalidates that review as evidence for the resulting state, even when some passing checks remain reusable. Follow the selected loop's next-round and closing rules, and preserve capped or incomplete review status. Never use test reuse to omit a required review or to claim that an earlier review inspected a later state.
+Check evidence never proves review coverage. A task edit after a review means that review does not cover the resulting state, even when checks stay reusable. Follow the loop's next-round and closing rules, and keep capped or incomplete review status. Never use check reuse to skip a required review or to claim that an earlier review saw a later state.

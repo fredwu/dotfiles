@@ -1,30 +1,54 @@
 ---
 name: final-pass
 description: Close a completed phase or execution; resolve omissions and residual issues, then establish passing evidence for the project's full testing and quality checks.
+metadata:
+  origin: custom
 ---
 
 # Final Pass
 
-Use at each required [execution checkpoint](../execute-plan/SKILL.md#completion-and-review-checkpoints), including phase checks before review and recovery after the selected review sequence, or for a standalone final check. Review the full checkpoint change set against the original request and later updates, including integration with completed phases. Resolve task-relevant omissions and inconsistencies across code, documentation, tests, and configuration within scope.
+Close a checkpoint: check the full change set against the original request and later updates, resolve what is missing, clean up, and establish passing evidence for the project's full checks.
 
-For a pre-review phase checkpoint, complete phase acceptance, cleanup, and required checks, then return to execution with selected reviews pending. Pending review coverage does not prevent that phase checkpoint from closing. Post-review coverage recovery below applies only after the selected review sequence returns or the active loop ends at its cap or a concrete continuation blocker.
+## Checkpoint type
 
-Reconcile execution and worker residuals, review findings, failed checks, and verification gaps. Fix all authorized task-relevant issues, including pre-existing failures discovered during the task. A review cap or terminal read-only audit does not defer these repairs: perform them here without restarting the loop. Reject unsupported findings with evidence.
+- **Phase checkpoint**, during [plan execution](../execute-plan/SKILL.md#completion-and-review-checkpoints): finish phase acceptance, integration with completed phases, cleanup, and required checks, then return to the executor. The selected reviews stay pending and do not block this checkpoint.
+- **Closing checkpoint**: after the selected review sequence returns, or after the active loop ends at its cap or a concrete blocker. Do everything below, including post-review recovery.
+- **Standalone**: a final check outside plan execution. Do everything below except post-review recovery, unless a review loop has ended.
 
-Do not use this recovery to replace a fresh review still required and available within the active loop, including after round 3. A failed attempt within an active loop follows its [failure recovery policy](../code-review-loop/SKILL.md#recover-failed-attempts), including a required next fresh review after a verified correction. When the loop ends at its cap or a concrete continuation blocker, identify missing coverage and unreviewed repairs against the original target, acceptance criteria, and review lenses. Inspect that coverage directly and record the evidence in task context; do not retry the failed call, restart the loop, or add disguised review rounds. A checkpoint can close when this coverage and all required repairs and checks are complete. Preserve the original loop's incomplete status or unreviewed-fix limit in the report; this recovery does not establish a clean loop result. If required coverage cannot be established, keep the checkpoint incomplete and apply the stop rules below.
+## Resolve issues
 
-Perform one cleanup round over changed and directly affected files. Remove confirmed obsolete, duplicate, dead, or unnecessary compatibility code and related tests/configuration/docs. Preserve required behavior, explicit compatibility, and unrelated work. With read-only or documentation-only authority, report material implementation findings without editing them. A clean result is valid.
+Review code, documentation, tests, and configuration in the checkpoint scope, including integration with completed phases. Resolve task-relevant omissions and inconsistencies within scope. Reconcile execution and worker residuals, review findings, failed checks, and verification gaps. Fix every authorized task-relevant issue, including pre-existing failures found during the task, and reject unsupported findings with evidence. A review cap or a final read-only review round does not defer these repairs.
 
-Discover the project's full testing and quality gates from repository instructions (including AGENTS.md), CI workflows, scripts, and contributor/testing documentation. Establish passing evidence for every required gate on the final relevant state during each invocation. Apply [Check evidence and reuse](references/check-evidence.md) to run a gate or reuse valid evidence from this task. Targeted tests, smoke tests, or document validators do not replace full suites or quality checks. Small changes and long runtime are not reasons to reduce coverage. Add checks proportional to risk where required gates leave a gap.
+## Post-review recovery
 
-Only explicit user instructions, documentation-only work, or checks that incur actual external charges permit skips. For documentation-only work, run required document or skill validators and skip unrelated application suites; this exception does not cover code, configuration, or test changes anywhere in the checkpoint. Skip paid checks, such as smoke tests that call billed APIs, unless already authorized; ordinary runtime and local compute are not paid-check exceptions. Establish passing evidence for all remaining free coverage under the shared reuse policy. Preserve authorization boundaries for external effects; missing access, services, or authority blocks a required check rather than exempting it. Try reasonable authorized alternatives and report unresolved blockers.
+While a review loop is active and has rounds left, it owns fresh review. Do not use this recovery to replace a required review; failed attempts follow the loop's [failure recovery](../code-review-loop/SKILL.md#recover-failed-attempts).
 
-Fix authorized in-scope failures and verify repairs. Reassess check evidence after every relevant change and rerun invalidated gates under the shared reuse policy. A failed or blocked required gate keeps the checkpoint incomplete. Record each required gate's command, result (passed, failed, skipped, or blocked), whether passing evidence was executed or reused and its origin, and the reason for any skip or blocker.
+When the loop has ended at its cap or a concrete blocker, list the missing coverage and the repairs no reviewer has seen, against the original target, acceptance criteria, and review lenses. Inspect that coverage directly and record the evidence in context. Do not retry the failed call, restart the loop, or add disguised review rounds. The checkpoint can close when this coverage and all required repairs and checks are complete. Report the loop's actual capped or incomplete status and the unreviewed repairs; this recovery does not make a clean loop result. If you cannot establish the coverage, keep the checkpoint incomplete.
 
-After repairs, inspect the affected result and verify it again as needed until no actionable task-relevant issue remains and required checks pass. A phase checkpoint does not end execution: return to the executor to continue the remaining plan. Stop with work remaining only for user direction, an explicit authorized session boundary, or a concrete blocker requiring missing authority, input, or external change; first try reasonable authorized alternatives and complete independent work. Report blocked work as incomplete, not a completed result with residuals.
+## Clean up
 
-Lead with changes or findings, then report executed and reused check results, explicit skips, and blockers. Use short, plain prose without stock headings or repeated summaries. Do not claim implementation verification from document validators or fresh review from reusable check evidence. Save a user report only if requested; check logs follow the temporary-file rules.
+Do one cleanup round over changed and directly affected files. Remove confirmed obsolete, duplicate, dead, or unnecessary compatibility code and the related tests, configuration, and documentation. Keep required behavior, explicit compatibility, and unrelated work. With read-only or documentation-only authority, report material implementation findings without editing them. A clean result is valid.
+
+## Run the full checks
+
+Find the project's full test and quality gates in repository instructions (including AGENTS.md), CI workflows, scripts, and contributor or testing documentation. In each invocation, establish passing evidence for every required gate on the final state, by running it or by reusing valid evidence under [Check evidence and reuse](references/check-evidence.md). Targeted tests, smoke tests, and document validators do not replace full suites or quality checks. Small changes and long run times do not reduce coverage. Add checks in proportion to risk where the required gates leave a gap.
+
+Only these permit a skip:
+
+- An explicit user instruction.
+- Documentation-only work: run the required document or skill validators and skip unrelated application suites. This does not apply when the checkpoint changes code, configuration, or tests anywhere.
+- Checks that incur real external charges, such as smoke tests that call billed APIs, unless already authorized. Local compute and run time are not charges.
+
+Missing access, services, or authority blocks a required check; it does not exempt it. Try reasonable authorized alternatives first, and keep authorization boundaries for external effects.
+
+Fix authorized in-scope failures and verify the repairs. After each relevant change, reassess the evidence and rerun invalidated gates. Repeat until no actionable task-relevant issue remains and required checks pass. A failed or blocked required gate keeps the checkpoint incomplete. For each required gate, record the command, the result (passed, failed, skipped, or blocked), whether a pass was executed or reused (with its origin), and the reason for any skip or blocker.
+
+## Finish
+
+A phase checkpoint returns to the executor; it does not end execution. Stop with work remaining only on user direction, an explicit authorized session boundary, or a concrete blocker that needs missing authority, input, or external change. First try alternatives and finish independent work. Report blocked work as incomplete, not as a completed result with residuals.
+
+Lead with changes or findings, then executed and reused check results, skips, and blockers, in short plain prose without stock headings or repeated summaries. Do not claim implementation verification from document validators, or fresh review from reused check evidence. Save a report only on request.
 
 ## Temporary files
 
-Keep scratch in context unless files serve a concrete agent need; never create them solely for user presentation. Track task-owned paths; remove them after use, including failure or abandonment, and verify cleanup before returning. Retain files only for active agent continuation with a cleanup owner and removal point; report retained paths or cleanup failures. Preserve requested deliverables (including `.local/` plans), pre-existing files, and unrelated work; never delete shared directories wholesale.
+Keep scratch notes in context. Create a temporary file only when an agent needs it; track it, delete it after use (also after failure or abandonment), and verify the deletion. If a file must stay for continuing agent work, name its cleanup owner and report its path. Never delete requested deliverables (including `.local/` plans), pre-existing files, unrelated work, or shared directories.

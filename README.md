@@ -79,6 +79,14 @@ through a shared whole-directory link. Catalog changes may require a new session
 Merge mode cannot prevent writes through links: edit shared skills here and
 keep vendor installs in real local folders.
 
+Skills written for this repository declare `metadata.origin: custom` in their
+`SKILL.md` frontmatter; add it to every new custom skill. Other skills come from
+vendors and are updated from upstream. List the custom skills with:
+
+```sh
+grep -lx '  origin: custom' ai/skillshare/skills/*/SKILL.md
+```
+
 Shared agents use neutral templates in `ai/skillshare/agents` and native
 conversion extensions in `ai/skillshare/extensions`. Provider models and effort
 values are defined only in `ai/skillshare/agent-models.json`. Managed sync

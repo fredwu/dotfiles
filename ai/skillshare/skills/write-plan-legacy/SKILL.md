@@ -1,16 +1,18 @@
 ---
 name: write-plan-legacy
 description: Save a legacy-removal plan for FeedBun-owned code, excluding Petal Pro boilerplate and assuming a database reset. Use for initial or follow-up cleanup audits.
+metadata:
+  origin: custom
 ---
 
 # Write Plan Legacy
 
-Use `$write-plan` with the constraints below, including its authority, autonomous session, completion and review checkpoints, risk handling, temporary-file, verification, and chat rules. Use its requirement interpretation and TL;DR format. Distinguish the task requirements from the skill constraints below; do not copy the invocation or this skill's text as the user's brief.
+Apply [write-plan](../write-plan/SKILL.md) in full, with the constraints below. The user's message is the task brief. Record these constraints as skill constraints, not as the user's words, and do not copy the invocation into the requirements.
 
 - Audit FeedBun-owned code only; leave Petal Pro boilerplate unchanged.
 - Find evidenced obsolete, duplicate, dead, superseded, or unnecessary compatibility code and database objects.
-- Assume a database reset and plan direct removal, without legacy-data support or transition machinery. This assumption does not authorize performing the reset.
-- Exclude intentional current-purpose fallback/redundancy, especially LLM fleets and routing/failover, proper architectural layering, and unrelated redesign or refactoring.
-- Accept a clean result; uncertain candidates are evidence gaps.
+- Assume a database reset and plan direct removal, without legacy-data support or transition machinery. This assumption does not authorize the reset.
+- Exclude intentional current-purpose fallback or redundancy, especially LLM fleets and routing or failover, proper architectural layering, and unrelated redesign or refactoring.
+- A clean result is valid; uncertain candidates are evidence gaps, not removals.
 
-Before proposing removal, trace definitions, callers, persistence, configuration, tests, dynamic/framework registration, generated references, external contracts, and operational tooling as relevant. Include directly related code, tests, configuration, and schema in each supported removal, with focused checks of surviving behavior. Save the plan; do not execute it.
+Before you propose a removal, trace definitions, callers, persistence, configuration, tests, dynamic or framework registration, generated references, external contracts, and operational tooling as relevant. Each supported removal includes the directly related code, tests, configuration, and schema, and focused checks of the surviving behavior. Save the plan; do not execute it.

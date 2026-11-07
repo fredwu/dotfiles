@@ -1,6 +1,8 @@
 ---
 name: grok-review-loop
 description: Review and remediate code through bounded Grok rounds, preferring T3's orchestrator with ACP fallback. Use only when explicitly requested.
+metadata:
+  origin: custom
 ---
 
 # Grok Review Loop

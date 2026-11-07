@@ -1,6 +1,8 @@
 ---
 name: deps-upgrade
 description: Upgrade project dependencies and runtimes, including Elixir/OTP, Mix/Hex, npm workspaces, and Tailwind; align local, CI, Docker, and deployment versions and repair resulting breakage.
+metadata:
+  origin: custom
 ---
 
 # Dependency Upgrade
@@ -15,7 +17,7 @@ Trace version declarations and effective versions across local version-manager f
 
 Check current official release and migration documentation for target versions, support status, runtime compatibility, and available platform images. Resolve the runtime, dependency, and image constraints together before edits; do not assume independently newest versions form a working stack.
 
-Delegate independent applications/ecosystems when useful. Before delegating, apply [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md) to select a configured child role without repeating its model or effort settings, or changing scope or context restrictions. Keep shared locks, generated outputs, and coupled packages under one owner. Reconcile worker changes and verification before integration.
+You can delegate independent applications or ecosystems under [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md). Keep shared locks, generated outputs, and coupled packages under one owner. Reconcile worker changes and verification before integration.
 
 ## Upgrade
 
@@ -43,4 +45,4 @@ Report package and runtime upgrades, environment consistency, intentional differ
 
 ## Temporary files
 
-Keep scratch in context unless files serve a concrete agent need; never create them solely for user presentation. Track task-owned paths; remove them after use, including failure or abandonment, and verify cleanup before returning. Retain files only for active agent continuation with a cleanup owner and removal point; report retained paths or cleanup failures. Preserve requested deliverables (including `.local/` plans), pre-existing files, and unrelated work; never delete shared directories wholesale.
+Keep scratch notes in context. Create a temporary file only when an agent needs it; track it, delete it after use (also after failure or abandonment), and verify the deletion. If a file must stay for continuing agent work, name its cleanup owner and report its path. Never delete requested deliverables (including `.local/` plans), pre-existing files, unrelated work, or shared directories.

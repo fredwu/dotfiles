@@ -1,6 +1,8 @@
 ---
 name: compare-worktree
 description: Compare the current worktree with one explicit peer and recommend material improvements read-only. Use only on explicit invocation with exactly one target worktree path.
+metadata:
+  origin: custom
 ---
 
 # Compare Worktree
@@ -9,7 +11,7 @@ Evaluate both implementations against the user's requirements and recommend impr
 
 ## Boundaries and history
 
-Require explicit invocation and exactly one target path, passed as a quoted argument. Stay read-only: do not edit files, install, fetch, run artifact-writing checks, or alter refs, indexes, worktrees, or external state. Preserve all existing content.
+Require exactly one target path, passed as a quoted argument. Stay read-only: do not edit files, install, fetch, run artifact-writing checks, or alter refs, indexes, worktrees, or external state. Preserve all existing content.
 
 Resolve both Git roots with `git rev-parse --show-toplevel`, using `git -C <target>` for the peer. Require distinct existing worktrees. Establish each HEAD, branch/detached state, and Git common directory. For shared objects, use `git merge-base --all` and account for multiple best bases.
 
@@ -21,7 +23,7 @@ Recover the original request, updates, and referenced plans from available read-
 
 Inspect each worktree's committed changes from the verified base, staged changes (`git diff --cached`), unstaged changes (`git diff`), and relevant untracked files (`git status --short --untracked-files=all`). Assess the combined effective implementation while retaining layer provenance.
 
-Start with status and diff names/stats, then focused patches and complete files as needed. Account for deletions, renames, modes, submodules, generated files, and tests. Treat inaccessible content as an evidence limit and avoid exposing secrets. Delegate independent read-only scopes when useful after establishing shared bases and requirements; reconcile results without losing layer coverage. Before delegating, apply [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md) to select a configured child role without repeating its model or effort settings, or changing scope or context restrictions.
+Start with status and diff names/stats, then focused patches and complete files as needed. Account for deletions, renames, modes, submodules, generated files, and tests. Treat inaccessible content as an evidence limit and avoid exposing secrets. After you establish the bases and requirements, you can delegate independent read-only scopes under [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md); reconcile the results without losing layer coverage.
 
 Recommend only material requirement, correctness, security, compatibility, UX, performance, maintainability, or validation gains. Prefer the smallest useful change, preserve required behavior, and omit equivalent alternatives or style churn. Include confirmed obsolete or unnecessary code removal only within the changed/directly affected scope; do not invent cleanup.
 
