@@ -24,10 +24,10 @@ function snapshot(home = process.env.SKILLSHARE_TEST_REAL_HOME || os.homedir()) 
         const value = JSON.parse(content);
         entry.topLevelShas = Object.fromEntries(Object.entries(value).map(([key, item]) => [key, digest(JSON.stringify(item))]));
         if (file !== path.join(home, '.claude.json')) { result[file] = entry; return; }
-        const metadataKeys = ['pluginUsage', 'cachedGrowthBookFeatures', 'cachedGrowthBookFeaturesAt'];
-        entry.metadataSha = digest(JSON.stringify(metadataKeys.map(key => value[key] ?? null)));
-        for (const key of metadataKeys) delete value[key];
-        entry.stableSha = digest(JSON.stringify(value));
+        // Skillshare writes only mcpServers here; a running Claude Code rewrites its other keys at any time.
+        const ownedKeys = ['mcpServers'];
+        entry.stableSha = digest(JSON.stringify(ownedKeys.map(key => value[key] ?? null)));
+        entry.metadataSha = digest(JSON.stringify(Object.entries(value).filter(([key]) => !ownedKeys.includes(key))));
       }
     } else if (info.isDirectory()) {
       entry.directory = true;

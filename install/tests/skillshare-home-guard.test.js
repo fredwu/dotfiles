@@ -7,7 +7,7 @@ const os = require('node:os');
 const path = require('node:path');
 const guard = require('./skillshare-home-guard');
 
-test('real-home guard permits only observed concurrent runtime metadata changes', () => {
+test('real-home guard permits Claude runtime changes outside Skillshare-owned keys', () => {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'skillshare-guard-'));
   const file = path.join(home, '.claude.json');
   const write = value => fs.writeFileSync(file, JSON.stringify(value));
@@ -19,8 +19,10 @@ test('real-home guard permits only observed concurrent runtime metadata changes'
     assert.deepEqual(guard.assertUnchanged(before, guard.snapshot(home)), [file]);
     write({ mcpServers: { shared: { command: 'node' } }, pluginUsage: { sample: 1 }, cachedGrowthBookFeaturesAt: 123 });
     assert.deepEqual(guard.assertUnchanged(before, guard.snapshot(home)), [file]);
-    write({ mcpServers: { shared: { command: 'node' } }, pluginUsage: { sample: 1 }, cachedGrowthBookFeatures: { flag: true }, cachedGrowthBookFeaturesAt: 456 });
+    write({ mcpServers: { shared: { command: 'node' } }, pluginUsage: { sample: 1 }, cachedGrowthBookFeatures: { flag: true }, clientDataCacheSlots: [1] });
     assert.deepEqual(guard.assertUnchanged(before, guard.snapshot(home)), [file]);
+    write({ mcpServers: { shared: { command: 'node' }, added: { command: 'npx' } }, pluginUsage: { sample: 1 } });
+    assert.throws(() => guard.assertUnchanged(before, guard.snapshot(home)), /Real-home files changed/);
     write({ mcpServers: { shared: { command: 'changed' } }, pluginUsage: { sample: 3 } });
     assert.throws(() => guard.assertUnchanged(before, guard.snapshot(home)), /Real-home files changed/);
     write({ mcpServers: { shared: { command: 'node' } }, pluginUsage: { sample: 1 } });

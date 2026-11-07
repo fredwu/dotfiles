@@ -229,7 +229,7 @@ test_linux_flat_tarball_install() {
     "flat-tarball executable should be linked from the local bin directory"
   assert_false "repeat flat-tarball install should create no backup" \
     test -e "$DOTFILES_BACKUP_ROOT"
-  finish_test "pinned Linux flat tarballs install idempotently"
+  finish_test "Linux flat tarballs install idempotently"
 }
 
 test_apt_missing_required_package_fails() {
