@@ -201,7 +201,7 @@ function nativeFixture() {
   return { ...p, source, targets, env: { ...p.env, ...overrides, NODE_OPTIONS: '--require=/must/not/load' } };
 }
 
-test('actual Skillshare >=0.26.4: native accounts, mapping drift, direct edits, pruning, and local skills', () => {
+test('actual Skillshare >=0.29.1: native accounts, mapping drift, direct edits, pruning, and local skills', () => {
   const p = nativeFixture();
   assert.match(runtime.requireSupportedSkillshare(p), /^\d+\.\d+\.\d+$/);
   const before = snapshot(p.temporary);

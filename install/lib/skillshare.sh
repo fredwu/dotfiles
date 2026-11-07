@@ -7,8 +7,8 @@ require_supported_skillshare() {
     die "cannot determine installed Skillshare version"
   installed_version=$(printf '%s\n' "$output" | sed -nE 's/^skillshare v([0-9]+\.[0-9]+\.[0-9]+)([[:space:]].*)?$/\1/p' | tail -1)
   [[ -n "$installed_version" ]] || die "cannot determine installed Skillshare version"
-  version_at_least "$installed_version" 0.26.4 || \
-    die "Skillshare 0.26.4 or newer is required (found $installed_version)"
+  version_at_least "$installed_version" 0.29.1 || \
+    die "Skillshare 0.29.1 or newer is required (found $installed_version)"
 }
 
 configure_skillshare() (

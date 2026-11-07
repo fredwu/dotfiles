@@ -4,7 +4,7 @@ NEOVIM_MIN_VERSION=0.12.0
 NEOVIM_FALLBACK_VERSION=0.12.4
 MISE_VERSION=2026.7.6
 TREE_SITTER_VERSION=0.26.11
-SKILLSHARE_VERSION=0.26.4
+SKILLSHARE_REPOSITORY=https://github.com/runkids/skillshare
 
 ensure_homebrew() {
   local brew_binary
@@ -208,26 +208,48 @@ install_linux_flat_tarball() {
   ensure_symlink "$install_dir/$executable" "$HOME/.local/bin/$name"
 }
 
+latest_skillshare_version() {
+  local url
+
+  require_command curl
+  url=$(curl -fsSIL --retry 3 --connect-timeout 15 -o /dev/null -w '%{url_effective}' \
+    "$SKILLSHARE_REPOSITORY/releases/latest") || die "cannot resolve the latest Skillshare release"
+  [[ "$url" =~ /releases/tag/v([0-9]+\.[0-9]+\.[0-9]+)$ ]] || \
+    die "unexpected latest Skillshare release URL: $url"
+  printf '%s\n' "${BASH_REMATCH[1]}"
+}
+
+release_asset_checksum() {
+  local checksums_url=$1
+  local asset=$2
+  local checksums
+  local checksum
+
+  require_command curl
+  checksums=$(curl -fsSL --retry 3 --connect-timeout 15 "$checksums_url") || \
+    die "download failed: $checksums_url"
+  checksum=$(awk -v asset="$asset" '$2 == asset { print $1 }' <<< "$checksums")
+  [[ "$checksum" =~ ^[[:xdigit:]]{64}$ ]] || die "no SHA-256 checksum for $asset in $checksums_url"
+  printf '%s\n' "$checksum"
+}
+
+# Linux installs the latest release, verified against that release's published checksums.
 ensure_skillshare_on_linux() {
   local arch
+  local version
   local asset
+  local base
   local checksum
 
   arch=$(linux_architecture)
-  case "$arch" in
-    x86_64)
-      asset="skillshare_${SKILLSHARE_VERSION}_linux_amd64.tar.gz"
-      checksum=53e81febc1c1b2c4ed1fd8ecea948de28b9aef60a17c259c35ac44fb20224847
-      ;;
-    arm64)
-      asset="skillshare_${SKILLSHARE_VERSION}_linux_arm64.tar.gz"
-      checksum=45086dfda6e0a158fcc3a342cba60df61780db429c115e11a5b6ea18d288ced4
-      ;;
-  esac
+  [[ "$arch" != x86_64 ]] || arch=amd64
+  version=$(latest_skillshare_version) || die "cannot resolve the latest Skillshare release"
+  asset="skillshare_${version}_linux_${arch}.tar.gz"
+  base="$SKILLSHARE_REPOSITORY/releases/download/v$version"
+  checksum=$(release_asset_checksum "$base/checksums.txt" "$asset") || \
+    die "cannot verify $asset"
 
-  install_linux_flat_tarball skillshare "$SKILLSHARE_VERSION" "$asset" "$checksum" \
-    "https://github.com/runkids/skillshare/releases/download/v$SKILLSHARE_VERSION/$asset" \
-    skillshare
+  install_linux_flat_tarball skillshare "$version" "$asset" "$checksum" "$base/$asset" skillshare
 }
 
 ensure_tree_sitter_on_linux() {

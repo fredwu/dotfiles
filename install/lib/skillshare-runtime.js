@@ -5,7 +5,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { spawnSync } = require('node:child_process');
 
-const { ACCOUNT_OVERRIDES } = require('./skillshare-config');
+const { ACCOUNT_OVERRIDES, MIN_VERSION } = require('./skillshare-config');
 
 function settings(options) {
   for (const key of ['root', 'home']) {
@@ -52,9 +52,9 @@ function requireSupportedSkillshare(options) {
   const match = /^skillshare v(\d+)\.(\d+)\.(\d+)(?:\s|$)/m.exec(result.stdout);
   if (!match) throw new Error('Cannot determine Skillshare version');
   const actual = match.slice(1).map(Number);
-  const minimum = [0, 26, 4];
+  const minimum = MIN_VERSION.split('.').map(Number);
   const different = actual.findIndex((value, index) => value !== minimum[index]);
-  if (different !== -1 && actual[different] < minimum[different]) throw new Error('Skillshare 0.26.4 or newer is required');
+  if (different !== -1 && actual[different] < minimum[different]) throw new Error(`Skillshare ${MIN_VERSION} or newer is required`);
   return actual.join('.');
 }
 

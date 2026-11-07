@@ -157,11 +157,26 @@ test_linux_tarball_install() {
   finish_test "pinned Linux tarballs install idempotently"
 }
 
+# Simulates GitHub's latest-release redirect and the release's published checksums.
+skillshare_release_curl() {
+  local latest=9.8.7
+  case "$*" in
+    *'%{url_effective}'*"$SKILLSHARE_REPOSITORY/releases/latest")
+      printf '%s/releases/tag/v%s' "$SKILLSHARE_REPOSITORY" "$latest" ;;
+    *"$SKILLSHARE_REPOSITORY/releases/download/v$latest/checksums.txt")
+      printf '%s  skillshare_%s_linux_amd64.tar.gz\n' "$(printf 'b%.0s' {1..64})" "$latest"
+      [[ -n "${OMIT_ARM64_CHECKSUM:-}" ]] || \
+        printf '%s  skillshare_%s_linux_arm64.tar.gz\n' "$(printf 'a%.0s' {1..64})" "$latest" ;;
+    *) return 22 ;;
+  esac
+}
+
 test_skillshare_release_selection() {
   local marker="$HOME/skillshare-release"
   local name version asset checksum url executable
 
   (
+    curl() { skillshare_release_curl "$@"; }
     linux_architecture() { printf 'arm64\n'; }
     install_linux_flat_tarball() { printf '%s\n' "$*" > "$marker"; }
     ensure_skillshare_on_linux
@@ -169,20 +184,25 @@ test_skillshare_release_selection() {
 
   read -r name version asset checksum url executable < "$marker"
   assert_eq skillshare "$name" "Skillshare should select the Skillshare installer"
-  assert_eq 0.26.4 "$SKILLSHARE_VERSION" \
-    "Skillshare's supported Linux release should remain pinned"
-  assert_eq "$SKILLSHARE_VERSION" "$version" \
-    "Skillshare should select the configured version"
-  assert_eq "skillshare_${SKILLSHARE_VERSION}_linux_arm64.tar.gz" "$asset" \
+  assert_eq 9.8.7 "$version" "Skillshare should select the latest release"
+  assert_eq skillshare_9.8.7_linux_arm64.tar.gz "$asset" \
     "Skillshare should select the ARM64 asset"
-  [[ "$checksum" =~ ^[[:xdigit:]]{64}$ ]] || \
-    fail "Skillshare should require a SHA-256 checksum"
-  assert_eq \
-    "https://github.com/runkids/skillshare/releases/download/v$SKILLSHARE_VERSION/$asset" \
-    "$url" "Skillshare should construct the configured release URL"
+  assert_eq "$(printf 'a%.0s' {1..64})" "$checksum" \
+    "Skillshare should use the asset's published SHA-256 checksum"
+  assert_eq "$SKILLSHARE_REPOSITORY/releases/download/v9.8.7/$asset" "$url" \
+    "Skillshare should construct the latest release URL"
   assert_eq skillshare "$executable" \
     "Skillshare should select the executable within the archive"
-  finish_test "Skillshare release selection is pinned and architecture-aware"
+
+  if (
+    curl() { OMIT_ARM64_CHECKSUM=1 skillshare_release_curl "$@"; }
+    linux_architecture() { printf 'arm64\n'; }
+    install_linux_flat_tarball() { :; }
+    ensure_skillshare_on_linux
+  ) > "$HOME/output" 2>&1; then
+    fail "Skillshare should not install an asset without a published checksum"
+  fi
+  finish_test "Skillshare installs the latest release with its published checksum"
 }
 
 test_linux_flat_tarball_install() {
@@ -299,7 +319,7 @@ make_skillshare_bootstrap_fixture() {
 #!/bin/bash
 printf 'skillshare %s\n' "$*" >> "$HOME/invocations"
 [[ "$*" == --version ]] || exit 91
-printf '%s\n' "${FIXTURE_VERSION:-skillshare v0.26.4}"
+printf '%s\n' "${FIXTURE_VERSION:-skillshare v0.29.1}"
 exit "${FIXTURE_VERSION_EXIT:-0}"
 SH
   cat > "$HOME/bin/npm" <<'SH'
@@ -393,7 +413,7 @@ test_skillshare_bootstrap_command_failure() {
 test_skillshare_bootstrap_preflight() {
   local version
   make_skillshare_bootstrap_fixture
-  for version in 'skillshare v0.26.3' 'not a Skillshare version'; do
+  for version in 'skillshare v0.29.0' 'not a Skillshare version'; do
     if FIXTURE_VERSION="$version" run_skillshare_bootstrap_fixture > "$HOME/output" 2>&1; then
       fail "unsupported or unrecognized Skillshare should fail preflight"
     fi

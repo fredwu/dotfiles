@@ -6,7 +6,7 @@ const { isDeepStrictEqual: equal } = require('node:util');
 const { spawnSync } = require('node:child_process');
 
 const ACCOUNT_OVERRIDES = ['CLAUDE_CONFIG_DIR', 'CODEX_HOME', 'OPENCODE_CONFIG_DIR', 'PI_CODING_AGENT_DIR', 'GROK_HOME'];
-const MIN_VERSION = '0.26.4';
+const MIN_VERSION = '0.29.1';
 const plain = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const clone = value => value === undefined ? undefined : JSON.parse(JSON.stringify(value));
 
@@ -61,7 +61,7 @@ function loadIntent(options) {
   return resolveMcpDefaults(expand(intent, p), p);
 }
 
-// Skillshare v0.26.4 internal/mcp/clients.go: Desktop has no Linux path,
+// Skillshare v0.29.1 internal/mcp/clients.go: Desktop has no Linux path,
 // accepts only stdio, and has no verified environment-reference syntax.
 function mcpDeliveryTargets(intent, server, options = {}) {
   const declared = Object.hasOwn(server, 'targets') ? server.targets : intent.config.mcp?.targets || [];

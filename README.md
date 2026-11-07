@@ -35,9 +35,11 @@ checkouts are left alone.
 
 Claude Code, Codex, and Grok keep real configuration directories at
 `~/.claude`, `~/.codex`, and `~/.grok`. Their instruction files link to
-`ai/shared`. [Skillshare](https://skillshare.runkids.cc/) 0.26.4 or newer manages
-shared resources from `ai/skillshare`. Linux installs pin 0.26.4; Homebrew may
-provide a newer compatible release. Bootstrap provisions a locked, private YAML
+`ai/shared`. [Skillshare](https://skillshare.runkids.cc/) 0.29.1 or newer manages
+shared resources from `ai/skillshare`. Each install run brings Skillshare to its
+latest release: Homebrew upgrades the formula, and Linux installs the latest
+GitHub release after it verifies the archive against the release's published
+SHA-256 checksums. Bootstrap provisions a locked, private YAML
 parser under `.local/skillshare-node` with `npm ci --ignore-scripts`.
 Install the MCP launchers selected in intent too: currently `npx`, `uvx`, and
 the Docker CLI. Preparation checks required launchers before configuration
@@ -217,7 +219,7 @@ The entry point is intentionally small; implementation modules live in
 /bin/bash install/tests/run.sh
 ```
 
-The tests use temporary homes and require Skillshare 0.26.4 or newer, Node,
+The tests use temporary homes and require Skillshare 0.29.1 or newer, Node,
 npm, and the standard shell tools. Parser bootstrap may fetch its pinned npm
 dependency; package-manager and system-install tests use doubles. They do not
 need root privileges or start MCP servers.

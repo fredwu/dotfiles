@@ -73,7 +73,7 @@ function fixture(installed = true) {
     env: { ...process.env, APPDATA: path.join(home, 'AppData/Roaming'), PATH: bin, SKILLSHARE_CODEX_CLI: path.join(bin, 'codex') } };
   // Locate the CLI before restricting PATH, including on Linux.
   const found = require('node:child_process').spawnSync('/bin/sh', ['-c', 'command -v skillshare'], { encoding: 'utf8' }).stdout.trim();
-  assert(found, 'Skillshare >= 0.26.4 is required');
+  assert(found, 'Skillshare >= 0.29.1 is required');
   options.skillshare = found;
   for (const name of ['claude', 'codex', 'git']) { const file = path.join(bin, name); write(file, client); fs.chmodSync(file, 0o700); }
   for (const key of [...runtime.ACCOUNT_OVERRIDES, 'NODE_OPTIONS']) options.env[key] = path.join(home, 'forbidden override');
@@ -99,7 +99,7 @@ function calls(options) {
   const file = path.join(options.home, 'calls.jsonl');
   return fs.existsSync(file) ? fs.readFileSync(file, 'utf8').trim().split('\n').map(JSON.parse) : [];
 }
-// Installed identity and commit come from the native sync preview; config holds only shared intent in Skillshare >= 0.29.
+// Installed identity and commit come from the native sync preview; config holds only shared intent.
 function effectiveBinding(options, target) {
   const plan = JSON.parse(runtime.runNative(['sync', 'plugins', 'demo', '--dry-run', '--json', '-g'], options).stdout);
   return plan.changes.find(change => change.name === 'demo' && change.target === target).binding;
@@ -239,10 +239,10 @@ test('manifest requires exact pins, credential-free sources, unique selections a
 test('obsolete Skillshare stops adoption before any native write', () => {
   const options = fixture();
   const executable = path.join(options.home, 'old-skillshare');
-  write(executable, `#!${process.execPath}\nconsole.log('skillshare v0.26.3');\n`);
+  write(executable, `#!${process.execPath}\nconsole.log('skillshare v0.29.0');\n`);
   fs.chmodSync(executable, 0o700);
   const before = runtime.inventory(options.home);
-  assert.throws(() => plugins.adoptPlugin(selection, { ...options, skillshare: executable }), /0.26.4/);
+  assert.throws(() => plugins.adoptPlugin(selection, { ...options, skillshare: executable }), /0.29.1/);
   assert.deepEqual(runtime.inventory(options.home), before);
 });
 

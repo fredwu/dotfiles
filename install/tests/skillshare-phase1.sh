@@ -6,6 +6,8 @@ set -euo pipefail
 root=$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)
 fixture=$(mktemp -d "${TMPDIR:-/tmp}/skillshare dependency test.XXXXXX")
 trap 'rm -rf "$fixture"' EXIT
+# shellcheck source=../lib/common.sh
+source "$root/install/lib/common.sh"
 # shellcheck source=../lib/skillshare-deps.sh
 source "$root/install/lib/skillshare-deps.sh"
 # shellcheck source=../lib/packages.sh
@@ -40,13 +42,18 @@ JS
   [[ $(rg -c '(^| )npm( |$)' "$fixture/packages") == 3 ]]
 )
 
-# Verify both release/checksum selections from the pinned upstream release.
+# Verify the x86_64 asset mapping for the latest release.
 (
+  curl() {
+    case "$*" in
+      *'%{url_effective}'*) printf '%s/releases/tag/v1.2.3' "$SKILLSHARE_REPOSITORY" ;;
+      *checksums.txt) printf '%s  skillshare_1.2.3_linux_amd64.tar.gz\n' "$(printf 'c%.0s' {1..64})" ;;
+      *) return 22 ;;
+    esac
+  }
   install_linux_flat_tarball() { printf '%s\n' "$3 $4"; }
   linux_architecture() { printf 'x86_64\n'; }
-  [[ $(ensure_skillshare_on_linux) == 'skillshare_0.26.4_linux_amd64.tar.gz 53e81febc1c1b2c4ed1fd8ecea948de28b9aef60a17c259c35ac44fb20224847' ]]
-  linux_architecture() { printf 'arm64\n'; }
-  [[ $(ensure_skillshare_on_linux) == 'skillshare_0.26.4_linux_arm64.tar.gz 45086dfda6e0a158fcc3a342cba60df61780db429c115e11a5b6ea18d288ced4' ]]
+  [[ $(ensure_skillshare_on_linux) == "skillshare_1.2.3_linux_amd64.tar.gz $(printf 'c%.0s' {1..64})" ]]
 )
 
 # Missing Node or npm must stop before dependency/configuration directories exist.
