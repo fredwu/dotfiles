@@ -19,6 +19,8 @@ test('real-home guard permits only observed concurrent runtime metadata changes'
     assert.deepEqual(guard.assertUnchanged(before, guard.snapshot(home)), [file]);
     write({ mcpServers: { shared: { command: 'node' } }, pluginUsage: { sample: 1 }, cachedGrowthBookFeaturesAt: 123 });
     assert.deepEqual(guard.assertUnchanged(before, guard.snapshot(home)), [file]);
+    write({ mcpServers: { shared: { command: 'node' } }, pluginUsage: { sample: 1 }, cachedGrowthBookFeatures: { flag: true }, cachedGrowthBookFeaturesAt: 456 });
+    assert.deepEqual(guard.assertUnchanged(before, guard.snapshot(home)), [file]);
     write({ mcpServers: { shared: { command: 'changed' } }, pluginUsage: { sample: 3 } });
     assert.throws(() => guard.assertUnchanged(before, guard.snapshot(home)), /Real-home files changed/);
     write({ mcpServers: { shared: { command: 'node' } }, pluginUsage: { sample: 1 } });

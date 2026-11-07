@@ -24,7 +24,7 @@ function snapshot(home = process.env.SKILLSHARE_TEST_REAL_HOME || os.homedir()) 
         const value = JSON.parse(content);
         entry.topLevelShas = Object.fromEntries(Object.entries(value).map(([key, item]) => [key, digest(JSON.stringify(item))]));
         if (file !== path.join(home, '.claude.json')) { result[file] = entry; return; }
-        const metadataKeys = ['pluginUsage', 'cachedGrowthBookFeaturesAt'];
+        const metadataKeys = ['pluginUsage', 'cachedGrowthBookFeatures', 'cachedGrowthBookFeaturesAt'];
         entry.metadataSha = digest(JSON.stringify(metadataKeys.map(key => value[key] ?? null)));
         for (const key of metadataKeys) delete value[key];
         entry.stableSha = digest(JSON.stringify(value));

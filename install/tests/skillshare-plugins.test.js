@@ -99,6 +99,11 @@ function calls(options) {
   const file = path.join(options.home, 'calls.jsonl');
   return fs.existsSync(file) ? fs.readFileSync(file, 'utf8').trim().split('\n').map(JSON.parse) : [];
 }
+// Installed identity and commit come from the native sync preview; config holds only shared intent in Skillshare >= 0.29.
+function effectiveBinding(options, target) {
+  const plan = JSON.parse(runtime.runNative(['sync', 'plugins', 'demo', '--dry-run', '--json', '-g'], options).stdout);
+  return plan.changes.find(change => change.name === 'demo' && change.target === target).binding;
+}
 function nativeConfig(options) {
   return config.parser({ ...options, depsDir: process.env.SKILLSHARE_TEST_DEPS || path.join(repository, '.local/skillshare-node') }).parse(fs.readFileSync(path.join(options.home, '.config/skillshare/config.yaml'), 'utf8'));
 }
@@ -158,8 +163,9 @@ test('adoption uses actual native import and preserves content, enablement and p
   const before = files.map(runtime.inventory);
   assert.equal(plugins.adoptPlugin(selection, options).action, 'adopt');
   assert.deepEqual(files.map(runtime.inventory), before);
-  const binding = nativeConfig(options).plugins.packages.demo.bindings.claude;
-  assert.deepEqual(binding, { id: 'demo@team', version: '1.2.3' });
+  assert(nativeConfig(options).plugins.packages.demo.bindings.claude);
+  const { id, version } = effectiveBinding(options, 'claude');
+  assert.deepEqual({ id, version }, { id: 'demo@team', version: '1.2.3' });
   assert(calls(options).length > 0);
   assert(calls(options).every(call => call.args[0] === '--version' || call.args.includes('list')));
   // Native import must preserve an existing deselection and its local version metadata too.
@@ -177,7 +183,7 @@ for (const target of ['claude', 'codex']) test(`clean ${target} home adds the ex
   const binding = nativeConfig(options).plugins.packages.demo.bindings[target];
   assert.equal(binding.source, recipe.source);
   assert.equal(binding.source_ref, commit);
-  assert.equal(binding.commit, commit);
+  assert.equal(effectiveBinding(options, target).commit, commit);
   const before = calls(options).length;
   runtime.runNative(['sync', 'plugins', 'demo', '--json', '-g'], options);
   const later = calls(options).slice(before);

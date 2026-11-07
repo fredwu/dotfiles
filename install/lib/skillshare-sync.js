@@ -379,17 +379,22 @@ function preparePlugins(options) {
   return plugins.loadPlugins(file).plugins.map(recipe => {
     const summary = { name: recipe.name, target: recipe.target };
     if (recipe.classification === 'local') return { ...summary, action: 'local', reason: recipe.reason };
+    // Shared intent lives in config; installed identity and commit come from the native sync preview.
     const binding = packages[recipe.name]?.bindings?.[recipe.target];
     const settings = path.join(options.home, '.claude/settings.json');
     const enablement = recipe.target === 'claude' && fs.existsSync(settings) ? JSON.parse(fs.readFileSync(settings, 'utf8')).enabledPlugins : {};
-    if (binding?.sync === false || enablement?.[recipe.nativeId] === false || (binding?.id && enablement?.[binding.id] === false)) {
-      return { ...summary, action: 'local', reason: 'Native plugin is disabled; preserve the local selection.' };
-    }
-    if (binding?.source === recipe.source && binding.source_ref === recipe.sourceRef && binding.commit === recipe.sourceRef) {
+    const disabled = { ...summary, action: 'local', reason: 'Native plugin is disabled; preserve the local selection.' };
+    if (binding?.sync === false || enablement?.[recipe.nativeId] === false) return disabled;
+    let plan, selected;
+    if (binding) {
       const preview = native(['sync', 'plugins', recipe.name, '--dry-run', '--json'], { ...options, dryRun: false }).data;
-      const plan = preview.plan || preview;
-      const selected = plan.changes?.find(change => change.target === recipe.target && change.name === recipe.name);
-      if (!plan.blocked && selected?.action === 'noop') return { ...summary, action: 'managed' };
+      plan = preview.plan || preview;
+      selected = plan.changes?.find(change => change.target === recipe.target && change.name === recipe.name);
+    }
+    const effective = selected?.binding || {};
+    if (effective.id && enablement?.[effective.id] === false) return disabled;
+    if (binding?.source === recipe.source && binding.source_ref === recipe.sourceRef) {
+      if (!plan.blocked && selected?.action === 'noop' && effective.commit === recipe.sourceRef) return { ...summary, action: 'managed' };
       if (plan.blocked || selected?.action !== 'install') return { ...summary, action: 'hold', reason: 'Native plugin selection needs attention; installation preserved.' };
       if (options.bootstrap) { plugins.rebuildPlugin(recipe, options); return { ...summary, action: 'add' }; }
       return { ...summary, action: 'pending', reason: 'Run --bootstrap to restore the pinned selection.' };
@@ -399,7 +404,7 @@ function preparePlugins(options) {
       if (!equal(observed, recipe)) return { ...summary, action: 'hold', reason: 'Installed provenance differs from the pinned recipe; retain the native installation.' };
       if (options.bootstrap) plugins.adoptPlugin(recipe, options);
       if (options.bootstrap) return { ...summary, action: 'adopt' };
-      return binding?.id === recipe.nativeId ? { ...summary, action: 'managed' }
+      return effective.id === recipe.nativeId ? { ...summary, action: 'managed' }
         : { ...summary, action: 'pending', reason: 'Run --bootstrap to adopt the matching native installation.' };
     }
     const registry = path.join(options.home, `.${recipe.target}/plugins/installed_plugins.json`);
