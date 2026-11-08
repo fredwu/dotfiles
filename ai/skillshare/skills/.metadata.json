@@ -35,17 +35,17 @@
     "skillshare": {
       "source": "github.com/runkids/skillshare/skills/skillshare",
       "type": "github-subdir",
-      "installed_at": "2026-11-05T11:17:09.62907+11:00",
+      "installed_at": "2026-11-08T22:06:35.099635+11:00",
       "repo_url": "https://github.com/runkids/skillshare.git",
       "subdir": "skills/skillshare",
-      "version": "add5753",
-      "tree_hash": "7ed1389d199e60b8e8435c2965cde3eb71d43c65",
-      "commit": "add5753ab9cac045e12b14d1ffe5b1871471fdf8",
+      "version": "60be623",
+      "tree_hash": "760da9912ed5d508391802184e777361ebed012f",
+      "commit": "60be62362c6435c856bc097cda07b39a03c226dc",
       "file_hashes": {
-        "SKILL.md": "sha256:3665b33e33574eb93dd2620fbe739395e9374a3fed20bef9ea16dea469b307a6",
+        "SKILL.md": "sha256:fe442e24ffdf1ae996551834d3dc63b7c696974a7a928e2558ad96fe18d1e23e",
         "references/TROUBLESHOOTING.md": "sha256:6964001f3f1fcbaadf0daae7478724ffd12196c20c7b3762876385670660cd99",
         "references/audit-review.md": "sha256:8ce54d8440a56078da8d7a1849000ae985346c950de3c49164eab21049ff2924",
-        "references/audit.md": "sha256:224bc405e5ae7778f2bf4e0d86150aef5ac9e47f7d4fb0ab8ac58755916db341",
+        "references/audit.md": "sha256:eba9fefa8c8cc69e4f82d8126bea33f01303bf55e8b99fcb88c4789452eddce8",
         "references/backup.md": "sha256:d794b66b18120cfaae0dcb3773031a08426895fd618d02393337a1eb57f98f6f",
         "references/extras.md": "sha256:0845bb01f48b1ee6c91eee756319e301b224cec0f944b90dbee370934d0dbb57",
         "references/hooks.md": "sha256:de0f7c4261adfc9cd1aaa409ff484676c694e45011458d5885afb9108619e07d",
@@ -58,7 +58,7 @@
         "references/plugins.md": "sha256:6029edc99ec75b34a8c669d5af86c80ad90a08683a90d4271620438c8bb00bb7",
         "references/status.md": "sha256:f4eb90d8034cff3394d27dd46d5df976e98ec47e08b8e83efd1bdc10e24b19b1",
         "references/sync.md": "sha256:aa2740ae9f92181e318f077ae85250cc8041914dfea67123975de30730276511",
-        "references/targets.md": "sha256:c58ccaf726e8a5448a3da952fc3101923e05e48d93d0ba9f9e39fe160a3f0680",
+        "references/targets.md": "sha256:336a1e874696111c27102f07d9c0f5299d0856fc47707f49c4d355383c12f822",
         "references/trash.md": "sha256:e53ddc74ccf633d1c67481e616df584542dd882bac3a10e0857459628322f219",
         "scripts/run.sh": "sha256:e434ebdb7d3ae0b37c00ddc36687bc975da9e766b8cb863f9aed9a624ebbdfa9"
       }

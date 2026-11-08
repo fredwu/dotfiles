@@ -9,7 +9,7 @@ description: |
   noninteractive automation, and guidance for the terminal UI.
 argument-hint: "[command] [target] [--json] [--dry-run] [-p|-g]"
 metadata:
-  version: v0.28.4
+  version: v0.29.2
 ---
 
 # Skillshare CLI
@@ -144,6 +144,7 @@ nothing is downloaded again. It does not sync; run `sync` afterwards. Read
 
 ```bash
 skillshare project list --json
+skillshare project localize ~/work/existing --dry-run
 skillshare project add ~/work/app --target claude,codex --skills-mode copy --dry-run
 skillshare project add ~/work/app --target claude,codex --skills-mode copy --sync
 skillshare project edit app --skills-include 'frontend-*'
@@ -152,7 +153,10 @@ skillshare project remove app --dry-run --json
 ```
 
 `project` always uses the global config, including inside a repo; it does not accept
-`-p`. Edit filters replace lists. Removal detaches skills and keeps agent files;
+`-p`. New projects are saved in `config.yaml`, or on this machine only with
+`--machine-local` or `projects_storage: machine-local` (`--shared` overrides the setting);
+`localize` and `share` move one between the two. Removing a local copy of a `config.yaml`
+project keeps `config.yaml`'s version unless `--shared` is given. Edit filters replace lists. Removal detaches skills and keeps agent files;
 JSON removal requires `--yes` unless previewing. Read [targets.md](references/targets.md)
 for saved-then-sync failures, retries, and partial removal results.
 
