@@ -1,6 +1,0 @@
-interface:
-  display_name: "Write Legacy-Removal Plan"
-  short_description: "Plan a focused legacy-code purge"
-  default_prompt: "Use $write-plan-legacy to audit project-owned code and write an evidence-backed legacy-removal plan."
-policy:
-  allow_implicit_invocation: false

@@ -1,6 +1,6 @@
 interface:
   display_name: "Write Refactoring Plan"
-  short_description: "Plan code, test, and documentation quality improvements"
-  default_prompt: "Use $write-plan-refactor to audit project-owned code, tests, and documentation for architecture, data flow, security, and maintainability, and write an evidence-backed refactoring plan."
+  short_description: "Plan code quality improvements and legacy removal"
+  default_prompt: "Use $write-plan-refactor to audit project-owned code, tests, and documentation for architecture, data flow, security, legacy, and maintainability, and write an evidence-backed refactoring plan."
 policy:
   allow_implicit_invocation: false
