@@ -1,0 +1,6 @@
+interface:
+  display_name: "Write Performance Plan"
+  short_description: "Plan app performance and test-suite improvements"
+  default_prompt: "Use $write-plan-perf to audit project-owned code for runtime performance and test-suite value and speed, and write an evidence-backed plan."
+policy:
+  allow_implicit_invocation: false
