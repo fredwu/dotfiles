@@ -107,6 +107,16 @@ test('real CLI captures a local vendor update and another home holds its baselin
   assert(sync.synchronize(first).agents.changed.length === 0);
 });
 
+test('target skill filters keep excluded skills out without failing the link check', () => {
+  const options = fixture();
+  const intent = JSON.parse(fs.readFileSync(options.intentFile));
+  intent.config.targets.claude.skills.exclude = ['exam*'];
+  write(options.intentFile, intent);
+  sync.synchronize({ ...options, bootstrap: true });
+  assert(!fs.existsSync(path.join(options.home, '.claude/skills/example')));
+  assert(fs.lstatSync(path.join(options.home, '.codex/skills/example')).isSymbolicLink());
+});
+
 test('legacy node cleanup uses native ownership before changing the MCP source', () => {
   const options = fixture();
   const intent = config.loadIntent(options);

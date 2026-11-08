@@ -21,16 +21,6 @@
       ],
       "transport": "stdio"
     },
-    "firefox-devtools": {
-      "transport": "stdio",
-      "command": {
-        "executable": "npx"
-      },
-      "args": [
-        "-y",
-        "@mozilla/firefox-devtools-mcp@0.10.6"
-      ]
-    },
     "godot-ai": {
       "transport": "stdio",
       "command": {

@@ -355,11 +355,18 @@ function retireLegacyFiles(options, backup) {
   }
 }
 
+const globMatches = (pattern, name) =>
+  new RegExp(`^${pattern.replace(/[.+$(){}|\\]/g, '\\$&').replace(/\*/g, '[^/]*').replace(/\?/g, '[^/]')}$`).test(name);
+
+const targetSelects = (filters, name) =>
+  (!filters.include?.length || filters.include.some(pattern => globMatches(pattern, name))) &&
+  !(filters.exclude || []).some(pattern => globMatches(pattern, name));
+
 function assertSkillLinks(options, intent, requirePresent = false) {
   const skills = native(['list', '--json'], options).data.filter(item => item.kind === 'skill');
   for (const [name, target] of Object.entries(intent.config.targets)) {
     if (!target.skills?.path || target.skills.enabled === false) continue;
-    for (const skill of skills) {
+    for (const skill of skills.filter(item => targetSelects(target.skills, item.name))) {
       const destination = path.join(target.skills.path, skill.name);
       const source = path.join(intent.config.sources.skills, skill.relPath);
       let info;

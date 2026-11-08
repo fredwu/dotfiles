@@ -23,7 +23,8 @@
 ## Tool routing
 
 - Load relevant skills, reference material, and tool details as needed. Keep unrelated context out of the active loop.
-- Use the cua-driver skill by default for native desktop app and window tasks. Respect explicitly requested tools. Use browser-specific tools for web pages and agent-device for mobile or TV devices.
+- Use the cua-driver skill by default for native desktop app and window tasks. Respect explicitly requested tools. Use agent-device for mobile or TV devices.
+- For web pages, use the T3 Code preview tools (`preview_open`, `preview_snapshot`, `preview_act`, `preview_evaluate`) when they are available; load them through tool search. Use the `default` profile, which holds the user's sessions. When a site needs a sign-in, ask the user to sign in in that profile, not in an automation browser. Use chrome-devtools or Playwright only when the user asks for them, the task needs a clean or isolated profile, or the task needs a capability that the preview tools do not have (performance traces, Lighthouse, request interception, full request headers). Never restart or close a browser in which the user signed in.
 - Check `cua-driver --version`, the running daemon version (`health_report`), and `describe <tool>` before using unfamiliar options. The updater owns the linked cua-driver skill pack; keep local preferences here so `cua-driver skills update` does not erase them.
 - For cua-driver, prefer exact-window background capture and input; set `delivery_mode:"background"` where supported. Preserve the user's frontmost app, keyboard focus, pointer position, and workspace/Space when background operation can complete the task.
 - Use `launch_app` for background launches and file opening. Prefer exact-window accessibility actions with fresh `element_token` values; use screenshot coordinates only from a valid capture of that window. Keep one controller per shared desktop.

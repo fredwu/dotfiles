@@ -15,13 +15,13 @@
         "agents": {"exclude": ["*"]}
       },
       "claude": {
-        "skills": {"path": "${home}/.claude/skills", "mode": "merge"},
+        "skills": {"path": "${home}/.claude/skills", "mode": "merge", "exclude": ["mimo-browser-use__*"]},
         "agents": {"path": "${home}/.claude/agents", "mode": "copy", "extension": "${root}/ai/skillshare/extensions/dotfiles-claude-agents"}
       },
       "claude-gamma": {
         "agent": "claude",
         "config_dir": "${home}/.claude-gamma",
-        "skills": {"path": "${home}/.claude-gamma/skills", "mode": "merge"},
+        "skills": {"path": "${home}/.claude-gamma/skills", "mode": "merge", "exclude": ["mimo-browser-use__*"]},
         "agents": {"path": "${home}/.claude-gamma/agents", "mode": "copy", "extension": "${root}/ai/skillshare/extensions/dotfiles-claude-agents"}
       },
       "codex": {
@@ -33,7 +33,7 @@
         "agents": {"exclude": ["*"]}
       },
       "universal": {
-        "skills": {"path": "${home}/.agents/skills", "mode": "merge"},
+        "skills": {"path": "${home}/.agents/skills", "mode": "merge", "exclude": ["mimo-browser-use__*"]},
         "agents": {"exclude": ["*"]}
       }
     },
