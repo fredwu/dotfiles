@@ -1,6 +1,6 @@
 # Audit plan rules
 
-Shared rules for the focused audit variants of [write-plan](../SKILL.md), such as `write-plan-perf` and `write-plan-legacy`. Each variant applies `write-plan` in full, then these rules, then its own focus rules.
+Shared rules for the focused audit variants of [write-plan](../SKILL.md), such as `write-plan-perf`, `write-plan-legacy`, and `write-plan-refactor`. Each variant applies `write-plan` in full, then these rules, then its own focus rules.
 
 ## Brief
 
