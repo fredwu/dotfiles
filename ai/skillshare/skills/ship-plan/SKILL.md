@@ -1,13 +1,13 @@
 ---
 name: ship-plan
-description: Review and refine a supplied plan or session scope, run final-pass, then execute-plan with the same optional reviewer preferences.
+description: Run final-pass on a supplied plan or session scope, review and refine it, run final-pass again, then execute-plan with the same optional reviewer preferences.
 metadata:
   origin: custom
 ---
 
 # Ship Plan
 
-Run three stages in order, and finish each before the next: one review loop over the plan or session scope, [final-pass](../final-pass/SKILL.md), then [execute-plan](../execute-plan/SKILL.md). Each skill keeps its own authority, checks, recovery, and completion rules. This shortcut does not authorize commits, pushes, or deployment.
+Run four stages in order, and finish each before the next: [final-pass](../final-pass/SKILL.md) over the plan or session scope, one review loop over it, `final-pass` again, then [execute-plan](../execute-plan/SKILL.md). Each skill keeps its own authority, checks, recovery, and completion rules. This shortcut does not authorize commits, pushes, or deployment.
 
 ## Resolve input and reviewers
 
@@ -26,12 +26,13 @@ An additional internal preference does not add a plan-review loop. Resolve compe
 
 ## Run the stages
 
-1. **Plan review.** Apply the selected loop to the plan or resolved scope as a planning target. Review requirements, architectural commitments, feasibility against the current repository, boundaries, omissions, and acceptance criteria. Assess findings, and refine the plan or in-context scope within existing authority. Leave implementation to `execute-plan`; this review needs no implementation diff. For a saved plan, give the reviewer its path; for session-only scope, give a concise requirements and acceptance brief, not the conversation history. Keep the loop's mechanics, fresh rounds, cap, failure recovery, and honest coverage reporting. Planning checks establish readiness, not implementation verification.
-2. **Plan final-pass.** After the loop returns, also after a capped or incomplete loop, run `final-pass` as a standalone checkpoint over the planning target, with its documentation-only checks. Keep the loop's actual status. Do not run `execute-plan`'s implementation checkpoints yet. A concrete blocker or an incomplete required final-pass stops dependent execution; finish independent authorized work and report what is missing.
-3. **Execution.** Run `execute-plan` with the refined plan or scope and the same reviewer preferences and explicit options. With no preference, it uses its internal default. Its phases, phase final passes, review loops, and closing final-pass all stay required; the plan review cannot replace any implementation review.
+1. **Initial plan final-pass.** Before the review loop, run `final-pass` as a standalone checkpoint over the planning target, with its documentation-only checks. Resolve omissions and residual issues in the plan or in-context scope within existing authority, so the review starts from the most complete plan. Do not run `execute-plan`'s implementation checkpoints. A concrete blocker stops dependent stages; report what is missing.
+2. **Plan review.** Apply the selected loop to the plan or resolved scope as a planning target. Review requirements, architectural commitments, feasibility against the current repository, boundaries, omissions, and acceptance criteria. Assess findings, and refine the plan or in-context scope within existing authority. Leave implementation to `execute-plan`; this review needs no implementation diff. For a saved plan, give the reviewer its path; for session-only scope, give a concise requirements and acceptance brief, not the conversation history. Keep the loop's mechanics, fresh rounds, cap, failure recovery, and honest coverage reporting. Planning checks establish readiness, not implementation verification.
+3. **Plan final-pass.** After the loop returns, also after a capped or incomplete loop, run `final-pass` as a standalone checkpoint over the planning target, with its documentation-only checks. Keep the loop's actual status. Do not run `execute-plan`'s implementation checkpoints yet. A concrete blocker or an incomplete required final-pass stops dependent execution; finish independent authorized work and report what is missing.
+4. **Execution.** Run `execute-plan` with the refined plan or scope and the same reviewer preferences and explicit options. With no preference, it uses its internal default. Its phases, phase final passes, review loops, and closing final-pass all stay required; the plan review cannot replace any implementation review.
 
-Apply `execute-plan`'s [Report progress](../execute-plan/SKILL.md#report-progress) rules from the first message, with one overall estimate across all three stages. Before execution, use `Plan review: <loop name> · ~P% overall` and `Plan final-pass · ~P% overall`, and reserve most of the estimate for execution.
+Apply `execute-plan`'s [Report progress](../execute-plan/SKILL.md#report-progress) rules from the first message, with one overall estimate across all four stages. Before execution, use `Initial plan final-pass · ~P% overall`, `Plan review: <loop name> · ~P% overall`, and `Plan final-pass · ~P% overall`, and reserve most of the estimate for execution.
 
 Continue between stages without routine confirmation or handoff. Report the result concisely, keep plan-review status separate from implementation review status, and name material blockers or verification limits.
 
-Examples, with a supplied plan or session context: `/ship-plan codex` runs `codex-review-loop`, `final-pass`, then `execute-plan codex`. `/ship-plan internal and claude` runs `claude-review-loop`, `final-pass`, then `execute-plan internal and claude`. `/ship-plan` runs `code-review-loop`, `final-pass`, then `execute-plan` with its internal default.
+Examples, with a supplied plan or session context: `/ship-plan codex` runs `final-pass`, `codex-review-loop`, `final-pass`, then `execute-plan codex`. `/ship-plan internal and claude` runs `final-pass`, `claude-review-loop`, `final-pass`, then `execute-plan internal and claude`. `/ship-plan` runs `final-pass`, `code-review-loop`, `final-pass`, then `execute-plan` with its internal default.
