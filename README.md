@@ -93,7 +93,9 @@ grep -lx '  origin: custom' ai/skillshare/skills/*/SKILL.md
 
 Shared agents use neutral templates in `ai/skillshare/agents` and native
 conversion extensions in `ai/skillshare/extensions`. Provider models and effort
-values are defined only in `ai/skillshare/agent-models.json`. Managed sync
+values are defined only in `ai/skillshare/agent-models.json`, except that Codex,
+Claude, and Grok reviews select the newest model of a named family (see
+`ai/skillshare/skills/code-review/references/reviewer-settings.md`). Managed sync
 validates and renders them before native publication, verifies the output, and
 restores backed-up agents if publication fails. Primary Claude, Gamma, and
 Codex receive converted files. Edit the templates or model map; direct edits

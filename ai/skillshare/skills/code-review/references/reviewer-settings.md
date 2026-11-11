@@ -4,9 +4,13 @@ Apply this policy to every review, internal or external, including each loop rou
 
 ## Select
 
-- **Model:** use the requested model. Otherwise use the provider's configured `worker` role model, from its generated agent definition or the dotfiles `ai/skillshare/agent-models.json`. If the provider has no role mapping, such as Grok, choose from the live model list and state material limits.
+- **Model:** use the requested model. Otherwise, for Codex, Claude, and Grok, resolve a [model family](#resolve-a-model-family): in a [two-pass review](two-pass-review.md), the pass's family; in a single pass, Sol for Codex, Opus for Claude, and Grok for Grok, which has no separate families. For other providers, use the provider's configured `worker` role model, from its generated agent definition or the dotfiles `ai/skillshare/agent-models.json`. If the provider has no role mapping, choose from the live model list and state material limits.
 - **Codex and Claude effort:** `medium` or `high` only. Use `medium` for a narrow, well-understood target with limited interactions. Use `high` for broad coverage, uncertain behavior, or consequential security, concurrency, data-integrity, or architectural interactions. Judge risk and uncertainty, not file count. If unsure, use `high`.
 - **Grok effort:** always `xhigh`.
+
+### Resolve a model family
+
+The family name selects the model; do not fix version numbers. Before each launch, read the live model list (T3 `orchestrator_capabilities`, or the ACP client's model list) and select the newest available model whose ID or display name contains the family name, case-insensitive. Prefer the standard variant over mini, fast, preview, or extended-context variants when both exist. Record the resolved model ID. If no model of the family is available, the review is blocked: report it, and do not substitute another family or provider.
 
 Record the selection and a short reason in context. A new round can reassess complexity; retries keep the round's model and effort.
 
