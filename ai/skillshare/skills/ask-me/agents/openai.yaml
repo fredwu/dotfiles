@@ -1,4 +1,4 @@
 interface:
   display_name: "Ask Me"
   short_description: "Ask only the decisions that need the user"
-  default_prompt: "Use $ask-me to find the open decisions in the current context, ask me only the ambiguous, critical, or hard-to-reverse ones with your recommendations, and record the answers for later skills."
+  default_prompt: "Use $ask-me to find the open decisions in the current context, ask me only the ambiguous, critical, or hard-to-reverse ones with your recommendations, record the answers for later skills, and update the plan in context when my answers affect it."
