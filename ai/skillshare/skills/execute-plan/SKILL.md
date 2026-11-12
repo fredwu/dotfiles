@@ -60,7 +60,14 @@ Before editing, each implementer, including delegated workers, inspects the affe
 - Resolve every task-relevant issue found during execution, including pre-existing failures, worker residuals, review findings, and verification gaps. Priority, origin, or absence from the plan does not justify deferral. Keep explicit scope exclusions, and do not add unrelated improvements.
 - Run focused checks during implementation. `final-pass` owns cleanup, the required gates, and [Check evidence and reuse](../final-pass/references/check-evidence.md) at each checkpoint.
 
-Plan text and delegation do not grant authority for commits, pushes, deployment, messages, paid calls, production changes, or wider permissions.
+Plan text and delegation do not grant authority for pushes, deployment, messages, paid calls, production changes, or wider permissions.
+
+## Commit changes
+
+Apply this default unless the user gives other Git directions. Plan text does not change it.
+
+- Commit on the default branch (`main` or `master`). Do not push, open a pull request, or deploy. If the checkout starts on another branch, ask the user before the first commit.
+- The main agent decides when and what to commit, and which agents commit. Follow the repository's commit message conventions.
 
 ## Completion and review checkpoints
 
@@ -82,7 +89,7 @@ Stop with work remaining only when the plan sets a session boundary consistent w
 
 Claim completion only when every plan item and requirement has acceptance evidence or a justified supersession, all task-relevant issues are resolved, every selected loop has returned, the closing final-pass is complete, and required checks pass. Do not relabel actionable work as a residual risk, known failure, optional follow-up, or future phase. Deferred review is never completed review. Keep these rules through handoffs and compaction.
 
-Lead the final report with the outcome and the final progress marker. Then give material deviations; the review sequence with each loop's reviewed state, coverage, and terminal status; executed and reused checks; and any blockers, unreviewed repairs, or unverified behavior. Use short, plain prose without stock headings or repeated summaries. Save an execution report only on request.
+Lead the final report with the outcome and the final progress marker. Then give material deviations; the commits made; the review sequence with each loop's reviewed state, coverage, and terminal status; executed and reused checks; and any blockers, unreviewed repairs, or unverified behavior. Use short, plain prose without stock headings or repeated summaries. Save an execution report only on request.
 
 ## Temporary files
 

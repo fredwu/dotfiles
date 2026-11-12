@@ -7,7 +7,7 @@ metadata:
 
 # Ship Plan
 
-Run four stages in order, and finish each before the next: [final-pass](../final-pass/SKILL.md) over the plan or session scope, one review loop over it, `final-pass` again, then [execute-plan](../execute-plan/SKILL.md). Each skill keeps its own authority, checks, recovery, and completion rules. This shortcut does not authorize commits, pushes, or deployment.
+Run four stages in order, and finish each before the next: [final-pass](../final-pass/SKILL.md) over the plan or session scope, one review loop over it, `final-pass` again, then [execute-plan](../execute-plan/SKILL.md). Each skill keeps its own authority, checks, recovery, and completion rules. This shortcut adds no Git authority: `execute-plan` applies its own commit default, and pushes or deployment still need user direction.
 
 ## Resolve input and reviewers
 
