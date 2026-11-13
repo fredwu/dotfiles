@@ -2,7 +2,7 @@
 
 Scan skills for prompt injection, data exfiltration, credential access, destructive commands, obfuscation, suspicious URLs, and broken local links. Use `audit rules --no-tui` for the installed rule set.
 
-Local references in Markdown links/images, code paths with a file extension (prefixes `./`, `../`, `scripts/`, `references/`, or `assets/`), explicit `path:` declarations, and `skillshare-paths` fences are checked within the skill directory. Markdown links/images are document-relative. Code paths, `path:` declarations and path fences use the containing document for leading `./` or `../`; other relative code paths use the skill root, even in nested Markdown files. Absolute in-bundle paths accept equivalent spellings derived from the root and its symlinked ancestors. Missing targets remain LOW `dangling-link`; explicit reference escapes are HIGH `reference-escapes-root`; implicit inline-code paths outside the bundle are ignored and trailing `:line` suffixes are stripped; unreadable, unsupported or bounded-out checks are LOW `reference-check-incomplete`. Implicit glob/template and extensionless examples, URLs, anchors, ordinary identifiers and unmarked absolute code examples are excluded. Use `path:` or a path fence for required directories and extensionless files. Disable individual IDs with `enabled: false` in `audit-rules.yaml`. `doctor` uses the same checker and reports escapes as errors, missing/incomplete checks as warnings.
+Local references in Markdown links/images, code paths with a file extension (prefixes `./`, `../`, `scripts/`, `references/`, or `assets/`), explicit `path:` declarations, and `skillshare-paths` fences are checked within the skill directory. Markdown links/images are document-relative. Code paths, `path:` declarations and path fences use the containing document for leading `./` or `../`; other relative code paths use the skill root, even in nested Markdown files. A nested skill (a subdirectory with its own `SKILL.md`) is its own root, also when its parent is audited. Absolute in-bundle paths accept equivalent spellings derived from the root and its symlinked ancestors. Missing targets remain LOW `dangling-link`; explicit reference escapes are HIGH `reference-escapes-root`; implicit inline-code paths outside the bundle are ignored and trailing `:line` suffixes are stripped; unreadable, unsupported or bounded-out checks are LOW `reference-check-incomplete`. Implicit glob/template and extensionless examples, URLs, anchors, ordinary identifiers and unmarked absolute code examples are excluded. Use `path:` or a path fence for required directories and extensionless files. Disable individual IDs with `enabled: false` in `audit-rules.yaml`. `doctor` uses the same checker and reports escapes as errors, missing/incomplete checks as warnings, each finding once.
 
 ## Usage
 
@@ -35,6 +35,7 @@ skillshare audit --analyzer static # Run only the static analyzer
 | `--json` | Same as `--format json` (deprecated) |
 | `--quiet, -q` | Only show skills with findings + summary |
 | `--no-tui` | Disable interactive TUI, print plain text |
+| `--respect-accepted` | Do not fail on findings accepted earlier with `--force`; JSON marks them `acknowledged`, SARIF adds `suppressions` |
 | `--yes, -y` | Skip large-scan confirmation prompt |
 | `--init-rules` | Create a starter `audit-rules.yaml` |
 | `-h, --help` | Show help |
@@ -70,6 +71,10 @@ Markdown is still scanned, including fenced code blocks. A shared Markdown parse
 HIGH findings warn at the default CRITICAL threshold and block at a HIGH threshold (the `strict` profile default). Some malicious wording can also match only the generic HIGH rule; use strict when that ambiguity must block. SDK parameter context is only a syntax heuristic. Credential access, data exfiltration, and other injection rules retain their configured severity.
 
 Explicit global or project severity overrides, including CRITICAL, take precedence over SDK parameter downgrades. Generic disclosure restrictions now use `prompt-injection-5`; overrides for `prompt-injection-4` apply only to explicit concealment. Built-in rule 5 excludes explicit-concealment phrases, not separate generic restrictions on the same line. Full custom regex replacements retain whole-line exclusion semantics. To make generic restrictions CRITICAL, override `prompt-injection-5`. For reviewed false positives, findings accepted with `--force` remain visible and are remembered for that resource; a different rule, file, matched text, or detector-specific evidence requires fresh acceptance. For `whitespace-padding`, density findings use all eligible content in the file as evidence. Identical occurrences have separate acceptance keys; previously accepted padding findings require acceptance again.
+
+### Python Comments and Docstrings
+
+In `.py` files, built-in CRITICAL `credential-access` matches on comment-only lines, or inside a string that is a whole statement such as a docstring, are reported as HIGH. f-strings, assigned or argument strings, and code before a trailing comment keep CRITICAL, as does every line of a file that references `__doc__` or `getdoc` or uses bare CR line breaks, and every line after an f-string replacement field that holds a quote or `#` or does not close. Explicit severity overrides and full custom regex replacements keep their configured severity. Markdown, other file types, and other rules are unchanged. Text output, the TUIs and the dashboard mark such findings as lowered from CRITICAL (`severityContext: python-inert` in JSON and SARIF), and `audit rules` shows the context on each affected rule.
 
 ### Whitespace Padding
 
@@ -137,7 +142,7 @@ skillshare audit rules reset                    # Restore built-in defaults
 skillshare audit rules init                     # Create starter audit-rules.yaml
 ```
 
-Audit exits `0` when findings are below the threshold, `1` for threshold findings, and `2` for execution, usage, configuration, or scan errors. Scan errors take precedence over findings. Declining the large-scan confirmation exits `0` without scanning. Audits launched from `list` use the same exit codes.
+Audit exits `0` when findings are below the threshold, `1` for threshold findings, and `2` for execution, usage, configuration, or scan errors. Scan errors take precedence over findings. With `--respect-accepted`, findings accepted earlier with `--force` do not count toward `1`. Declining the large-scan confirmation exits `0` without scanning. Audits launched from `list` use the same exit codes.
 
 ## Custom Audit Rules
 
@@ -146,7 +151,7 @@ skillshare audit --init-rules       # Global: ~/.config/skillshare/audit-rules.y
 skillshare audit --init-rules -p    # Project: .skillshare/audit-rules.yaml
 ```
 
-Three-layer merge (later overrides earlier): built-in → global → project. Set `confidence` from 0 to 1 by rule ID or pattern; rules without a value default to 0.95. The HIGH prose patterns `anti-refusal`, `prompt-leakage`, `memory-poisoning`, `agent-snooping`, and `persistence` detect narrowly phrased risky directives.
+Three-layer merge (later overrides earlier): built-in → global → project. A rules file that cannot be read, parsed, or compiled makes every scan using it a scan error that names the file. Set `confidence` from 0 to 1 by rule ID or pattern; rules without a value default to 0.95. The HIGH prose patterns `anti-refusal`, `prompt-leakage`, `memory-poisoning`, `agent-snooping`, and `persistence` detect narrowly phrased risky directives.
 
 ```yaml
 rules:
@@ -190,13 +195,16 @@ headers are INFO. This does not analyze runtime behavior or archive members.
 from header reads; the existing source-link policy and six-level depth limit stay
 in effect. There is no file-count cap; directory scans count header read failures as skipped
 and continue. An unreadable direct-file target still returns an error. Hidden
-directories receive header classification only; links to non-special files keep existing text scanning. Special targets are
+directories inside a skill receive header classification only. A whole-repository
+scan (`install --track`, tracked updates) text-scans skills found in hidden
+directories such as `.agents/skills/` or `.curated/`, but not target copies.
+Links to non-special files keep existing text scanning. Special targets are
 skipped; direct audits of them return an error. Hidden names alone do not imply disguise. HIGH requires a document,
 image or configuration extension or a `.cache`/`__pycache__` parent directory;
 other native binaries, including `.venv/bin/python`, are MEDIUM.
 JSON results and summaries expose `binaryFiles`, `skippedFiles`, `oversizedFiles`;
 CLI and dashboard summaries show the same counts; the dashboard, Markdown and SARIF also report per-resource counts. Skipped includes read failures, binary,
-unsupported, oversized and regular files below hidden directories, so the counters
+unsupported, oversized and regular files below hidden directories inside a skill, so the counters
 overlap. Special files and links to special targets outside hidden directories count as skipped; other links are not counted just for skipping header reads. Header
 bytes are not auditable text. The rules `disguised-executable`, `python-bytecode`,
 `executable-artifact`, `archive-artifact`, `uncertain-header` can be disabled by ID

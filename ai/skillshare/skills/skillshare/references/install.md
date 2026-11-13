@@ -13,6 +13,21 @@ a valid `SKILL.md` frontmatter `name` is used, lowercased with spaces normalized
 or conflicting frontmatter names fall back to the directory name. `--name` overrides the default; updates
 preserve existing install names. Tracked repository naming is unchanged.
 
+Discovery skips target directories such as `.claude/` and `.agents/`, which usually
+hold copies of a repository's skills. A repository with no other skills has its
+root `.agents/skills/` discovered instead.
+
+The `.agents/skills/` fallback requires both `.agents` and `skills` to be real directories, not symlinks or junctions, even with `follow_source_links: true`. An intentionally followed repository root remains supported. Discovered agent installs and updates reject intermediate or final destination links; audits run before publication, and a blocked audit leaves existing agent contents unchanged.
+
+For an explicit, untracked skill source, `install <source> --dry-run --json`
+returns `planned: [{name, path}]`: canonical install names and repository-relative
+Git paths (including a selected subdirectory), or `.` for a local skill. Use this
+instead of scanning for `SKILL.md` or guessing names. Discovery, `.skillignore`, and
+selection rules apply; without a filter JSON mode selects all. `skills` remains
+empty during dry-run. An empty discovered selection returns `planned: []`;
+tracked and config-based installs omit the field. Check the exit status as well
+as `error`, including when consuming JSON from older CLIs.
+
 ### Source Formats
 
 ```bash
@@ -117,7 +132,7 @@ or `--kind agent` to choose which resource to manage.
 | `--kind <skill\|agent>` | Restrict resource discovery |
 | `--agent, -a <names>` | Select agents by name (comma-separated) |
 | `--branch, -b <name>` | Select a Git branch, tag or commit SHA (overrides a ref in a web URL) |
-| `--force, -f` | Overwrite existing and explicitly override audit blocking |
+| `--force, -f` | Overwrite existing and explicitly override audit blocking from findings (not a failed scan) |
 | `--update, -u` | Update if exists |
 | `--track, -t` | Track for updates (preserves .git); a local path works if it is a git repository. Rejects `--all`, `--yes`, `--skill`, and `--agent` |
 | `--skill, -s <names>` | Select specific skills from multi-skill repo (comma-separated). Rejects `--track`, `--all`, and `--yes` |
@@ -127,7 +142,7 @@ or `--kind agent` to choose which resource to manage.
 | `--exclude <name>` | Skip specific skills during multi-skill install (repeatable) |
 | `--skip-audit` | Skip security audit for this install |
 | `--audit-threshold <t>` / `--threshold <t>` / `-T <t>` | Override block threshold for this run (`critical\|high\|medium\|low\|info`; shorthand: `c\|h\|m\|l\|i`, plus `crit`, `med`) |
-| `--json` | Noninteractive JSON; permits overwrite and selects all when no skill/agent filter is given; retains audit blocking |
+| `--json` | Noninteractive JSON; permits overwrite and selects all when no skill/agent filter is given; retains audit blocking; when every skill fails or is blocked it exits non-zero with an `error` field naming each one, while a partial failure lists names in `failed` and exits 0 |
 | `--dry-run, -n` | Preview |
 
 **Fuzzy subdirectory resolution:** When a monorepo has nested skill directories, you can specify just the skill name — e.g., `user/repo/vue-best-practices` finds `skills/vue-best-practices/` automatically. Fails with an error if multiple matches exist.
@@ -147,9 +162,9 @@ Tracked custom names must not contain path separators (`/`, `\`) or `..`.
 
 **License display:** If a SKILL.md has a `license` frontmatter field, it's shown in selection prompts (e.g., `my-skill (MIT)`) and in the single-skill confirmation box.
 
-**Security audit:** Install auto-scans skills after download. Blocking follows the active threshold (default `CRITICAL`), while aggregate risk is reported separately for context. Use `--force` to override blocking, `--skip-audit` to skip scanning, or `--audit-threshold` / `--threshold` / `-T` to override threshold per command.
+**Security audit:** Install auto-scans skills after download. Blocking follows the active threshold (default `CRITICAL`), while aggregate risk is reported separately for context. Use `--force` to override blocking, `--skip-audit` to skip scanning, or `--audit-threshold` / `--threshold` / `-T` to override threshold per command. A scan that cannot run (for example, an invalid `audit-rules.yaml`) blocks the install, and `--force` does not override it.
 
-**Private repos (HTTPS):** `install` and `update` auto-detect `GITHUB_TOKEN`, `GITLAB_TOKEN`, `BITBUCKET_TOKEN`, `AZURE_DEVOPS_TOKEN`, `GITEA_TOKEN`, `CNB_TOKEN`, or `SKILLSHARE_GIT_TOKEN` for HTTPS clone/pull. No manual git config needed. SSH works as usual.
+**Private repos (HTTPS):** Provider tokens are sent only over HTTPS on the default port (or 443): `github.com`, `gitlab.com`, `bitbucket.org`, `dev.azure.com`, `*.visualstudio.com`, `gitea.com`, and `cnb.cool`. Self-hosted Gitea/CNB requires an exact hostname in `gitea_hosts`/`cnb_hosts`, even if its name contains the provider name. For self-hosted GitHub/GitLab or other hosts, use a host-scoped Git credential helper, or set `SKILLSHARE_GIT_TOKEN` only for the intended invocation. That generic fallback can be sent to **any HTTPS source**; provider-looking names do not authorize provider tokens. SSH and host-scoped Git credential helpers work as usual.
 
 **After install:** `skillshare sync`
 
@@ -160,9 +175,15 @@ Check for available updates and validate skill metadata.
 ```bash
 skillshare check             # Show update status for all repos/skills
 skillshare check --json      # JSON output (CI-friendly)
+skillshare check --exit-code # Exit 1 when anything is not up to date (CI gate)
 skillshare check -p          # Check project skills
 skillshare check my-skill --diff  # Show local edits vs the installed version
 ```
+
+With `--json`, a failure is one object on stdout, `{"error": "..."}`, with exit
+code 1: a name or group that matches nothing to check, an invalid flag
+combination, or a missing config. When some names match and others do not, the
+result lists the skipped ones in `warnings`.
 
 - **Tracked repos:** Fetches from origin, shows commits behind
 - **Remote skills:** Compares installed version with remote HEAD
@@ -250,7 +271,8 @@ skillshare uninstall -G frontend -p --force
 # Preview
 skillshare uninstall --group frontend --dry-run
 
-# Global JSON output (skips confirmation; dirty tracked repos still require --force)
+# JSON output, global or -p (skips confirmation; dirty tracked repos still require --force;
+# when every skill fails, or any agent fails, it exits non-zero and "error" gives the reasons)
 skillshare uninstall my-skill --json
 ```
 
