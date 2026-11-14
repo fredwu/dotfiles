@@ -8,8 +8,8 @@ A two-pass request selects two sequential invocations of the provider's review l
 
 | Provider | Pass 1 | Pass 2 |
 | -------- | ------ | ------ |
-| Codex    | Astra  | Sol    |
-| Claude   | Fable  | Opus   |
+| Codex    | Sol    | Astra  |
+| Claude   | Opus   | Fable  |
 
 Each pass is a full loop invocation with its own round cap, recovery, and terminal status. Finish pass 1, including its repairs, before pass 2 starts; never run the passes in parallel. Pass 2 reviews the whole current target, including pass-1 repairs. Give it pass-1 residuals and open objections only as claims to verify. A capped or incomplete pass 1 does not cancel pass 2.
 

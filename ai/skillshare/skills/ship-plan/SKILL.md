@@ -22,7 +22,7 @@ Select exactly one plan-review loop:
 - Grok requested: [grok-review-loop](../grok-review-loop/SKILL.md).
 - No external reviewer, including internal only: [code-review-loop](../code-review-loop/SKILL.md).
 
-A repeat request for Codex or Claude, such as `codex x 2` or `claude twice`, runs that loop as two sequential passes under [Two-pass review](../code-review/references/two-pass-review.md), for plan review and again in execution: Codex uses Astra, then Sol; Claude uses Fable, then Opus. An additional internal preference does not add a plan-review loop. Resolve competing external providers or an unnamed external reviewer before review starts. Confirm that the selected skills exist, and briefly state the plan-review loop and the execution review sequence.
+A repeat request for Codex or Claude, such as `codex x 2` or `claude twice`, runs that loop as two sequential passes under [Two-pass review](../code-review/references/two-pass-review.md), for plan review and again in execution: Codex uses Sol, then Astra; Claude uses Opus, then Fable. An additional internal preference does not add a plan-review loop. Resolve competing external providers or an unnamed external reviewer before review starts. Confirm that the selected skills exist, and briefly state the plan-review loop and the execution review sequence.
 
 ## Run the stages
 
@@ -35,4 +35,4 @@ Apply `execute-plan`'s [Report progress](../execute-plan/SKILL.md#report-progres
 
 Continue between stages without routine confirmation or handoff. Report the result concisely, keep plan-review status separate from implementation review status, and name material blockers or verification limits.
 
-Examples, with a supplied plan or session context: `/ship-plan codex` runs `final-pass`, `codex-review-loop`, `final-pass`, then `execute-plan codex`. `/ship-plan internal and claude` runs `final-pass`, `claude-review-loop`, `final-pass`, then `execute-plan internal and claude`. `/ship-plan codex x 2` runs `final-pass`, `codex-review-loop` (Astra), `codex-review-loop` (Sol), `final-pass`, then `execute-plan codex x 2`. `/ship-plan` runs `final-pass`, `code-review-loop`, `final-pass`, then `execute-plan` with its internal default.
+Examples, with a supplied plan or session context: `/ship-plan codex` runs `final-pass`, `codex-review-loop`, `final-pass`, then `execute-plan codex`. `/ship-plan internal and claude` runs `final-pass`, `claude-review-loop`, `final-pass`, then `execute-plan internal and claude`. `/ship-plan codex x 2` runs `final-pass`, `codex-review-loop` (Sol), `codex-review-loop` (Astra), `final-pass`, then `execute-plan codex x 2`. `/ship-plan` runs `final-pass`, `code-review-loop`, `final-pass`, then `execute-plan` with its internal default.
