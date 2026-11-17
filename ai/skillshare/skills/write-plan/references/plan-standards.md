@@ -24,6 +24,8 @@ Phases, milestones, checkpoints, size, complexity, risk, and copied schedules do
 
 Number implementation phases consecutively from `Phase 1` in their headings, so the executor can report `Phase N/T` progress. Do not number checkpoints, review loops, or pre-execution actions as phases. Give each phase an approximate effort share as a rounded percentage of implementation effort, with all phases totaling 100%, and add a few words on the basis when it is not obvious. These shares are estimates for progress reporting, not commitments or schedules.
 
+For a phase with a new or significant UI/UX change, record the UX goals and constraints, and mark the phase for [UI mockups](../../execute-plan/references/ui-mockups.md) at execution. Record a user-specified design as a requirement. Otherwise, do not draft mockups or select a visual design in the plan.
+
 ## Decisions and risk
 
 Resolve each decision with the best-supported recommendation, including high-risk, destructive, expensive, or hard-to-reverse choices. Risk alone is not a reason to defer to the user. Give mitigation, residual risk, and recovery steps where relevant. With incomplete evidence, state the assumptions, a conditional recommendation, and the decisive check or fallback, and continue. Keep open items only for essential unavailable input or required execution authorization, with a recommended path where possible. A recommendation never grants execution authority.

@@ -56,6 +56,7 @@ Give agents disjoint edit ownership where possible. Serialize overlapping edits 
 
 Before editing, each implementer, including delegated workers, inspects the affected code, runtime paths, tests, configuration, and documentation, and derives the implementation approach from current evidence within the plan's commitments. Verify any concrete implementation suggestions in the plan. Missing routine detail is execution work, not a plan defect.
 
+- For new or significant UI/UX changes, apply [UI mockups](references/ui-mockups.md) before implementation.
 - Fix root causes and add regression coverage where practical.
 - Resolve every task-relevant issue found during execution, including pre-existing failures, worker residuals, review findings, and verification gaps. Priority, origin, or absence from the plan does not justify deferral. Keep explicit scope exclusions, and do not add unrelated improvements.
 - Run focused checks during implementation. `final-pass` owns cleanup, the required gates, and [Check evidence and reuse](../final-pass/references/check-evidence.md) at each checkpoint.
@@ -89,7 +90,7 @@ Stop with work remaining only when the plan sets a session boundary consistent w
 
 Claim completion only when every plan item and requirement has acceptance evidence or a justified supersession, all task-relevant issues are resolved, every selected loop has returned, the closing final-pass is complete, and required checks pass. Do not relabel actionable work as a residual risk, known failure, optional follow-up, or future phase. Deferred review is never completed review. Keep these rules through handoffs and compaction.
 
-Lead the final report with the outcome and the final progress marker. Then give material deviations; the commits made; the review sequence with each loop's reviewed state, coverage, and terminal status; executed and reused checks; and any blockers, unreviewed repairs, or unverified behavior. Use short, plain prose without stock headings or repeated summaries. Save an execution report only on request.
+Lead the final report with the outcome and the final progress marker. Then give material deviations; the selected UI direction for each mockup exploration; the commits made; the review sequence with each loop's reviewed state, coverage, and terminal status; executed and reused checks; and any blockers, unreviewed repairs, or unverified behavior. Use short, plain prose without stock headings or repeated summaries. Save an execution report only on request.
 
 ## Temporary files
 

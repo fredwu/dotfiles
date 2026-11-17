@@ -39,3 +39,6 @@ dotfiles_root="${${(%):-%N}:A:h:h}"
 unset dotfiles_root
 
 . ~/.zsh_custom
+
+# Added by Kiri: its docker and kiri commands (kiri setup --uninstall removes this)
+case ":$PATH:" in *":$HOME/.kiri/bin:"*) ;; *) export PATH="$PATH:$HOME/.kiri/bin" ;; esac
