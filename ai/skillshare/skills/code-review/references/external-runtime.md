@@ -1,6 +1,6 @@
 # External review runtime
 
-Use this policy for every delegated review, including Codex, Claude, and Grok reviews and loops. [code-review](../SKILL.md) sets the review standard. [code-review-loop](../../code-review-loop/SKILL.md) owns assessment, repairs, rounds, and completion. These skills are instructions only: use existing tools, and do not build clients, wrappers, parsers, or validators.
+Use this policy for every delegated review, including Codex, Claude, Grok, and Gemini reviews and loops. [code-review](../SKILL.md) sets the review standard. [code-review-loop](../../code-review-loop/SKILL.md) owns assessment, repairs, rounds, and completion. These skills are instructions only: use existing tools, and do not build clients, wrappers, parsers, or validators.
 
 ## Select the runtime
 

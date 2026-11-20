@@ -11,7 +11,7 @@ Own assessment, repairs, verification, and completion. Read [code-review](../cod
 
 ## Coordinate review
 
-Every round reviews under [code-review](../code-review/SKILL.md). External loops (Codex, Claude, Grok) always delegate the reviewer. For an internal loop inside T3 Code, delegate each round as a fresh `delegate_task`; without T3 orchestration, delegating internal review is optional, so use a separate reviewer when independent scrutiny adds value. Delegated rounds follow the [external review runtime](../code-review/references/external-runtime.md) and [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md). Keep ownership clear, and join assigned work before you advance.
+Every round reviews under [code-review](../code-review/SKILL.md). External loops (Codex, Claude, Grok, Gemini) always delegate the reviewer. For an internal loop inside T3 Code, delegate each round as a fresh `delegate_task`; without T3 orchestration, delegating internal review is optional, so use a separate reviewer when independent scrutiny adds value. Delegated rounds follow the [external review runtime](../code-review/references/external-runtime.md) and [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md). Keep ownership clear, and join assigned work before you advance.
 
 Reviewers and repair agents reason from requirements and current evidence; they do not defer to each other's conclusions. Give later rounds only concise prior findings, responses, and open objections, as claims to verify; leave out unrelated repair history. Report reviewer independence accurately.
 

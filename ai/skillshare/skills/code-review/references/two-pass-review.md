@@ -21,6 +21,6 @@ An explicit model that the user names for a specific pass replaces that pass's f
 
 ## Limits and reporting
 
-Two passes are defined only for Codex and Claude. For another count, or a repeat request for Grok or internal review, ask before review starts; do not invent model families.
+Two passes are defined only for Codex and Claude. For another count, or a repeat request for Grok, Gemini, or internal review, ask before review starts; do not invent model families.
 
 Name each pass with its loop and family in progress markers, for example `Review: codex-review-loop (Astra) · ~P% overall`. Report the resolved model, status, and coverage of each pass separately.

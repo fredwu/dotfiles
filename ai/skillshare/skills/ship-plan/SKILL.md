@@ -20,6 +20,7 @@ Select exactly one plan-review loop:
 - Codex requested: [codex-review-loop](../codex-review-loop/SKILL.md).
 - Claude requested: [claude-review-loop](../claude-review-loop/SKILL.md).
 - Grok requested: [grok-review-loop](../grok-review-loop/SKILL.md).
+- Gemini requested: [gemini-review-loop](../gemini-review-loop/SKILL.md).
 - No external reviewer, including internal only: [code-review-loop](../code-review-loop/SKILL.md).
 
 A repeat request for Codex or Claude, such as `codex x 2` or `claude twice`, runs that loop as two sequential passes under [Two-pass review](../code-review/references/two-pass-review.md), for plan review and again in execution: Codex uses Sol, then Astra; Claude uses Opus, then Fable. An additional internal preference does not add a plan-review loop. Resolve competing external providers or an unnamed external reviewer before review starts. Confirm that the selected skills exist, and briefly state the plan-review loop and the execution review sequence.

@@ -1,6 +1,6 @@
 ---
 name: execute-plan
-description: Execute a supplied plan or work resolved from session context with final-pass after every phase, then internal review by default, a requested Codex/Claude/Grok review (Codex or Claude optionally in two passes), or both in that order, followed by a final final-pass. Interpret reviewer preferences from freeform user language.
+description: Execute a supplied plan or work resolved from session context with final-pass after every phase, then internal review by default, a requested Codex/Claude/Grok/Gemini review (Codex or Claude optionally in two passes), or both in that order, followed by a final final-pass. Interpret reviewer preferences from freeform user language.
 metadata:
   origin: custom
 ---
@@ -21,7 +21,7 @@ Complete the full plan or resolved scope in one autonomous session, unless the a
 Read reviewer preferences from the user's request in context. Do not require fixed argument positions, spelling, casing, or flags. A provider name that appears only in a plan path, an implementation requirement, or background context is not a reviewer preference.
 
 - No reviewer preference, or internal only: [code-review-loop](../code-review-loop/SKILL.md).
-- One external reviewer: only its loop. Codex selects [codex-review-loop](../codex-review-loop/SKILL.md), Claude selects [claude-review-loop](../claude-review-loop/SKILL.md), and Grok selects [grok-review-loop](../grok-review-loop/SKILL.md).
+- One external reviewer: only its loop. Codex selects [codex-review-loop](../codex-review-loop/SKILL.md), Claude selects [claude-review-loop](../claude-review-loop/SKILL.md), Grok selects [grok-review-loop](../grok-review-loop/SKILL.md), and Gemini selects [gemini-review-loop](../gemini-review-loop/SKILL.md).
 - Internal and an external reviewer: `code-review-loop` first, then the external loop, whatever the order in the request.
 - A repeat request for Codex or Claude, such as `codex x 2`, `claude x2`, or `codex twice`, makes that reviewer two sequential loop invocations under [Two-pass review](../code-review/references/two-pass-review.md): Codex uses Sol, then Astra; Claude uses Opus, then Fable.
 
