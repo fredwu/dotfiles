@@ -1,6 +1,6 @@
 ---
 name: ask-me
-description: Find the open decisions in the current context that need the user, ask only the ambiguous, critical, or hard-to-reverse ones with recommendations, record the answers for later skills such as write-plan, and update a plan in context when the questions were about it. Use on explicit invocation.
+description: Find the open decisions in the current context that need the user, ask only the ambiguous, critical, or hard-to-reverse ones with recommendations, record the answers for later skills such as write-plan, and update a plan in context when the questions were about it.
 metadata:
   origin: custom
 ---
@@ -48,6 +48,6 @@ When the context clearly identifies a plan and the questions were about that pla
 
 Read and apply [Plan standards](../write-plan/references/plan-standards.md) and [Resolve plan requirements](../write-plan/references/requirements.md). Read the whole plan, and edit it in place. If the plan exists only in the conversation, give the updated plan in the response.
 
-Integrate each user decision wherever it has an effect, update `## User requirements` and `## TL;DR`, and remove prose that the answers supersede. Put material agent decisions under the chosen direction or assumptions, not under user requirements. Change only what the answers affect; do not re-plan other parts. Read back the plan and its diff, and check for contradictions.
+Integrate each user decision wherever it has an effect, update `## User requirements` and `## TL;DR`, and remove prose that the answers supersede. Put material agent decisions under the chosen direction or assumptions, not under user requirements. Change only what the answers affect; do not re-plan other parts. When scope decisions add, remove, or materially resize phases, recheck phase numbering and effort shares so they stay consecutive and total 100%. Read back the plan and its diff, and check for contradictions.
 
 After the record, summarize the plan changes briefly.

@@ -13,9 +13,9 @@ Read and apply [Plan standards](references/plan-standards.md) and [Resolve plan 
 
 ## Original planning
 
-Before you investigate, exclude all other plans in the repository. Do not discover, read, search, compare, or reuse them, and do not derive requirements, decisions, structure, sequencing, or findings from them. Exclude plan files and directories from broad content searches. You can check whether a destination path exists, without reading existing plans.
+Before you investigate, exclude all peer or prior candidate and execution plans in the repository (such as `.local/*-plan*.md` and agent plan directories), unless the user explicitly supplies a specific plan as input. Do not discover, read, search, compare, or reuse excluded plans, and do not derive requirements, decisions, structure, sequencing, or findings from them. Exclude those plan files and directories from broad content searches without excluding domain code or non-plan documentation whose names happen to contain "plan". You can check whether a destination path exists, without reading existing plans.
 
-The exclusion also covers delegated research and review, and plan content in summaries, memory, or already-loaded context. Ground the plan in current user requirements, repository instructions, the actual implementation and tests, and non-plan documentation. When the requirements reference falls back to stored requirements or digests, it must not use other plans or plan-derived material.
+The exclusion also covers delegated research and review, and excluded plan content in summaries, memory, or already-loaded context. Ground the plan in current user requirements, repository instructions, the actual implementation and tests, and non-plan documentation. When the requirements reference falls back to stored requirements or digests, it must not use excluded plans or plan-derived material.
 
 ## Destination
 
@@ -23,11 +23,11 @@ Honor an explicit output path, and report a conflict instead of overwriting. Oth
 
 ## Coordinate agents
 
-Keep end-to-end reasoning, decisions, and plan writing in the main agent. Delegation is optional; use it when independent research, verification, or context isolation justifies the handoff cost, under the user's agent-routing instructions and [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md). Good assignments are independent evidence questions or separate components with stable interfaces. Inside T3 Code, use T3 delegation; otherwise use the harness's native controls. Do not substitute external reviewer services.
+Keep end-to-end reasoning, decisions, and plan writing in the main agent. Delegation is optional; use it when independent research, verification, or context isolation justifies the handoff cost, under the user's agent-routing instructions and [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md). Good assignments are independent evidence questions or separate components with stable interfaces. Inside T3 Code, use native subagent controls for same-provider `worker`/`fastworker` research when they satisfy the role settings, and T3 `delegate_task` when explicit options, isolation, or background execution are needed; outside T3 Code, use the harness's native controls. Do not substitute external reviewer services.
 
 Give each agent the outcome, a precise question, scope, relevant requirements and decisions, dependencies, acceptance criteria, and all read-only, authority, and original-planning exclusions. Ask for a compact result with source locations, evidence, assumptions, gaps, and exact check results. Continue non-overlapping work while agents run, reuse their evidence, and duplicate investigation only for deliberate corroboration.
 
-When independent scrutiny would expose missing requirements, weak evidence, or unsafe sequencing, run [code-review](../code-review/SKILL.md) once on the draft, with a short brief that names the draft and the requirements. The reviewer reads the draft and permitted repository evidence itself. Keep the draft unchanged during the review, and keep the original-planning exclusions. This does not authorize implementation or a review loop. Reconcile the findings against evidence, and report which draft was reviewed and what changed after. Without an independent reviewer, check the draft yourself and report that limit.
+When independent scrutiny would expose missing requirements, weak evidence, or unsafe sequencing, run [code-review](../code-review/SKILL.md) once on the draft (using the current session's provider, not an external reviewer), with a short brief that names the draft and the requirements. The reviewer reads the draft and permitted repository evidence itself. Keep the draft unchanged during the review, and keep the original-planning exclusions. This does not authorize implementation or a review loop. Reconcile the findings against evidence, and report which draft was reviewed and what changed after. Without an independent reviewer, check the draft yourself and report that limit.
 
 ## Investigate and decide
 

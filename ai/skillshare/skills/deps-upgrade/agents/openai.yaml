@@ -2,3 +2,5 @@ interface:
   display_name: "Dependency Upgrade"
   short_description: "Upgrade dependencies, runtimes, and environment versions"
   default_prompt: "Use $deps-upgrade to upgrade project dependencies and runtimes, align versions across local setup, CI, Docker, and deployment configuration, and fix resulting breakage."
+policy:
+  allow_implicit_invocation: true

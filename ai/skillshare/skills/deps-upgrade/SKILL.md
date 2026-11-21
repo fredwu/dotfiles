@@ -39,10 +39,6 @@ Run repository-required quality gates on the integrated result under the selecte
 
 Rerun outdated inventories and recheck version declarations and effective versions against the targets to catch stale pins. Inspect final diffs for coverage and canonical locks.
 
-Before the final report, run [final-pass](../final-pass/SKILL.md) on the complete integrated upgrade, including runtime and environment configuration. Follow its cleanup, full testing and quality checks, evidence-reuse, repair, and stop rules. A failed or blocked required check keeps the upgrade incomplete.
+Before the final report, run [final-pass](../final-pass/SKILL.md) on the complete integrated upgrade, including runtime and environment configuration. Follow its cleanup, full testing and quality checks, evidence-reuse, repair, stop, and [temporary-file](../final-pass/SKILL.md#temporary-files) rules. A failed or blocked required check keeps the upgrade incomplete.
 
 Report package and runtime upgrades, environment consistency, intentional differences, required migrations, held-back items with reasons, and material check results or gaps in short, plain prose. Distinguish local execution, container checks, and hosted CI/deployment evidence. Skip stock headings and repeated summaries; save a user report only if requested. An unavailable required check is not a pass.
-
-## Temporary files
-
-Keep scratch notes in context. Create a temporary file only when an agent needs it; track it, delete it after use (also after failure or abandonment), and verify the deletion. If a file must stay for continuing agent work, name its cleanup owner and report its path. Never delete requested deliverables (including `.local/` plans), pre-existing files, unrelated work, or shared directories.

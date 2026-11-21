@@ -27,6 +27,6 @@ Write a synthesis, not concatenated candidates. Remove duplicates, superseded an
 
 ## Save and respond
 
-Follow the plan file name rule with `<kind>` = `definitive-plan`. An explicit output path must be under `.local/`; normalize its stem to end in `-definitive-plan-<agent>`, completing a partial `-definitive` or `-definitive-plan` suffix or replacing another agent suffix.
+Follow the plan file name rule with `<kind>` = `definitive-plan`. An explicit output path must be under `.local/`; if the user gives a path outside `.local/`, ask before writing rather than relocating it silently. Under `.local/`, normalize its stem to end in `-definitive-plan-<agent>`, completing a partial `-definitive` or `-definitive-plan` suffix or replacing another agent suffix, and report a conflict instead of overwriting if that exact explicit path already exists (auto-named paths use `-v2`, `-v3` under the plan file name rule).
 
 Read back the saved plan. Check requirement accuracy and provenance, the TL;DR, phase numbering and effort shares, coverage, evidence, consistency, and executability. Respond under the plan standards, and name the base candidate.

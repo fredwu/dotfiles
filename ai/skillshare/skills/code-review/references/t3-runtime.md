@@ -4,7 +4,7 @@ Use T3's app-owned delegation for reviews whenever it is available. The [externa
 
 ## Launch
 
-1. Call `orchestrator_capabilities` for live provider, model, and option IDs.
+1. Call `orchestrator_capabilities` once per thread before the first `delegate_task` for live provider, model, and option IDs, and reuse that result across rounds and passes; re-read only after a launch or model error, a user-named provider change, or with `search` when a needed family or requested model is omitted from the cached short list.
 2. Select the model and effort under [Reviewer model and effort](reviewer-settings.md). Set `target.providerInstanceId`, `target.model`, and the effort in `target.options` explicitly. Do not change the main session or ambient configuration.
 3. Call `delegate_task` with the brief, `role: "review"`, `interactionMode: "default"`, and normally `isolation: "shared"`. `role: "review"` labels the purpose; it does not load a configured role. A worktree starts from the parent commit without uncommitted edits, so use `isolation: "worktree"` only when the target is fully committed.
 4. Use a fresh `delegate_task` for each round, with a distinct `clientRequestId` that stays the same across retries of that launch. Keep the `taskId`. Do not use top-level thread tools, and do not send review prompts to the task's `childThreadId`.
@@ -13,7 +13,7 @@ If a launch response is uncertain, retry with the same `clientRequestId` and ins
 
 ## Wait and assess
 
-Use async completion delivery or a yielding wait on the same task. Use `task_status` only when you need a result or a liveness check. A wait timeout does not cancel the task, and a task that waits for its children is still active. Cancel only owned work, and confirm it stopped before you launch a replacement.
+Use async completion delivery or a yielding wait on the same task, following the task's `next` instructions. Do not poll a running task with `task_status` before completion wakes you; call `task_status` only after completion delivery or when reconciling an interrupted or uncertain launch. A wait timeout does not cancel the task, and a task that waits for its children is still active. Cancel only owned work, and confirm it stopped before you launch a replacement.
 
 Answer child questions from existing authority and scope; do not add routine approval handoffs.
 

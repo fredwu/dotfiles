@@ -2,3 +2,5 @@ interface:
   display_name: "Write Plan"
   short_description: "Plan architecture, outcomes, and acceptance criteria"
   default_prompt: "Use $write-plan to investigate the brief read-only and save an evidence-backed architectural plan with current requirements, a TL;DR, outcome-based phases, and acceptance criteria; defer routine implementation details to execution."
+policy:
+  allow_implicit_invocation: true

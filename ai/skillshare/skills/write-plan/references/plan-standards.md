@@ -45,6 +45,6 @@ These rules apply when a skill creates a new plan; revising the current plan in 
 - `YYMMDD` is the current local date at creation, for example `261031` for 2026-10-31.
 - `<topic>` is a short kebab-case topic.
 - `<kind>` is set by the calling skill.
-- `<agent>` is the runtime: `claude`, `codex`, `grok`, or `agent` when unknown.
+- `<agent>` is the runtime: `claude`, `codex`, `gemini`, `grok`, or `agent` when unknown.
 
 On a collision, insert `-v2`, `-v3`, and so on before the agent suffix, and keep the date prefix. A new plan never overwrites an existing file.

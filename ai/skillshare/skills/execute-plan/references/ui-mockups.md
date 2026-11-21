@@ -18,7 +18,7 @@ Do not apply it to copy changes, small style fixes, bug fixes that keep the curr
 
 ## Select
 
-Render each mockup and examine a screenshot, not only its markup. Inside T3 Code, render with the preview tools; otherwise use an available browser tool. Score each direction on:
+Render each mockup and examine a screenshot, not only its markup. Inside T3 Code, render each static HTML mockup with `html_preview` (it returns a PNG without starting a server or opening a shared browser tab; do not call `html_render` or `preview_*` unless the user asks to view the mockups). Outside T3 Code, use an available browser or screenshot tool (such as Playwright). Score each direction on:
 
 - Fit to the task and to the user's goal.
 - Clarity of the visual hierarchy and of the primary action.
@@ -30,6 +30,6 @@ Select the best direction, or combine the strongest parts of several directions 
 
 ## Implement and check
 
-Implement the selected direction. Before the phase final-pass, render the real UI and compare it with the selected mockup. Correct material differences, or record why the implementation must differ.
+Implement the selected direction. Before the phase final-pass, render the real UI and compare it with the selected mockup. Inside T3 Code, use `preview_*` (closing any tab you opened when done) if browser verification is part of the user's request, `device_screenshot` for simulators/emulators, or an isolated browser tool (such as Playwright) for self-verification when the user did not ask for browser work; outside T3 Code, use Playwright or another available browser or device screenshot tool. Correct material differences, or record why the implementation must differ.
 
 Mockups are temporary files under [Temporary files](../SKILL.md#temporary-files). In the final report, give the selected direction in one line.

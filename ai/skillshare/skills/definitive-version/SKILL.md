@@ -13,7 +13,7 @@ Read and apply [Plan standards](../write-plan/references/plan-standards.md) and 
 
 ## Inputs
 
-Use exactly two distinct explicit paths to readable regular text files; ask for corrections instead of substituting files. Without paths, inspect only direct children of `.local/` at the repository root and find exactly two definitive plans for the same task by content and context. Ask for paths if the pair is not unique. Read both fully.
+Use exactly two distinct explicit paths to readable regular text files; ask for corrections instead of substituting files. Without paths, inspect only direct children of `.local/` at the repository root (the workspace root when there is no repository) and find exactly two definitive plans for the same task by content and context. Ask for paths if the pair is not unique. Read both fully.
 
 Establish the requirements from conversation context, or reconcile stored requirements and digests by meaning and provenance; identical wording, copied update histories, and missing originals are not blockers when intent is clear. Ask narrowly only about material unresolved scope or authority. For factual uncertainty, make a conditional selection.
 
