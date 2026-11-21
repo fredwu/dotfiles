@@ -1,6 +1,6 @@
 # Delegated review runtime
 
-Use this policy for every delegated review—both internal delegated reviews and external Codex, Claude, Grok, and Gemini reviews and loops. [code-review](../SKILL.md) sets the review standard. [code-review-loop](../../code-review-loop/SKILL.md) owns assessment, repairs, rounds, and completion. These skills are instructions only: use existing tools, and do not build clients, wrappers, parsers, or validators.
+Use this policy for every delegated review—both internal delegated reviews and external Codex, Claude, Grok, and Gemini reviews and loops. [code-review](../SKILL.md) sets the review standard. `code-review-loop` owns assessment, repairs, rounds, and completion. These skills are instructions only: use existing tools, and do not build clients, wrappers, parsers, or validators.
 
 ## Select the runtime
 
@@ -8,7 +8,7 @@ Prefer [T3's orchestrator](t3-runtime.md) whenever it is available, in any host 
 
 If T3 orchestration is absent, unsupported, or confirmed unavailable, use the harness's [ACP client](acp-runtime.md) and state the reason. Keep the same provider, model, options, repository, and scope, and confirm that earlier work stopped before you launch a replacement. If ACP cannot keep these, report the limit. Do not substitute a provider.
 
-Model-capacity, rate-limit, and provider API errors do not make T3 unavailable. Retry them in the same round under the [recovery policy](../../code-review-loop/SKILL.md#recover-failed-attempts). Do not change ambient configuration or transfer credentials.
+Model-capacity, rate-limit, and provider API errors do not make T3 unavailable. Retry them in the same round under the recovery policy (`code-review-loop`, `Recover failed attempts`). Do not change ambient configuration or transfer credentials.
 
 For every launch, apply [Reviewer model and effort](reviewer-settings.md).
 

@@ -263,7 +263,7 @@ test('the tracked intent bootstraps all runtime targets and detects replaced sha
   write(path.join(options.home, '.cua-driver/skills/cua-driver/SKILL.md'), '---\nname: cua-driver\ndescription: Fixture updater-owned skill\n---\nUse the updater.\n');
   const result = sync.synchronize({ ...options, bootstrap: true });
   assert.equal(result.external[0].action, 'ready');
-  for (const relative of ['.claude/skills', '.claude-gamma/skills', '.agents/skills', '.config/mimocode/skills']) {
+  for (const relative of ['.claude/skills', '.claude-gamma/skills', '.agents/skills', '.config/mimocode/skills', '.gemini/config/skills']) {
     assert(fs.lstatSync(path.join(options.home, relative, 'example')).isSymbolicLink());
     assert(fs.lstatSync(path.join(options.home, relative, 'cua-driver')).isSymbolicLink());
   }

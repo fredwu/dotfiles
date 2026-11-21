@@ -14,6 +14,10 @@
         "skills": {"path": "${home}/.config/mimocode/skills", "mode": "merge"},
         "agents": {"exclude": ["*"]}
       },
+      "antigravity": {
+        "skills": {"path": "${home}/.gemini/config/skills", "mode": "merge", "exclude": ["mimo-browser-use__*"]},
+        "agents": {"exclude": ["*"]}
+      },
       "claude": {
         "skills": {"path": "${home}/.claude/skills", "mode": "merge", "exclude": ["mimo-browser-use__*"]},
         "agents": {"path": "${home}/.claude/agents", "mode": "copy", "extension": "${root}/ai/skillshare/extensions/dotfiles-claude-agents"}

@@ -517,10 +517,14 @@ function synchronize(given) {
     // native sync can be retried without mistaking our own writes for local edits.
     config.writeState(options, { ...prepared.state, external: state.external });
     const migration = runtime.migrateRuntime(migrationOptions(options, intent));
-    progress('Checking plugins...');
+    progress('Preparing plugins...');
     const pluginResults = preparePlugins(options);
-    for (const change of external.changes.filter(c => c.kind === 'skill' && c.action === 'capture')) {
-      native(['install', change.path, '--name', change.name, '--update', '--json'], options);
+    const skillCaptures = external.changes.filter(c => c.kind === 'skill' && c.action === 'capture');
+    if (skillCaptures.length) {
+      progress('Updating external skills...');
+      for (const change of skillCaptures) {
+        native(['install', change.path, '--name', change.name, '--update', '--json'], options);
+      }
     }
     progress('Syncing skills and agents...');
     const targets = agentTargets(intent);

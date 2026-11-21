@@ -7,7 +7,7 @@ metadata:
 
 # Codex Review
 
-Run one read-only Codex review. Apply [code-review](../code-review/SKILL.md) for requirements, scope, evidence standards, and output, and the [external runtime](../code-review/references/external-runtime.md) for transport and handoff. Pass the shared review instructions to the reviewer.
+Run one read-only Codex review. Apply `code-review` for requirements, scope, evidence standards, and output, and the external runtime (`code-review/references/external-runtime.md`) for transport and handoff. Pass the shared review instructions to the reviewer.
 
 Prefer T3's orchestrator when available; otherwise use the Codex ACP peer under the shared fallback policy. Preserve the requested provider and explicit model/options. Do not substitute another provider.
 

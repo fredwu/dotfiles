@@ -7,11 +7,11 @@ metadata:
 
 # Code Review Loop
 
-Own assessment, repairs, verification, and completion. Read [code-review](../code-review/SKILL.md) and the original requirements. Keep the requested target, exclusions, authority, and unrelated work. Do not commit, push, publish comments, change branches, stash, reset, or clean the checkout without authorization.
+Own assessment, repairs, verification, and completion. Read `code-review` and the original requirements. Keep the requested target, exclusions, authority, and unrelated work. Do not commit, push, publish comments, change branches, stash, reset, or clean the checkout without authorization.
 
 ## Coordinate review
 
-Every round reviews under [code-review](../code-review/SKILL.md). External loops (Codex, Claude, Grok, Gemini) always delegate the reviewer. For an internal loop inside T3 Code, delegate each round as a fresh `delegate_task` on the current session's provider (resolved under [Reviewer model and effort](../code-review/references/reviewer-settings.md)); without T3 orchestration, delegating internal review is optional, so use a separate native reviewer when independent scrutiny adds value or when the main session's settings do not satisfy the reviewer policy. Delegated rounds follow the [delegated review runtime](../code-review/references/external-runtime.md) and [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md). Keep ownership clear, and join assigned work before you advance.
+Every round reviews under `code-review`. External loops (Codex, Claude, Grok, Gemini) always delegate the reviewer. For an internal loop inside T3 Code, delegate each round as a fresh `delegate_task` on the current session's provider (resolved under Reviewer model and effort (`code-review/references/reviewer-settings.md`)); without T3 orchestration, delegating internal review is optional, so use a separate native reviewer when independent scrutiny adds value or when the main session's settings do not satisfy the reviewer policy. Delegated rounds follow the delegated review runtime (`code-review/references/external-runtime.md`) and Subagent roles and reasoning (`execute-plan/references/subagent-reasoning.md`). Keep ownership clear, and join assigned work before you advance.
 
 Reviewers and repair agents reason from requirements and current evidence; they do not defer to each other's conclusions. Give later rounds only concise prior findings, responses, and open objections, as claims to verify; leave out unrelated repair history. Report reviewer independence accurately.
 
@@ -25,7 +25,7 @@ Reject unsupported claims, preferences, and scope expansion without routine user
 
 Group accepted defects by root cause. Before you edit, trace the affected ownership, boundaries, callers, data flow, and invariants, and choose a proportionate correction and its checks. Refactor when local patches would duplicate rules or leave the cause in place. Keep required behavior, data, explicit compatibility, and scope; do not add unrelated redesign or cleanup. Repair agents verify the diagnosis and approach independently, and return evidence for any disagreement instead of implementing a faulty request.
 
-Verify the original failure and surviving behavior across affected consumers. Add regression coverage when practical, do directly related cleanup, and inspect the combined diff. Apply [Check evidence and reuse](../final-pass/references/check-evidence.md): unaffected passing checks can stay valid, but an edited result still needs fresh review.
+Verify the original failure and surviving behavior across affected consumers. Add regression coverage when practical, do directly related cleanup, and inspect the combined diff. Apply Check evidence and reuse (`final-pass/references/check-evidence.md`): unaffected passing checks can stay valid, but an edited result still needs fresh review.
 
 If accepted defects persist after two repair stages, reassess the cumulative changes and shared invariants before the next edit, revise the repair plan, and use a bounded refactor when warranted. Repeated rejected suggestions do not trigger refactoring or scope expansion. This reassessment does not reset the round cap.
 
@@ -48,12 +48,12 @@ For a model-capacity, rate-limit, API, launch, transport, timeout, authenticatio
 
 Use up to three attempts per round unless the user says otherwise. For transient failures, follow retry-after guidance or use increasing delays within the budget. For configuration or access failures, fix the cause before you retry; stop as incomplete if required input or access is unavailable. A user cancellation stops work. Do not duplicate active calls or switch providers silently. If attempts or the time budget run out, report the failed round and blocker without advancing it or claiming that the round cap was reached.
 
-Track round and attempt separately. T3 launch keys and task replacement follow [T3 coordination](../code-review/references/t3-runtime.md); with ACP, use a fresh session after a confirmed failure. A permitted transport fallback stays in the same round and attempt budget.
+Track round and attempt separately. T3 launch keys and task replacement follow T3 coordination (`code-review/references/t3-runtime.md`); with ACP, use a fresh session after a confirmed failure. A permitted transport fallback stays in the same round and attempt budget.
 
 ## Finish
 
 The loop is clean when a complete broad review covers the final unchanged target, every finding has an evidence-backed disposition, no supported defect or material objection remains, and required checks pass. Verified repairs still need fresh review before a clean close.
 
-After the cap or a real blocker, hand the residual findings and missing coverage to [final-pass](../final-pass/SKILL.md) for authorized direct repair and verification. Keep the loop's actual capped or incomplete status, and identify repairs verified without fresh review. A cap ends this review invocation, not the authorized implementation work. Do not call direct inspection a clean review.
+After the cap or a real blocker, hand the residual findings and missing coverage to `final-pass` for authorized direct repair and verification. Keep the loop's actual capped or incomplete status, and identify repairs verified without fresh review. A cap ends this review invocation, not the authorized implementation work. Do not call direct inspection a clean review.
 
-During plan execution, follow [Completion and review checkpoints](../execute-plan/SKILL.md#completion-and-review-checkpoints). Report material findings, fixes, rejected claims with reasons, rounds used, checks, and limits concisely. Remove only task-owned scratch and verify the cleanup. Save reports or transcripts only on request.
+During plan execution, follow `execute-plan` (`Completion and review checkpoints`). Report material findings, fixes, rejected claims with reasons, rounds used, checks, and limits concisely. Remove only task-owned scratch and verify the cleanup. Save reports or transcripts only on request.

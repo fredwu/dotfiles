@@ -9,7 +9,7 @@ metadata:
 
 Compare the current plan with its peers, independently and read-only, and return findings that improve the current plan. Do not edit any plan or external state, or run checks that write artifacts. Keep comparison state in context.
 
-Read and apply [Plan standards](../write-plan/references/plan-standards.md) and [Resolve plan requirements](../write-plan/references/requirements.md).
+Read and apply Plan standards (`write-plan/references/plan-standards.md`) and Resolve plan requirements (`write-plan/references/requirements.md`).
 
 ## Inputs
 
@@ -25,7 +25,7 @@ Establish the current task under the requirements reference. Missing originals o
 
 Read every plan fully when practical. If you must sample, cover each plan's requirement-relevant conclusions, recommendations, caveats, and references, and disclose the limit. Assess requirement fit, correctness, shared omissions, contradictions, risks, dependencies, acceptance, executability, and conformance with the execution contract in the plan standards. Flag missing or conflicting checkpoint provisions and unsupported session breaks or confirmation handoffs, including ones all plans share.
 
-Verify finding premises against current source, configuration, schemas, contracts, tests, and other primary evidence, and cite precise locations. Reconcile differences in scope, version, assumptions, and behavior. Missing decisive evidence needs a condition or a specific gathering step, not a guess. You can delegate independent read-only evidence questions under [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md); reconcile the results before you conclude.
+Verify finding premises against current source, configuration, schemas, contracts, tests, and other primary evidence, and cite precise locations. Reconcile differences in scope, version, assumptions, and behavior. Missing decisive evidence needs a condition or a specific gathering step, not a guess. You can delegate independent read-only evidence questions under Subagent roles and reasoning (`execute-plan/references/subagent-reasoning.md`); reconcile the results before you conclude.
 
 For every material conflict, give each distinct position and the plans that hold it, and decide whether evidence supports the current plan, some peers, a combination, a conditional choice, none, or more investigation. Include conflicts among peers, and conflicts where the current plan is already right. Group each issue once across the set instead of pairwise, and name the plans that share a defect or omission, including all of them. Omit equivalent coverage, cosmetic differences, invented cleanup, and scope expansion.
 

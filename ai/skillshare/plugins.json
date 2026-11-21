@@ -7,7 +7,7 @@
       "nativeId": "context7@claude-plugins-official",
       "classification": "portable",
       "source": "https://github.com/anthropics/claude-plugins-official.git",
-      "sourceRef": "58267944f92187b7d6a1c822165c96c81c864806",
+      "sourceRef": "73c8cf3ea7e296057b467990f2f5d61b4c922260",
       "plugin": "context7"
     },
     {
@@ -16,7 +16,7 @@
       "nativeId": "frontend-design@claude-plugins-official",
       "classification": "portable",
       "source": "https://github.com/anthropics/claude-plugins-official.git",
-      "sourceRef": "58267944f92187b7d6a1c822165c96c81c864806",
+      "sourceRef": "f8c5e7a1dcb71b10cb74586224b5401f3de5db28",
       "plugin": "frontend-design"
     },
     {
@@ -39,7 +39,7 @@
       "nativeId": "skill-creator@claude-plugins-official",
       "classification": "portable",
       "source": "https://github.com/anthropics/claude-plugins-official.git",
-      "sourceRef": "58267944f92187b7d6a1c822165c96c81c864806",
+      "sourceRef": "73c8cf3ea7e296057b467990f2f5d61b4c922260",
       "plugin": "skill-creator"
     },
     {
@@ -69,7 +69,7 @@
       "nativeId": "security-guidance@claude-plugins-official",
       "classification": "portable",
       "source": "https://github.com/anthropics/claude-plugins-official.git",
-      "sourceRef": "af59ee3a1051a29dda4a2e7a2af221aa457ae08b",
+      "sourceRef": "73c8cf3ea7e296057b467990f2f5d61b4c922260",
       "plugin": "security-guidance"
     },
     {
@@ -85,7 +85,7 @@
       "nativeId": "elixir-phoenix@oliver-kriska",
       "classification": "portable",
       "source": "https://github.com/oliver-kriska/claude-elixir-phoenix.git",
-      "sourceRef": "268ac494838f97e2f1809b0674688d6efdc96719",
+      "sourceRef": "4621ae486f3ef3270cc5871685c9b13735ad5e60",
       "plugin": "elixir-phoenix"
     },
     {
@@ -94,7 +94,7 @@
       "nativeId": "pr-review-toolkit@claude-plugins-official",
       "classification": "portable",
       "source": "https://github.com/anthropics/claude-plugins-official.git",
-      "sourceRef": "58267944f92187b7d6a1c822165c96c81c864806",
+      "sourceRef": "f8c5e7a1dcb71b10cb74586224b5401f3de5db28",
       "plugin": "pr-review-toolkit"
     },
     {
@@ -103,7 +103,7 @@
       "nativeId": "claude-code-wakatime@wakatime",
       "classification": "portable",
       "source": "https://github.com/wakatime/claude-code-wakatime.git",
-      "sourceRef": "3915f4ec19d4fedf2a1a2a644f1138cd72e956da",
+      "sourceRef": "95eba979962ee195aef71eaffed3be812fb8c5f3",
       "plugin": "claude-code-wakatime"
     },
     {

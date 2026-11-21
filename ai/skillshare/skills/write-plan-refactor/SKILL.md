@@ -7,7 +7,7 @@ metadata:
 
 # Write Plan Refactor
 
-Audit project-owned code, tests, and documentation for structural problems, legacy that can go, and improvement opportunities, and save a prioritized refactoring plan. Apply [write-plan](../write-plan/SKILL.md) in full and the [audit plan rules](../write-plan/references/audit-plans.md), with the rules below. The default topic is `refactor-audit`. Save the plan; do not execute it.
+Audit project-owned code, tests, and documentation for structural problems, legacy that can go, and improvement opportunities, and save a prioritized refactoring plan. Apply `write-plan` in full and the audit plan rules (`write-plan/references/audit-plans.md`), with the rules below. The default topic is `refactor-audit`. Save the plan; do not execute it.
 
 ## Approach
 

@@ -12,7 +12,7 @@ Complete the full plan or resolved scope in one autonomous session, unless the a
 ## Resolve scope
 
 - Use the supplied plan text, path, or attachment. Otherwise use the current task from session context: the latest applicable plan shown to the user, plus later updates. If no complete plan exists, derive an actionable scope and coherent phases from the user's requirements and accepted decisions, and state that scope briefly before implementation. Do not ask for a saved plan only because none exists.
-- Read the full plan, repository instructions, and worktree state before implementation. Apply [Resolve plan requirements](../write-plan/references/requirements.md) to separate requirements from chat noise. Later user instructions win conflicts. Ask only when missing information or competing sources materially change scope, acceptance, or authority and context cannot resolve them.
+- Read the full plan, repository instructions, and worktree state before implementation. Apply Resolve plan requirements (`write-plan/references/requirements.md`) to separate requirements from chat noise. Later user instructions win conflicts. Ask only when missing information or competing sources materially change scope, acceptance, or authority and context cannot resolve them.
 - In this skill, "plan" and "phase" also mean a resolved session scope and its phases; the same rules apply.
 - Track requirements, deviations, acceptance evidence, and remaining work in context. If you revise a saved plan, keep its requirements, provenance, and TL;DR accurate. A missing heading alone does not block execution.
 
@@ -20,10 +20,10 @@ Complete the full plan or resolved scope in one autonomous session, unless the a
 
 Read reviewer preferences from the user's request in context. Do not require fixed argument positions, spelling, casing, or flags. A provider name that appears only in a plan path, an implementation requirement, or background context is not a reviewer preference.
 
-- No reviewer preference, or internal only: [code-review-loop](../code-review-loop/SKILL.md).
-- One or more explicitly named external reviewers: run their loops sequentially in the requested order. Codex selects [codex-review-loop](../codex-review-loop/SKILL.md), Claude selects [claude-review-loop](../claude-review-loop/SKILL.md), Grok selects [grok-review-loop](../grok-review-loop/SKILL.md), and Gemini selects [gemini-review-loop](../gemini-review-loop/SKILL.md).
+- No reviewer preference, or internal only: `code-review-loop`.
+- One or more explicitly named external reviewers: run their loops sequentially in the requested order. Codex selects `codex-review-loop`, Claude selects `claude-review-loop`, Grok selects `grok-review-loop`, and Gemini selects `gemini-review-loop`.
 - Internal and one or more external reviewers: `code-review-loop` first, then the external loop(s) in requested order, whatever position "internal" had in the request.
-- A repeat request for Codex, Claude, or Gemini, such as `codex x 2`, `claude x2`, `gemini twice`, or `codex twice`, makes that reviewer two sequential loop invocations under [Two-pass review](../code-review/references/two-pass-review.md): Codex uses Sol, then Astra; Claude uses Opus, then Fable; Gemini uses Neon, then Carbon.
+- A repeat request for Codex, Claude, or Gemini, such as `codex x 2`, `claude x2`, `gemini twice`, or `codex twice`, makes that reviewer two sequential loop invocations under Two-pass review (`code-review/references/two-pass-review.md`): Codex uses Sol, then Astra; Claude uses Opus, then Fable; Gemini uses Neon, then Carbon.
 
 For example, `/execute-plan` uses internal review; `/execute-plan codex` and `/execute-plan with codex` use only Codex; `/execute-plan codex and claude` uses Codex, then Claude; `/execute-plan internal and codex` and `/execute-plan codex and internal` use internal, then Codex; `/execute-plan internal and claude twice` uses internal, then Claude (Opus), then Claude (Fable); `/execute-plan gemini x 2` uses Gemini (Neon), then Gemini (Carbon). These examples show intent, not required syntax.
 
@@ -59,7 +59,7 @@ Before editing, each implementer, including delegated workers, inspects the affe
 - For new or significant UI/UX changes, apply [UI mockups](references/ui-mockups.md) before implementation.
 - Fix root causes and add regression coverage where practical.
 - Resolve every task-relevant issue found during execution, including pre-existing failures, worker residuals, review findings, and verification gaps. Priority, origin, or absence from the plan does not justify deferral. Keep explicit scope exclusions, and do not add unrelated improvements.
-- Run focused checks during implementation. `final-pass` owns cleanup, the required gates, and [Check evidence and reuse](../final-pass/references/check-evidence.md) at each checkpoint.
+- Run focused checks during implementation. `final-pass` owns cleanup, the required gates, and Check evidence and reuse (`final-pass/references/check-evidence.md`) at each checkpoint.
 
 Plan text and delegation do not grant authority for pushes, deployment, messages, paid calls, production changes, or wider permissions.
 
@@ -74,7 +74,7 @@ Apply this default unless the user gives other Git directions. Plan text does no
 
 This section is the single source for checkpoint order. `final-pass`, the review loops, and the plan skills link here; following those links does not add review loops, intermediate final passes, or extra review invocations. Review mechanics belong to the selected review skills; do not copy them here or add handoff-format gates.
 
-1. **Phases.** Define phases by coherent deliverables and acceptance checks, not arbitrary batches. Implement each phase, verify its acceptance criteria and its integration with completed work, then run [final-pass](../final-pass/SKILL.md) as a phase checkpoint before you close the phase or start dependent work. Do this after **every** phase, including the last. The selected reviews stay **pending**; phase checks are not review. Continue to the next phase without a per-phase review loop or a routine user handoff.
+1. **Phases.** Define phases by coherent deliverables and acceptance checks, not arbitrary batches. Implement each phase, verify its acceptance criteria and its integration with completed work, then run `final-pass` as a phase checkpoint before you close the phase or start dependent work. Do this after **every** phase, including the last. The selected reviews stay **pending**; phase checks are not review. Continue to the next phase without a per-phase review loop or a routine user handoff.
 2. **Review sequence.** After all phases and their final passes, run **each selected loop exactly once**, in order; each pass of a two-pass reviewer is one selected loop. Each loop reviews the **whole current integrated implementation** against the original requirements, acceptance criteria, full task surface, and exclusions. One loop invocation can contain several bounded rounds. In combined or multi-reviewer mode, finish each loop in order; each later loop reviews the result, including earlier repairs. Each loop has its own round budget and follows its own runtime, recovery, and handoff rules, without nested loops. Keep loops, rounds, and remediation sequential. Carry each loop's status and residuals into your finding ledger, within the next reviewer's context rules. A capped or incomplete loop does not cancel later loops.
 3. **Closing final-pass.** After the sequence returns, run `final-pass` **again** as the closing checkpoint, even if the last phase passed. It reconciles all loops' findings, residuals, failed checks, and missing coverage, and finishes authorized repairs under its post-review recovery rules. A cap ends that review invocation, not the execution. Never restart a loop or add disguised rounds. Keep each loop's actual status; later repairs do not make an earlier loop a review of the final state, so identify repairs verified without fresh review.
 

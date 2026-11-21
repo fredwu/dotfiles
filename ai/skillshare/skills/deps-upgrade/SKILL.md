@@ -17,7 +17,7 @@ Trace version declarations and effective versions across local version-manager f
 
 Check current official release and migration documentation for target versions, support status, runtime compatibility, and available platform images. Resolve the runtime, dependency, and image constraints together before edits; do not assume independently newest versions form a working stack.
 
-You can delegate independent applications or ecosystems under [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md). Keep shared locks, generated outputs, and coupled packages under one owner. Reconcile worker changes and verification before integration.
+You can delegate independent applications or ecosystems under Subagent roles and reasoning (`execute-plan/references/subagent-reasoning.md`). Keep shared locks, generated outputs, and coupled packages under one owner. Reconcile worker changes and verification before integration.
 
 ## Upgrade
 
@@ -39,6 +39,6 @@ Run repository-required quality gates on the integrated result under the selecte
 
 Rerun outdated inventories and recheck version declarations and effective versions against the targets to catch stale pins. Inspect final diffs for coverage and canonical locks.
 
-Before the final report, run [final-pass](../final-pass/SKILL.md) on the complete integrated upgrade, including runtime and environment configuration. Follow its cleanup, full testing and quality checks, evidence-reuse, repair, stop, and [temporary-file](../final-pass/SKILL.md#temporary-files) rules. A failed or blocked required check keeps the upgrade incomplete.
+Before the final report, run `final-pass` on the complete integrated upgrade, including runtime and environment configuration. Follow its cleanup, full testing and quality checks, evidence-reuse, repair, stop, and `Temporary files` rules. A failed or blocked required check keeps the upgrade incomplete.
 
 Report package and runtime upgrades, environment consistency, intentional differences, required migrations, held-back items with reasons, and material check results or gaps in short, plain prose. Distinguish local execution, container checks, and hosted CI/deployment evidence. Skip stock headings and repeated summaries; save a user report only if requested. An unavailable required check is not a pass.

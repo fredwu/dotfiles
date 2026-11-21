@@ -16,7 +16,7 @@ A saved plan stands alone, without chat history or comparison notes:
 
 ## Execution contract
 
-A plan completes in one autonomous execution session unless the user explicitly asks otherwise. It covers implementation, cleanup, and verification, and it uses [Completion and review checkpoints](../../execute-plan/SKILL.md#completion-and-review-checkpoints) for checkpoint order: `final-pass` after every phase, the selected review sequence over the whole integrated implementation, then a closing `final-pass`. Task-relevant issues found during execution are resolved in that session. Do not add per-phase review loops, and do not copy runtime, coverage, or check-evidence rules from the skills that own them.
+A plan completes in one autonomous execution session unless the user explicitly asks otherwise. It covers implementation, cleanup, and verification, and it uses `execute-plan` (`Completion and review checkpoints`) for checkpoint order: `final-pass` after every phase, the selected review sequence over the whole integrated implementation, then a closing `final-pass`. Task-relevant issues found during execution are resolved in that session. Do not add per-phase review loops, and do not copy runtime, coverage, or check-evidence rules from the skills that own them.
 
 Phases, milestones, checkpoints, size, complexity, risk, and copied schedules do not justify session breaks or routine confirmation handoffs. Keep concrete blockers and required authorization for the affected actions, and keep independent work executable.
 
@@ -24,7 +24,7 @@ Phases, milestones, checkpoints, size, complexity, risk, and copied schedules do
 
 Number implementation phases consecutively from `Phase 1` in their headings, so the executor can report `Phase N/T` progress. Do not number checkpoints, review loops, or pre-execution actions as phases. Give each phase an approximate effort share as a rounded percentage of implementation effort, with all phases totaling 100%, and add a few words on the basis when it is not obvious. These shares are estimates for progress reporting, not commitments or schedules.
 
-For a phase with a new or significant UI/UX change, record the UX goals and constraints, and mark the phase for [UI mockups](../../execute-plan/references/ui-mockups.md) at execution. Record a user-specified design as a requirement. Otherwise, do not draft mockups or select a visual design in the plan.
+For a phase with a new or significant UI/UX change, record the UX goals and constraints, and mark the phase for UI mockups (`execute-plan/references/ui-mockups.md`) at execution. Record a user-specified design as a requirement. Otherwise, do not draft mockups or select a visual design in the plan.
 
 ## Decisions and risk
 

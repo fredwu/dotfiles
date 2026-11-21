@@ -11,7 +11,7 @@ Close a checkpoint: check the full change set against the original request and l
 
 ## Checkpoint type
 
-- **Phase checkpoint**, during [plan execution](../execute-plan/SKILL.md#completion-and-review-checkpoints): finish phase acceptance, integration with completed phases, cleanup, and required checks, then return to the executor. The selected reviews stay pending and do not block this checkpoint.
+- **Phase checkpoint**, during plan execution (`execute-plan`, `Completion and review checkpoints`): finish phase acceptance, integration with completed phases, cleanup, and required checks, then return to the executor. The selected reviews stay pending and do not block this checkpoint.
 - **Closing checkpoint**: after the selected review sequence returns, or after the active loop ends at its cap or a concrete blocker. Do everything below, including post-review recovery.
 - **Standalone**: a final check outside plan execution. Do everything below except post-review recovery, unless a review loop has ended.
 
@@ -21,7 +21,7 @@ Review code, documentation, tests, and configuration in the checkpoint scope, in
 
 ## Post-review recovery
 
-While a review loop is active and has rounds left, it owns fresh review. Do not use this recovery to replace a required review; failed attempts follow the loop's [failure recovery](../code-review-loop/SKILL.md#recover-failed-attempts).
+While a review loop is active and has rounds left, it owns fresh review. Do not use this recovery to replace a required review; failed attempts follow the loop's failure recovery (`code-review-loop`, `Recover failed attempts`).
 
 When the loop has ended at its cap or a concrete blocker, list the missing coverage and the repairs no reviewer has seen, against the original target, acceptance criteria, and review lenses. Inspect that coverage directly and record the evidence in context. Do not retry the failed call, restart the loop, or add disguised review rounds. The checkpoint can close when this coverage and all required repairs and checks are complete. Report the loop's actual capped or incomplete status and the unreviewed repairs; this recovery does not make a clean loop result. If you cannot establish the coverage, keep the checkpoint incomplete.
 

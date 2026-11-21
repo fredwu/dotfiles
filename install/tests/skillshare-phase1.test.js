@@ -59,7 +59,7 @@ try {
   const yaml = m.parser(a);
   check('portable intent retains selected targets and separates Gamma and universal delivery', () => {
     const intent = m.loadIntent(a);
-    assert.deepEqual(Object.keys(intent.config.targets), ['Mimo', 'claude', 'claude-gamma', 'codex', 'grok', 'universal']);
+    assert.deepEqual(Object.keys(intent.config.targets), ['Mimo', 'antigravity', 'claude', 'claude-gamma', 'codex', 'grok', 'universal']);
     assert.equal(intent.config.targets.codex.skills.enabled, false);
     assert.equal(intent.config.targets.grok.skills.enabled, false);
     assert.equal(intent.config.targets['claude-gamma'].agent, 'claude');
@@ -208,7 +208,7 @@ try {
     assert(!fs.existsSync(path.join(a.home, '.grok/agents/worker.md')));
     assert(!fs.existsSync(path.join(a.home, '.agents/agents/worker.md')));
     native(a, ['sync', '--json', '-g']);
-    for (const rel of ['.claude/skills/example', '.claude-gamma/skills/example', '.agents/skills/example', '.config/mimocode/skills/example']) {
+    for (const rel of ['.claude/skills/example', '.claude-gamma/skills/example', '.agents/skills/example', '.config/mimocode/skills/example', '.gemini/config/skills/example']) {
       assert(fs.lstatSync(path.join(a.home, rel)).isSymbolicLink());
     }
     assert(!fs.existsSync(path.join(a.home, '.codex/skills/example')));

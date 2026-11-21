@@ -7,7 +7,7 @@ metadata:
 
 # Write Plan Perf
 
-Audit the app's runtime performance and the test suite's value and speed, and save a prioritized plan. Apply [write-plan](../write-plan/SKILL.md) in full and the [audit plan rules](../write-plan/references/audit-plans.md), with the rules below. The default topic is `perf-audit`. Save the plan; do not execute it.
+Audit the app's runtime performance and the test suite's value and speed, and save a prioritized plan. Apply `write-plan` in full and the audit plan rules (`write-plan/references/audit-plans.md`), with the rules below. The default topic is `perf-audit`. Save the plan; do not execute it.
 
 ## Measure
 

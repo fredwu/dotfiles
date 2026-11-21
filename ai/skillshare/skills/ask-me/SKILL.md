@@ -46,7 +46,7 @@ Keep the record in the conversation. Write it to a file only when the user asks.
 
 When the context clearly identifies a plan and the questions were about that plan, update the plan when there are no more questions. Do not wait for the user to ask. If a plan seems relevant but it is not clear which plan, do not guess. Say in the record that you did not update it, and why.
 
-Read and apply [Plan standards](../write-plan/references/plan-standards.md) and [Resolve plan requirements](../write-plan/references/requirements.md). Read the whole plan, and edit it in place. If the plan exists only in the conversation, give the updated plan in the response.
+Read and apply Plan standards (`write-plan/references/plan-standards.md`) and Resolve plan requirements (`write-plan/references/requirements.md`). Read the whole plan, and edit it in place. If the plan exists only in the conversation, give the updated plan in the response.
 
 Integrate each user decision wherever it has an effect, update `## User requirements` and `## TL;DR`, and remove prose that the answers supersede. Put material agent decisions under the chosen direction or assumptions, not under user requirements. Change only what the answers affect; do not re-plan other parts. When scope decisions add, remove, or materially resize phases, recheck phase numbering and effort shares so they stay consecutive and total 100%. Read back the plan and its diff, and check for contradictions.
 

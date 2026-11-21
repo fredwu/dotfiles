@@ -223,6 +223,41 @@ test('preparePlugins reuses a single bulk plugin preview across multiple bound p
   assert.deepEqual(sync.preparePlugins(options).map(item => item.action), ['managed', 'managed']);
   const listCalls = calls(options).slice(before).filter(call => call.bin === 'claude' && call.args.join(' ') === 'plugin list --json');
   assert.equal(listCalls.length, 1);
+
+  const realSkillshare = options.skillshare;
+  const shim = path.join(options.home, 'bin/skillshare-blocked-bulk');
+  const shimLog = path.join(options.home, 'bulk-fallback.jsonl');
+  write(shim, `#!${process.execPath}
+'use strict';
+const { execFileSync } = require('node:child_process');
+const fs = require('node:fs');
+const args = process.argv.slice(2);
+fs.appendFileSync(${JSON.stringify(shimLog)}, JSON.stringify(args) + '\\n');
+if (args[0] === 'sync' && args[1] === 'plugins' && args[2] === '--dry-run') {
+  process.stdout.write(JSON.stringify({ blocked: true, changes: [] }) + '\\n');
+  process.exit(1);
+}
+if (args[0] === 'sync' && args[1] === 'plugins' && args[2] === 'demo') {
+  process.stdout.write(JSON.stringify({ blocked: true, changes: [] }) + '\\n');
+  process.exit(0);
+}
+try {
+  const out = execFileSync(${JSON.stringify(realSkillshare)}, args, { encoding: 'utf8' });
+  process.stdout.write(out);
+} catch (error) {
+  if (error.stdout) process.stdout.write(error.stdout);
+  if (error.stderr) process.stderr.write(error.stderr);
+  process.exit(error.status || 1);
+}
+`);
+  fs.chmodSync(shim, 0o700);
+  const fallbackOptions = { ...options, skillshare: shim };
+  assert.deepEqual(sync.preparePlugins(fallbackOptions).map(item => item.action), ['hold', 'managed']);
+  const shimCalls = fs.readFileSync(shimLog, 'utf8').trim().split('\n').map(JSON.parse);
+  assert.deepEqual(
+    shimCalls.filter(args => args[0] === 'sync' && args[1] === 'plugins').map(args => args[2]),
+    ['--dry-run', 'demo', 'demo-two'],
+  );
 });
 
 test('rebuild refuses native import substitution, dry-run is pure, and local adoption never runs a CLI', () => {

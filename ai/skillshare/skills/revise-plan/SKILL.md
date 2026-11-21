@@ -9,7 +9,7 @@ metadata:
 
 Revise the current plan in place from the latest `compare-plans` result and any user guidance. Edit only that plan, and keep verification read-only. Write to another path only on explicit user direction.
 
-Read and apply [Plan standards](../write-plan/references/plan-standards.md) and [Resolve plan requirements](../write-plan/references/requirements.md).
+Read and apply Plan standards (`write-plan/references/plan-standards.md`) and Resolve plan requirements (`write-plan/references/requirements.md`).
 
 ## Resolve inputs
 

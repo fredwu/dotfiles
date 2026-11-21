@@ -75,7 +75,8 @@ therefore visible through existing links, and sync reconciles additions and
 removals. Vendor-local skills stay in their owning runtime. Codex and Grok read
 the shared universal directory (`~/.agents/skills`); their own skill directories
 remain available for vendor content without duplicate shared delivery. Primary
-Claude, Claude Gamma (`~/.claude-gamma`), and Mimo have separate merge targets.
+Claude, Claude Gamma (`~/.claude-gamma`), Antigravity
+(`~/.gemini/config/skills`), and Mimo have separate merge targets.
 `mimo-browser-use` is for Mimo only; target `exclude` filters keep it out of the
 other targets, and managed sync honours those filters. Gamma has its own skills
 and agents folders; account-local files do not leak through a shared

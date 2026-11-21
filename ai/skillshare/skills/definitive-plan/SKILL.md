@@ -9,7 +9,7 @@ metadata:
 
 Audit two or more candidate plans, choose the strongest as the base, correct it independently, and save one complete synthesis. Discovery and verification are read-only. The only permitted change is the new plan file and its `.local/` directory; do not edit candidates, implementation, or external state.
 
-Read and apply [Plan standards](../write-plan/references/plan-standards.md) and [Resolve plan requirements](../write-plan/references/requirements.md).
+Read and apply Plan standards (`write-plan/references/plan-standards.md`) and Resolve plan requirements (`write-plan/references/requirements.md`).
 
 ## Candidates and requirements
 
@@ -19,7 +19,7 @@ Prefer conversation context for requirements. When it is incomplete, reconcile t
 
 ## Audit and synthesize
 
-Assess the candidates symmetrically against the requirements: correctness, evidence, shared omissions, contradictions, risks, dependencies, prioritization, acceptance, executability, and the execution contract. Independently verify material claims that you can check safely; agreement between candidates is not proof. Label unavailable evidence. You can delegate independent read-only audits under [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md); reconcile their results and make the final selection yourself.
+Assess the candidates symmetrically against the requirements: correctness, evidence, shared omissions, contradictions, risks, dependencies, prioritization, acceptance, executability, and the execution contract. Independently verify material claims that you can check safely; agreement between candidates is not proof. Label unavailable evidence. You can delegate independent read-only audits under Subagent roles and reasoning (`execute-plan/references/subagent-reasoning.md`); reconcile their results and make the final selection yourself.
 
 Use the strongest overall candidate as the base. Resolve conflicts from requirements and evidence: adopt better positions, combine compatible ideas, state justified conditions, or reject every candidate's answer. Keep required behavior and explicit compatibility.
 

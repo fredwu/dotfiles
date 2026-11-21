@@ -9,7 +9,7 @@ Use T3's app-owned delegation for reviews whenever it is available. The [externa
 3. Call `delegate_task` with the brief, `role: "review"`, `interactionMode: "default"`, and normally `isolation: "shared"`. `role: "review"` labels the purpose; it does not load a configured role. A worktree starts from the parent commit without uncommitted edits, so use `isolation: "worktree"` only when the target is fully committed.
 4. Use a fresh `delegate_task` for each round, with a distinct `clientRequestId` that stays the same across retries of that launch. Keep the `taskId`. Do not use top-level thread tools, and do not send review prompts to the task's `childThreadId`.
 
-If a launch response is uncertain, retry with the same `clientRequestId` and inspect the task before you assume failure. A replacement for a confirmed failed or stopped task needs a fresh task and launch key in the same round, under the [loop recovery policy](../../code-review-loop/SKILL.md#recover-failed-attempts).
+If a launch response is uncertain, retry with the same `clientRequestId` and inspect the task before you assume failure. A replacement for a confirmed failed or stopped task needs a fresh task and launch key in the same round, under the loop recovery policy (`code-review-loop`, `Recover failed attempts`).
 
 ## Wait and assess
 

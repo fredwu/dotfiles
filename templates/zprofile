@@ -34,6 +34,7 @@ fi
 export EDITOR='nvim'
 export VISUAL='nvim'
 export PAGER='less'
+export SKILLSHARE_THEME='dark'
 
 #
 # Language
