@@ -206,6 +206,25 @@ test('managed plugin preparation recognizes the native alias created by clean-ho
   assert(calls(options).slice(before).every(call => call.bin !== 'git' && (call.args[0] === '--version' || call.args.includes('list'))));
 });
 
+test('preparePlugins reuses a single bulk plugin preview across multiple bound plugins', () => {
+  const options = config.paths({ ...fixture(false), depsDir: process.env.SKILLSHARE_TEST_DEPS || path.join(repository, '.local/skillshare-node') });
+  const upstream = path.join(options.home, 'upstream');
+  write(path.join(upstream, '.claude-plugin/marketplace.json'), {
+    name: 'team',
+    plugins: [{ name: 'demo', source: './demo' }, { name: 'demo-two', source: './demo-two' }],
+  });
+  write(path.join(upstream, 'demo-two/.claude-plugin/plugin.json'), { name: 'demo-two', version: '1.2.3', description: 'Second fixture plugin' });
+  const second = { ...recipe, name: 'demo-two', nativeId: 'demo-two@team', plugin: 'demo-two' };
+  options.pluginsFile = path.join(options.home, 'portable-plugins.json');
+  write(options.pluginsFile, { version: 1, plugins: [recipe, second] });
+  const sync = require('../lib/skillshare-sync');
+  assert.deepEqual(sync.preparePlugins({ ...options, bootstrap: true }).map(item => item.action), ['add', 'add']);
+  const before = calls(options).length;
+  assert.deepEqual(sync.preparePlugins(options).map(item => item.action), ['managed', 'managed']);
+  const listCalls = calls(options).slice(before).filter(call => call.bin === 'claude' && call.args.join(' ') === 'plugin list --json');
+  assert.equal(listCalls.length, 1);
+});
+
 test('rebuild refuses native import substitution, dry-run is pure, and local adoption never runs a CLI', () => {
   const options = fixture();
   const before = runtime.inventory(options.home);

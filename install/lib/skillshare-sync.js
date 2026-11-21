@@ -383,19 +383,32 @@ function preparePlugins(options) {
   const file = options.pluginsFile || path.join(options.root, 'ai/skillshare/plugins.json');
   if (!fs.existsSync(file)) return [];
   const packages = yamlValue(options.configFile, options).plugins?.packages || {};
+  const settings = path.join(options.home, '.claude/settings.json');
+  const claudeEnablement = fs.existsSync(settings) ? JSON.parse(fs.readFileSync(settings, 'utf8')).enabledPlugins : {};
+  let bulkPlan;
+  let bulkChecked = false;
+  const previewFor = recipe => {
+    if (!bulkChecked) {
+      bulkChecked = true;
+      const bulk = native(['sync', 'plugins', '--dry-run', '--json'], { ...options, dryRun: false }, true);
+      const candidate = bulk.data?.plan || bulk.data;
+      if (bulk.status === 0 && candidate && !candidate.blocked && Array.isArray(candidate.changes)) bulkPlan = candidate;
+    }
+    if (bulkPlan) return bulkPlan;
+    const preview = native(['sync', 'plugins', recipe.name, '--dry-run', '--json'], { ...options, dryRun: false }).data;
+    return preview.plan || preview;
+  };
   return plugins.loadPlugins(file).plugins.map(recipe => {
     const summary = { name: recipe.name, target: recipe.target };
     if (recipe.classification === 'local') return { ...summary, action: 'local', reason: recipe.reason };
     // Shared intent lives in config; installed identity and commit come from the native sync preview.
     const binding = packages[recipe.name]?.bindings?.[recipe.target];
-    const settings = path.join(options.home, '.claude/settings.json');
-    const enablement = recipe.target === 'claude' && fs.existsSync(settings) ? JSON.parse(fs.readFileSync(settings, 'utf8')).enabledPlugins : {};
+    const enablement = recipe.target === 'claude' ? claudeEnablement : {};
     const disabled = { ...summary, action: 'local', reason: 'Native plugin is disabled; preserve the local selection.' };
     if (binding?.sync === false || enablement?.[recipe.nativeId] === false) return disabled;
     let plan, selected;
     if (binding) {
-      const preview = native(['sync', 'plugins', recipe.name, '--dry-run', '--json'], { ...options, dryRun: false }).data;
-      plan = preview.plan || preview;
+      plan = previewFor(recipe);
       selected = plan.changes?.find(change => change.target === recipe.target && change.name === recipe.name);
     }
     const effective = selected?.binding || {};
@@ -441,6 +454,8 @@ function migrationOptions(options, intent) {
 
 function synchronize(given) {
   let options = config.paths(given);
+  const progress = message => options.onProgress?.(message);
+  progress('Checking Skillshare intent and external resources...');
   config.requireSupportedSkillshare(options);
   const intent = config.loadIntent(options);
   const state = config.readState(options);
@@ -464,6 +479,7 @@ function synchronize(given) {
     allowInlineMigration: inline && (!!options.bootstrap || !!state.projections.config) };
   if (options.dryRun) {
     const prepared = config.prepare(preparation);
+    progress('Checking plugins...');
     return { dryRun: true, external: external.changes, migration: options.bootstrap ? runtime.migrateRuntime(migrationOptions(options, intent)) : undefined,
       plugins: preparePlugins(options),
       mcp: { blocked: blocked.map(change => change.name), omittedDefaults: intent.metadata.omittedMcpDefaults, omitted: prepared.mcp.omitted },
@@ -501,10 +517,12 @@ function synchronize(given) {
     // native sync can be retried without mistaking our own writes for local edits.
     config.writeState(options, { ...prepared.state, external: state.external });
     const migration = runtime.migrateRuntime(migrationOptions(options, intent));
+    progress('Checking plugins...');
     const pluginResults = preparePlugins(options);
     for (const change of external.changes.filter(c => c.kind === 'skill' && c.action === 'capture')) {
       native(['install', change.path, '--name', change.name, '--update', '--json'], options);
     }
+    progress('Syncing skills and agents...');
     const targets = agentTargets(intent);
     runtime.renderAgents({ ...options, targets });
     assertSkillLinks(options, intent);
@@ -512,6 +530,7 @@ function synchronize(given) {
     assertSkillLinks(options, intent, true);
     const agents = runtime.syncNativeAgents({ ...options, targets });
     assertInputsUnchanged(options, intent, external);
+    progress('Syncing MCP...');
     const pending = external.changes.filter(change => change.kind === 'mcp' && change.action === 'pending');
     const mcp = blockedNames.size ? { changes: [], blocked: [...blockedNames] } : syncMcp(options);
     config.prepare({ ...preparation, state: prepared.state });
