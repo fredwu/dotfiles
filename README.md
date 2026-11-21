@@ -58,7 +58,7 @@ owned fields. Change owned settings here, then run:
 Run `./install.sh` for initial setup. Its Skillshare step uses
 `./scripts/skillshare-sync --bootstrap` to adopt the existing configuration and
 migrate the old directory links. Bootstrap keeps verified backups before it
-moves vendor files or replaces generated agents. The managed command requires
+moves vendor files. The managed command requires
 the parser installed by bootstrap.
 Existing configurations require `--bootstrap` for their first adoption.
 Bootstrap stops before replacing a different external MCP source; migrate that
@@ -66,8 +66,7 @@ source deliberately first so its unrelated servers stay managed. The declared
 `sources.mcp` must match the generated MCP file.
 An interrupted migration that already recorded its owned settings can resume
 through the normal command. If a native MCP conflict blocks legacy migration,
-its staged source and ownership records are restored while skills and agents
-continue.
+its staged source and ownership records are restored while skills continue.
 
 Skills live in `ai/skillshare/skills`. Runtime skill directories are real
 folders; merge mode creates a link for each maintained skill. Source edits are
@@ -79,7 +78,7 @@ Claude, Claude Gamma (`~/.claude-gamma`), Antigravity
 (`~/.gemini/config/skills`), and Mimo have separate merge targets.
 `mimo-browser-use` is for Mimo only; target `exclude` filters keep it out of the
 other targets, and managed sync honours those filters. Gamma has its own skills
-and agents folders; account-local files do not leak through a shared
+folder; account-local files do not leak through a shared
 whole-directory link. Catalog changes may require a new session.
 Merge mode cannot prevent writes through links: edit shared skills here and
 keep vendor installs in real local folders.
@@ -91,17 +90,6 @@ vendors and are updated from upstream. List the custom skills with:
 ```sh
 grep -lx '  origin: custom' ai/skillshare/skills/*/SKILL.md
 ```
-
-Shared agents use neutral templates in `ai/skillshare/agents` and native
-conversion extensions in `ai/skillshare/extensions`. Provider models and effort
-values are defined only in `ai/skillshare/agent-models.json`, except that Codex,
-Claude, Grok, and Gemini reviews select the newest model of a named family (see
-`ai/skillshare/skills/code-review/references/reviewer-settings.md`). Managed sync
-validates and renders them before native publication, verifies the output, and
-restores backed-up agents if publication fails. Primary Claude, Gamma, and
-Codex receive converted files. Edit the templates or model map; direct edits
-to generated files are backed up and replaced. Native status and dry-run do
-not execute converters, so status alone cannot detect a model-map change.
 
 `ai/skillshare/mcp.json` holds portable shared MCP definitions. The command
 resolves executable bindings into one real local
@@ -130,13 +118,13 @@ A local last-applied record distinguishes a vendor update from a Git update.
 If only the vendor input changes, the portable source updates. If another
 computer has newer tracked MCP content, the older computer holds that resource
 at its last local baseline until its vendor is updated. If both sides differ,
-MCP publication stops for a source choice; skills and agents still sync, and
+MCP publication stops for a source choice; skills still sync, and
 the command reports blocked MCP names with a failing exit status. Resolve the
 choice by making the selected portable definition and vendor input agree.
 Missing external entries on fresh setups remain pending while other servers
 publish. If a previously managed entry disappears, the native MCP plan is held
-to avoid recreating it and mistaking it for a vendor update. Skills and agents
-still sync. No version comparison,
+to avoid recreating it and mistaking it for a vendor update. Skills still sync.
+No version comparison,
 watcher, automatic upstream update, or automatic commit is involved.
 
 MCP previews must match the selected destinations and their native file paths,
@@ -148,8 +136,8 @@ client-directory overrides and use the declared account paths. The caller's
 environment stays unchanged. A stopped process's lock is recovered;
 an active sync keeps its lock.
 
-The Skillshare dashboard and raw CLI do not run external refresh or the agent
-recovery checks. Use the managed command after vendor updates and when onboarding
+The Skillshare dashboard and raw CLI do not run external refresh or managed sync
+checks. Use the managed command after vendor updates and when onboarding
 a destination. Native `install`, `update`, and `uninstall` remain the explicit
 workflow for ordinary upstream skills. Review and commit tracked changes.
 The upstream Godot `first-index` diagnostic can misread a hardened uv resolver
@@ -199,7 +187,7 @@ repeatable and then performs the normal install.
 - Hack Nerd Font
 - Git, GnuPG, direnv, fzf, zoxide, ripgrep, fd, Node.js, mise, and related build tools
 - Grok, Codex, and Claude Code CLI casks on macOS
-- Skillshare, with shared skills and agents stored in this repository
+- Skillshare, with shared skills stored in this repository
 - Shared instructions for Claude Code, Codex, and Grok
 
 Homebrew installs the same command-line formulae on macOS and Linux, under

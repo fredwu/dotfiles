@@ -378,58 +378,6 @@ test_skillshare_bootstrap_missing_tools() {
   finish_test "Skillshare requires its CLI, Node, and npm before preparation"
 }
 
-test_shared_agents_are_provider_neutral() {
-  local agent_file="$TEST_ROOT/ai/skillshare/agents/fastworker.md"
-  local claude_output="$HOME/fastworker.md"
-  local codex_output="$HOME/fastworker.toml"
-  local source
-
-  for source in "$TEST_ROOT/ai/skillshare/agents/"*.md; do
-    [[ -e "$source" ]] || continue
-    if awk '
-      NR == 1 { next }
-      $0 == "---" { exit }
-      /^(model|effort):/ { found = 1 }
-      END { exit found ? 0 : 1 }
-    ' "$source"; then
-      fail "shared agent frontmatter should not select a provider model: $source"
-    fi
-  done
-
-  env -u NODE_OPTIONS node \
-    "$TEST_ROOT/ai/skillshare/extensions/dotfiles-agent-transform/validate.js" \
-    "$TEST_ROOT/ai/skillshare/agents"
-  SS_REL_PATH=fastworker.md env -u NODE_OPTIONS node \
-    "$TEST_ROOT/ai/skillshare/extensions/dotfiles-claude-agents/convert.js" \
-    < "$agent_file" > "$claude_output"
-  SS_REL_PATH=fastworker.md env -u NODE_OPTIONS node \
-    "$TEST_ROOT/ai/skillshare/extensions/dotfiles-codex-agents/convert.js" \
-    < "$agent_file" > "$codex_output"
-
-  env -u NODE_OPTIONS node - "$TEST_ROOT/ai/skillshare/agent-models.json" \
-    "$claude_output" "$codex_output" <<'NODE'
-const assert = require("node:assert/strict");
-const fs = require("node:fs");
-const [mapPath, claudePath, codexPath] = process.argv.slice(2);
-const expected = JSON.parse(fs.readFileSync(mapPath, "utf8")).fastworker;
-for (const [provider, outputPath, separator] of [
-  ["claude", claudePath, ": "],
-  ["codex", codexPath, " = "],
-]) {
-  const lines = fs.readFileSync(outputPath, "utf8").split("\n");
-  for (const [field, value] of Object.entries(expected[provider])) {
-    assert.ok(
-      lines.includes(`${field}${separator}${JSON.stringify(value)}`),
-      `${provider} generation should use the mapped ${field}`,
-    );
-  }
-}
-NODE
-  assert_false "generated agents should not include a service tier" \
-    grep -q 'service_tier' "$codex_output"
-  finish_test "neutral agents generate provider-specific model settings"
-}
-
 test_repository_path_with_spaces() {
   local source_root=$TEST_ROOT
   local DOTFILES_ROOT="$HOME/repository with spaces"
@@ -439,8 +387,7 @@ test_repository_path_with_spaces() {
 
   mkdir -p "$DOTFILES_ROOT/config/nvim" "$DOTFILES_ROOT/zsh" \
     "$DOTFILES_ROOT/ai/shared" \
-    "$DOTFILES_ROOT/ai/skillshare/skills/example" \
-    "$DOTFILES_ROOT/ai/skillshare/agents"
+    "$DOTFILES_ROOT/ai/skillshare/skills/example"
   printf 'repository skill\n' > "$DOTFILES_ROOT/ai/skillshare/skills/example/SKILL.md"
   printf 'instructions\n' > "$DOTFILES_ROOT/ai/shared/AGENTS.md"
   cp -R "$source_root/templates" "$DOTFILES_ROOT/"
@@ -706,7 +653,6 @@ new_home; test_skillshare_bootstrap_dependency_failure
 new_home; test_skillshare_bootstrap_command_failure
 new_home; test_skillshare_bootstrap_preflight
 new_home; test_skillshare_bootstrap_missing_tools
-new_home; test_shared_agents_are_provider_neutral
 new_home; test_repository_path_with_spaces
 new_home; test_ai_config_directories_preserve_provider_data
 new_home; test_legacy_ai_symlink_is_reversed

@@ -16,8 +16,8 @@ function fixture(name) {
   const home = path.join(temporary, name, 'home with spaces');
   const fixtureRoot = path.join(temporary, name, 'repo with spaces');
   fs.mkdirSync(home, { recursive: true });
-  for (const relative of ['ai/skillshare/intent.json', 'ai/skillshare/mcp.json', 'ai/skillshare/agent-models.json',
-    'ai/skillshare/agents', 'ai/skillshare/extensions', 'install/skillshare-deps']) {
+  for (const relative of ['ai/skillshare/intent.json', 'ai/skillshare/mcp.json',
+    'install/skillshare-deps']) {
     const dest = path.join(fixtureRoot, relative);
     fs.mkdirSync(path.dirname(dest), { recursive: true });
     fs.cpSync(path.join(root, relative), dest, { recursive: true });
@@ -189,24 +189,7 @@ try {
     assert.equal(again.mcp.changed, false);
     assert.equal(again.config.text, fs.readFileSync(p.paths.configFile, 'utf8'));
   });
-  check('native account targets execute the configured converters and exclude neutral delivery', () => {
-    const p = m.paths(a);
-    // Converters resolve the shared map from their repository location.
-    for (const name of ['dotfiles-agent-transform', 'dotfiles-claude-agents', 'dotfiles-codex-agents']) {
-      const dest = path.join(p.configDir, 'extensions', name);
-      fs.mkdirSync(dest, { recursive: true });
-      for (const entry of fs.readdirSync(path.join(a.root, 'ai/skillshare/extensions', name))) {
-        fs.symlinkSync(path.join(a.root, 'ai/skillshare/extensions', name, entry), path.join(dest, entry));
-      }
-    }
-    native(a, ['sync', 'agents', '--json', '-g']);
-    for (const account of ['.claude', '.claude-gamma']) {
-      assert(fs.readFileSync(path.join(a.home, account, 'agents/worker.md'), 'utf8').includes('model:'));
-      assert(fs.readFileSync(path.join(a.home, account, 'agents/fastworker.md'), 'utf8').includes('model:'));
-    }
-    assert(fs.readFileSync(path.join(a.home, '.codex/agents/worker.toml'), 'utf8').includes('model ='));
-    assert(!fs.existsSync(path.join(a.home, '.grok/agents/worker.md')));
-    assert(!fs.existsSync(path.join(a.home, '.agents/agents/worker.md')));
+  check('native account targets sync shared skills and skip disabled targets', () => {
     native(a, ['sync', '--json', '-g']);
     for (const rel of ['.claude/skills/example', '.claude-gamma/skills/example', '.agents/skills/example', '.config/mimocode/skills/example', '.gemini/config/skills/example']) {
       assert(fs.lstatSync(path.join(a.home, rel)).isSymbolicLink());
@@ -465,11 +448,10 @@ try {
     assert(!fs.existsSync(clean.configFile));
     assert(!fs.existsSync(clean.mcpFile));
   });
-  check('deferred MCP keeps inline configuration while native skills and agents can synchronize', () => {
+  check('deferred MCP keeps inline configuration while native skills can synchronize', () => {
     const b = fixture('deferred-inline');
     const intent = m.loadIntent(b);
     intent.config.targets = { claude: intent.config.targets.claude };
-    intent.config.targets.claude.agents.extension = path.join(b.root, 'ai/skillshare/extensions/dotfiles-claude-agents');
     const inline = { personal: { command: '/personal/tool', targets: ['claude'] },
       node_repl: { command: '/vendor/tool', targets: ['codex'] } };
     file(b.configFile, yaml.stringify({ mcp: { targets: ['claude'], servers: inline } }));
@@ -484,9 +466,7 @@ try {
     assert.deepEqual(config.mcp, { targets: ['claude'], servers: inline });
     assert(!Object.hasOwn(config.sources, 'mcp'));
     native(b, ['sync', '--json', '-g']);
-    native(b, ['sync', 'agents', '--json', '-g']);
     assert(fs.lstatSync(path.join(b.home, '.claude/skills/example')).isSymbolicLink());
-    assert(fs.readFileSync(path.join(b.home, '.claude/agents/worker.md'), 'utf8').includes('model:'));
     assert(!fs.existsSync(path.join(b.home, '.claude.json')));
     const ready = m.prepare({ ...b, intent, allowInlineMigration: true });
     m.applyPrepared(ready); m.writeState(b, ready.state);

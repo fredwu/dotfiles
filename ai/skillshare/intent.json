@@ -3,7 +3,6 @@
   "config": {
     "sources": {
       "skills": "${root}/ai/skillshare/skills",
-      "agents": "${root}/ai/skillshare/agents",
       "mcp": "${mcpFile}"
     },
     "mode": "merge",
@@ -11,34 +10,27 @@
     "ignore": [".DS_Store", ".git/", "__pycache__/", ".system/", ".trash/", "synced/"],
     "targets": {
       "Mimo": {
-        "skills": {"path": "${home}/.config/mimocode/skills", "mode": "merge"},
-        "agents": {"exclude": ["*"]}
+        "skills": {"path": "${home}/.config/mimocode/skills", "mode": "merge"}
       },
       "antigravity": {
-        "skills": {"path": "${home}/.gemini/config/skills", "mode": "merge", "exclude": ["mimo-browser-use__*"]},
-        "agents": {"exclude": ["*"]}
+        "skills": {"path": "${home}/.gemini/config/skills", "mode": "merge", "exclude": ["mimo-browser-use__*"]}
       },
       "claude": {
-        "skills": {"path": "${home}/.claude/skills", "mode": "merge", "exclude": ["mimo-browser-use__*"]},
-        "agents": {"path": "${home}/.claude/agents", "mode": "copy", "extension": "${root}/ai/skillshare/extensions/dotfiles-claude-agents"}
+        "skills": {"path": "${home}/.claude/skills", "mode": "merge", "exclude": ["mimo-browser-use__*"]}
       },
       "claude-gamma": {
         "agent": "claude",
         "config_dir": "${home}/.claude-gamma",
-        "skills": {"path": "${home}/.claude-gamma/skills", "mode": "merge", "exclude": ["mimo-browser-use__*"]},
-        "agents": {"path": "${home}/.claude-gamma/agents", "mode": "copy", "extension": "${root}/ai/skillshare/extensions/dotfiles-claude-agents"}
+        "skills": {"path": "${home}/.claude-gamma/skills", "mode": "merge", "exclude": ["mimo-browser-use__*"]}
       },
       "codex": {
-        "skills": {"path": "${home}/.codex/skills", "mode": "merge", "enabled": false},
-        "agents": {"path": "${home}/.codex/agents", "mode": "copy", "extension": "${root}/ai/skillshare/extensions/dotfiles-codex-agents"}
+        "skills": {"path": "${home}/.codex/skills", "mode": "merge", "enabled": false}
       },
       "grok": {
-        "skills": {"path": "${home}/.grok/skills", "mode": "merge", "enabled": false},
-        "agents": {"exclude": ["*"]}
+        "skills": {"path": "${home}/.grok/skills", "mode": "merge", "enabled": false}
       },
       "universal": {
-        "skills": {"path": "${home}/.agents/skills", "mode": "merge", "exclude": ["mimo-browser-use__*"]},
-        "agents": {"exclude": ["*"]}
+        "skills": {"path": "${home}/.agents/skills", "mode": "merge", "exclude": ["mimo-browser-use__*"]}
       }
     },
     "mcp": {"targets": ["claude", "codex", "opencode", "grok", "claude-desktop"]}

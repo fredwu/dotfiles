@@ -1,13 +1,13 @@
 # Subagent roles and reasoning
 
-Apply this policy before each delegation and when an assignment's scope changes. The calling skill and the user's instructions decide whether to delegate; this policy selects the role and settings. It never relaxes the caller's authority, source, or context limits.
+Apply this policy before each delegation and when an assignment's scope changes. The calling skill and the user's instructions decide whether to delegate; this policy selects the agent and settings. It never relaxes the caller's authority, source, or context limits.
 
-## Select the role
+## Select the agent and effort
 
 - Keep the main agent's user-selected model and reasoning settings. Skills do not set the main agent's effort.
-- Use the configured `worker` role for complex, general, or uncertain work: implementation, investigation, review, debugging, and meaningful verification.
-- Use the configured `fastworker` role for clearly bounded, simple, low-risk work with clear inputs and acceptance criteria, such as searches, documentation edits, and deterministic checks. The task label alone is not enough: a documentation investigation or a test diagnosis can need `worker`. If a `fastworker` assignment grows more complex, reassign it to `worker` with its context and evidence, without repeating completed work.
-- Non-review assignments inherit the role's model and effort with no per-task override. Review assignments use Reviewer model and effort (`code-review/references/reviewer-settings.md`) for the provider that runs the reviewer, including an external one.
+- For complex, general, or uncertain work (implementation, investigation, debugging, and meaningful verification), let delegated agents inherit the current session's model and reasoning settings.
+- For clearly bounded, simple, low-risk work with clear inputs and acceptance criteria (such as quick lookups, documentation edits, and deterministic checks), you may use a lighter built-in subagent or model tier when the active runtime provides one. The task label alone is not enough: a documentation investigation or a test diagnosis can need full reasoning. If a lightweight assignment grows more complex, escalate it back to the parent or a full-strength agent with its context and evidence, without repeating completed work.
+- Non-review assignments use the active runtime's native defaults without fixed model pins. Review assignments use Reviewer model and effort (`code-review/references/reviewer-settings.md`) for the provider that runs the reviewer, including an external one.
 
 ## Child boundaries
 
@@ -15,18 +15,18 @@ A child executes its assignment and reports to its parent. It does not ask the u
 
 ## Apply supported controls
 
-- Inside T3 Code, use the harness's native subagent controls with the configured `worker` or `fastworker` role for same-provider non-review assignments when the native role satisfies this policy and needs no separate worktree or background task. Use T3 `delegate_task` with live provider and model IDs and supported options for reviews (setting and verifying model and effort under the reviewer policy), cross-provider assignments, explicit model or effort overrides, worktree isolation, or background tasks. Outside T3 Code, use the harness's native subagent controls and configured `worker` and `fastworker` roles, and use supported controls (or ACP fallback for cross-provider reviews) when review effort must differ from a fixed role default.
-- `ai/skillshare/agent-models.json` in the dotfiles repository is the source of the role models and default efforts. Codex, Claude, Grok, and Gemini reviews instead resolve the model families set in Reviewer model and effort (`code-review/references/reviewer-settings.md`). Do not copy model IDs or versions into skills, and do not reload the map when the runtime roles already provide them.
-- If a preferred role is unavailable, use the closest real role or supported spawn controls, and carry over the configured role settings when accessible. Do not invent role names, tools, or effort parameters. Prompt prose does not set the model or reasoning budget. Report material limits when you cannot apply or verify the required settings.
-- Respect history-fork restrictions and role-fixed settings. Role selection never permits extra history or evidence; when an API needs fresh context for explicit controls, give only the permitted task context.
-- Do not change the main session, ambient provider configuration, permissions, or configured role models to select a child. Keep selections in context, and report only limits that affect the outcome.
+- Inside T3 Code, use the harness's native subagent controls for same-provider non-review assignments when no extra model/effort overrides, separate worktree, or background task are needed. Use T3 `delegate_task` with live provider and model IDs and supported options for reviews (setting and verifying model and effort under the reviewer policy), cross-provider assignments, explicit model or effort overrides, worktree isolation, or background tasks. Outside T3 Code, use the harness's native subagent controls, and use supported controls (or ACP fallback for cross-provider reviews) when review effort must differ from the session default.
+- Do not copy hardcoded model IDs or versions into skills. Codex, Claude, Grok, and Gemini reviews resolve live model families under Reviewer model and effort (`code-review/references/reviewer-settings.md`).
+- Do not invent role names, tools, or effort parameters. Prompt prose does not set the model or reasoning budget. Report material limits when you cannot apply or verify required settings.
+- Respect history-fork restrictions. Selection never permits extra history or evidence; when an API needs fresh context for explicit controls, give only the permitted task context.
+- Do not change the main session, ambient provider configuration, or permissions to select a child. Keep selections in context, and report only limits that affect the outcome.
 
 ## Provider details
 
-**Codex:** custom agent roles support `model_reasoning_effort`, which overrides spawn, default, and parent effort. Select the configured role through the active API; harness controls can differ from Codex's native agent configuration. See [Codex custom agents](https://learn.chatgpt.com/docs/agent-configuration/subagents#custom-agents) and the [configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference).
+**Codex:** native subagents inherit session settings unless overridden through supported spawn controls. See [Codex subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents) and the [configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference).
 
-**Claude:** agent definitions supply the model and `effort`. Select the configured role instead of repeating its settings on `Agent` calls. `CLAUDE_CODE_EFFORT_LEVEL` overrides session and agent-definition effort; report a material ambient override instead of changing configuration. See [Claude subagent effort](https://code.claude.com/docs/en/sub-agents#choose-an-effort-level) and [effort configuration](https://code.claude.com/docs/en/model-config#adjust-effort-level).
+**Claude:** native `Agent` calls inherit the session model and effort unless overridden by a built-in subagent or explicit call parameters. `CLAUDE_CODE_EFFORT_LEVEL` overrides session effort; report a material ambient override instead of changing configuration. See [Claude subagents](https://code.claude.com/docs/en/sub-agents) and [effort configuration](https://code.claude.com/docs/en/model-config#adjust-effort-level).
 
-**Grok:** use the configured role's model and effort through supported runtime controls, without imposing a provider-wide effort. See [Grok agent definition controls](https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-agent/src/config.rs) and [child effort resolution](https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-subagent-resolution/src/definition.rs).
+**Grok:** apply child model and effort only through supported runtime controls, without imposing a provider-wide effort. See [Grok agent definition controls](https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-agent/src/config.rs) and [child effort resolution](https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-subagent-resolution/src/definition.rs).
 
-**Gemini (Antigravity):** inside T3 Code, target the enabled provider that exposes the Gemini model and supports `thought_level` (such as `antigravity`), and set `thought_level` explicitly in `target.options`. Outside T3 Code, or for native Antigravity subagents (`invoke_subagent`), use the supported model tiers (`inherit`, `pro`, `flash`, `flash_lite`) and report if a required effort control cannot be applied or verified.
+**Gemini (Antigravity):** inside T3 Code, target the enabled provider that exposes the Gemini model and supports `thought_level` (such as `antigravity`), and set `thought_level` explicitly in `target.options` when explicit effort is required. Outside T3 Code, or for native Antigravity subagents (`invoke_subagent`), use the supported model tiers (`inherit`, `pro`, `flash`, `flash_lite`) and report if a required effort control cannot be applied or verified.

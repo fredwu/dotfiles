@@ -319,42 +319,6 @@ function acquireLock(directory) {
   } finally { fs.unlinkSync(temporary); }
 }
 
-function retireExtra(options, backup) {
-  if (!fs.existsSync(options.configFile)) return;
-  const doc = config.parser(options).parseDocument(fs.readFileSync(options.configFile, 'utf8'));
-  const extras = doc.get('extras')?.toJSON?.() || [];
-  const legacy = extras.find(item => item.name === 'dotfiles-agents');
-  if (!legacy) return;
-  if (path.resolve(legacy.source) !== path.join(options.root, 'ai/skillshare/agents')) throw new Error('Unexpected legacy agent extra source');
-  backup.save(options.configFile);
-  doc.set('extras', extras.filter(item => item.name !== 'dotfiles-agents'));
-  config.writeAtomic(options.configFile, doc.toString());
-}
-
-function agentTargets(intent) {
-  return Object.entries(intent.config.targets).filter(([, target]) => target.agents?.extension).map(([name, target]) => ({
-    name, path: target.agents.path, provider: (target.agent || name) === 'codex' ? 'codex' : 'claude',
-  }));
-}
-
-function retireLegacyFiles(options, backup) {
-  const manifest = path.join(options.stateDir, 'skillshare-agents.manifest');
-  if (fs.existsSync(manifest)) { backup.save(manifest); fs.unlinkSync(manifest); }
-  const emptySource = path.join(options.configDir, 'agents');
-  if (fs.existsSync(emptySource) && fs.lstatSync(emptySource).isDirectory() && !fs.lstatSync(emptySource).isSymbolicLink() && !fs.readdirSync(emptySource).length) fs.rmdirSync(emptySource);
-  for (const name of ['dotfiles-claude-agents', 'dotfiles-codex-agents']) {
-    const directory = path.join(options.configDir, 'extensions', name);
-    if (!fs.existsSync(directory) || !fs.lstatSync(directory).isDirectory() || fs.lstatSync(directory).isSymbolicLink()) continue;
-    const files = fs.readdirSync(directory);
-    if (!files.every(file => {
-      const target = path.join(directory, file);
-      return fs.lstatSync(target).isSymbolicLink() && path.resolve(path.dirname(target), fs.readlinkSync(target)) === path.join(options.root, 'ai/skillshare/extensions', name, file);
-    })) continue;
-    for (const file of files) { backup.save(path.join(directory, file)); fs.unlinkSync(path.join(directory, file)); }
-    fs.rmdirSync(directory);
-  }
-}
-
 const globMatches = (pattern, name) =>
   new RegExp(`^${pattern.replace(/[.+$(){}|\\]/g, '\\$&').replace(/\*/g, '[^/]*').replace(/\?/g, '[^/]')}$`).test(name);
 
@@ -443,11 +407,10 @@ function preparePlugins(options) {
 function migrationOptions(options, intent) {
   const source = intent.config.sources.skills;
   const skillsTargets = Object.values(intent.config.targets).filter(t => t.skills?.path).map(t => ({ path: t.skills.path, knownLinks: [source] }));
-  const targets = agentTargets(intent);
   const accounts = [{ accountFile: path.join(options.home, '.claude.json'), skillsPath: path.join(options.home, '.claude/skills') },
     { accountFile: path.join(options.home, '.claude-gamma/.claude.json'), skillsPath: path.join(options.home, '.claude-gamma/skills') }];
   const updaterPath = path.join(options.home, '.cua-driver/skills/cua-driver');
-  return { ...options, source, skillsTargets, agentTargets: targets.map(t => ({ ...t, knownLinks: t.provider === 'claude' && t.name !== 'claude' ? [path.join(options.home, '.claude/agents')] : [] })),
+  return { ...options, source, skillsTargets,
     codexSkillsPath: path.join(options.home, '.codex/skills'), accounts,
     ...(fs.existsSync(updaterPath) ? { cuaDriver: { sourceLink: path.join(source, 'cua-driver'), updaterPath } } : {}) };
 }
@@ -483,7 +446,7 @@ function synchronize(given) {
     return { dryRun: true, external: external.changes, migration: options.bootstrap ? runtime.migrateRuntime(migrationOptions(options, intent)) : undefined,
       plugins: preparePlugins(options),
       mcp: { blocked: blocked.map(change => change.name), omittedDefaults: intent.metadata.omittedMcpDefaults, omitted: prepared.mcp.omitted },
-      limitations: ['This render preview does not execute native publication, pruning, or agent converters.'] };
+      limitations: ['This render preview does not execute native publication or pruning.'] };
   }
   config.prepare(preparation);
   runtime.migrateRuntime({ ...migrationOptions(options, intent), dryRun: true });
@@ -500,7 +463,6 @@ function synchronize(given) {
         options.deferMcp = true;
         preparation.deferMcp = true;
       }
-      retireExtra(options, backup);
     }
     const canonicalFile = options.mcpIntentFile || path.join(options.root, 'ai/skillshare/mcp.json');
     const captured = external.changes.filter(c => c.kind === 'mcp' && c.action === 'capture' && !options.deferMcp);
@@ -526,13 +488,10 @@ function synchronize(given) {
         native(['install', change.path, '--name', change.name, '--update', '--json'], options);
       }
     }
-    progress('Syncing skills and agents...');
-    const targets = agentTargets(intent);
-    runtime.renderAgents({ ...options, targets });
+    progress('Syncing skills...');
     assertSkillLinks(options, intent);
     native(['sync', '--json'], options);
     assertSkillLinks(options, intent, true);
-    const agents = runtime.syncNativeAgents({ ...options, targets });
     assertInputsUnchanged(options, intent, external);
     progress('Syncing MCP...');
     const pending = external.changes.filter(change => change.kind === 'mcp' && change.action === 'pending');
@@ -545,15 +504,14 @@ function synchronize(given) {
       }
     }
     config.writeState(options, next);
-    if (options.bootstrap) retireLegacyFiles(options, backup);
-    return { external: external.changes, plugins: pluginResults, agents: { changed: agents.changed },
+    return { external: external.changes, plugins: pluginResults,
       mcp: { omittedDefaults: intent.metadata.omittedMcpDefaults, omitted: prepared.mcp.omitted, changes: mcp.changes.map(({ target, name, action, path: file }) => ({ target, name, action, path: file })),
         ...(pending.length ? { pending: pending.map(change => change.name) } : {}),
         ...(mcp.blocked ? { blocked: mcp.blocked } : {}) },
       ...(migration ? { migration: { collisions: migration.collisions, backupDir: migration.backupDir } } : {}),
-      backupDir: backup.directory, agentsBackupDir: agents.backupDir };
+      backupDir: backup.directory };
   } finally { release(); }
 }
 
 module.exports = { decision, jsonOutput, native, yamlValue, externalMcp, treeHash, planExternal,
-  assertInputsUnchanged, backups, checkDestinations, syncMcp, detachBundled, migrateLegacy, retireExtra, agentTargets, migrationOptions, preparePlugins, acquireLock, synchronize };
+  assertInputsUnchanged, backups, checkDestinations, syncMcp, detachBundled, migrateLegacy, migrationOptions, preparePlugins, acquireLock, synchronize };

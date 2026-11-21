@@ -209,7 +209,7 @@ function migrateRuntime(options) {
   const source = absolute(p.source || path.join(p.root, 'ai/skillshare/skills'));
   if (!stat(source)?.isDirectory() || stat(source).isSymbolicLink()) throw new Error('Skills source must be a real directory');
   safeParents(source);
-  const directories = [...(p.skillsTargets || []), ...(p.agentTargets || [])].map(realDirectoryPlan);
+  const directories = [...(p.skillsTargets || [])].map(realDirectoryPlan);
   const paths = new Set(directories.map(target => path.normalize(target.path)));
   if (paths.size !== directories.length) throw new Error('Duplicate runtime directories');
   for (const left of directories) for (const right of directories) {
@@ -285,90 +285,5 @@ function migrateRuntime(options) {
   }
 }
 
-function renderAgents(options) {
-  const p = settings(options);
-  const source = absolute(p.source || path.join(p.root, 'ai/skillshare/agents'));
-  const extensions = path.join(p.root, 'ai/skillshare/extensions');
-  execute(process.execPath, [path.join(extensions, 'dotfiles-agent-transform/validate.js'), source], p);
-  const files = fs.readdirSync(source).filter(file => file.endsWith('.md')).sort();
-  const outputs = [];
-  const destinations = new Set();
-  if (!(p.targets || []).length) throw new Error('Explicit native agent targets are required');
-  for (const left of p.targets) for (const right of p.targets) {
-    absolute(left.path); absolute(right.path);
-    if (left !== right && within(left.path, right.path)) throw new Error('Native agent target directories overlap');
-  }
-  for (const target of p.targets) {
-    absolute(target.path);
-    safeParents(target.path);
-    if (!['claude', 'codex'].includes(target.provider)) throw new Error('Unsupported agent provider');
-    const info = stat(target.path);
-    if (info && (!info.isDirectory() || info.isSymbolicLink())) throw new Error('Native agent targets must be real directories');
-    const converter = path.join(extensions, `dotfiles-${target.provider}-agents/convert.js`);
-    for (const file of files) {
-      const input = path.join(source, file);
-      if (!stat(input)?.isFile() || stat(input).isSymbolicLink()) throw new Error('Native agent source must be a regular file');
-      const converted = execute(process.execPath, [converter], p, { input: fs.readFileSync(input), cwd: path.dirname(converter),
-        env: { ...nativeEnv(p, p.env || process.env), SS_REL_PATH: file } }).stdout;
-      if (!converted.trim()) throw new Error('Agent converter produced empty output');
-      const output = path.join(target.path, `${path.basename(file, '.md')}.${target.provider === 'codex' ? 'toml' : 'md'}`);
-      const existing = stat(output);
-      if (existing && !existing.isFile() && !existing.isSymbolicLink()) throw new Error('Generated agent output collides with a non-file resource');
-      if (destinations.has(output)) throw new Error('Duplicate generated agent output');
-      destinations.add(output);
-      outputs.push({ target: target.name, path: output, content: converted });
-    }
-  }
-  return outputs;
-}
-
-function assertNativeAgentDestinations(options) {
-  const p = settings(options);
-  let status;
-  try { status = JSON.parse(runNative(['status', '--json', '-g'], p).stdout); }
-  catch (error) { throw new Error('Cannot verify native agent destinations', { cause: error }); }
-  const source = absolute(p.source || path.join(p.root, 'ai/skillshare/agents'));
-  if (!status.agents || path.resolve(status.agents.source || '') !== source || !Array.isArray(status.agents.targets)) throw new Error('Native agent source does not match intent');
-  const expected = new Map((p.targets || []).map(target => [target.name, absolute(target.path)]));
-  if (expected.size !== p.targets.length || expected.has(undefined)) throw new Error('Unique native target names are required');
-  if (status.agents.targets.length !== expected.size) throw new Error('Native agent target selection does not match intent');
-  const seen = new Set();
-  for (const target of status.agents.targets) {
-    if (seen.has(target.name)) throw new Error('Duplicate native agent target');
-    seen.add(target.name);
-    if (!expected.has(target.name) || path.resolve(target.path) !== expected.get(target.name)) throw new Error('Native agent destination does not match intent');
-  }
-  return status.agents;
-}
-
-function syncNativeAgents(options) {
-  const p = settings(options);
-  const outputs = renderAgents(p);
-  const changed = outputs.filter(output => !stat(output.path)?.isFile() || stat(output.path).isSymbolicLink() || fs.readFileSync(output.path, 'utf8') !== output.content).map(output => output.path);
-  if (p.dryRun) return { dryRun: true, changed, outputs, limitations: ['Native pruning and publication are not executed in render preview.'] };
-  requireSupportedSkillshare(p);
-  assertNativeAgentDestinations(p);
-  const source = p.source || path.join(p.root, 'ai/skillshare/agents');
-  const inputs = [source, path.join(p.root, 'ai/skillshare/agent-models.json'), path.join(p.root, 'ai/skillshare/extensions')];
-  const before = inputs.map(inventory);
-  const configBefore = inventory(p.configFile);
-  const backup = backupNodes([...(p.targets || []).map(target => target.path), ...(p.nativeStatePaths || [])], p);
-  try {
-    if (JSON.stringify(inventory(p.configFile)) !== JSON.stringify(configBefore)) throw new Error('Native configuration changed before publication');
-    for (const output of outputs) if (stat(output.path)?.isSymbolicLink()) fs.unlinkSync(output.path);
-    const result = runNative(['sync', 'agents', '-g', '--json'], p);
-    for (const [index, input] of inputs.entries()) if (JSON.stringify(inventory(input)) !== JSON.stringify(before[index])) throw new Error('Agent inputs changed during publication');
-    for (const output of outputs) {
-      const info = stat(output.path);
-      if (!info?.isFile() || info.isSymbolicLink() || fs.readFileSync(output.path, 'utf8') !== output.content) throw new Error(`Native agent output does not match converter: ${output.path}`);
-    }
-    return { dryRun: false, changed, backupDir: backup.directory, result };
-  } catch (error) {
-    try { restoreBackup(backup, p); } catch (recoveryError) { error.recoveryError = recoveryError; }
-    error.backupDir = backup.directory;
-    throw error;
-  }
-}
-
 module.exports = { ACCOUNT_OVERRIDES, nativeEnv, runNative, requireSupportedSkillshare, inventory,
-  accountBuckets, migrateRuntime, renderAgents, assertNativeAgentDestinations, syncNativeAgents, restoreBackup };
+  accountBuckets, migrateRuntime, restoreBackup };

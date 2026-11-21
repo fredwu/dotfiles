@@ -35,21 +35,17 @@ function fixture(sharedRoot) {
   const home = path.join(temporary, 'home');
   fs.mkdirSync(home);
   if (!sharedRoot) {
-    for (const relative of ['ai/skillshare/agents', 'ai/skillshare/extensions', 'install/skillshare-deps']) {
-      fs.cpSync(path.join(repository, relative), path.join(root, relative), { recursive: true });
-    }
-    fs.copyFileSync(path.join(repository, 'ai/skillshare/agent-models.json'), path.join(root, 'ai/skillshare/agent-models.json'));
+    fs.cpSync(path.join(repository, 'install/skillshare-deps'), path.join(root, 'install/skillshare-deps'), { recursive: true });
     write(path.join(root, 'ai/skillshare/skills/example/SKILL.md'), '---\nname: example\ndescription: Use when testing local skill distribution.\n---\nRead the example.\n');
   }
   const options = config.paths({ root, home, depsDir, env: { ...process.env, APPDATA: path.join(home, 'AppData/Roaming') } });
-  const target = (name, provider = name) => ({
+  const target = name => ({
     ...(name === 'claude-gamma' ? { agent: 'claude', config_dir: path.join(home, '.claude-gamma') } : {}),
     skills: { path: path.join(home, `.${name}/skills`), mode: 'merge' },
-    agents: { path: path.join(home, `.${name}/agents`), mode: 'copy', extension: path.join(root, `ai/skillshare/extensions/dotfiles-${provider}-agents`) },
   });
   const intent = { version: 1, config: {
-    sources: { skills: path.join(root, 'ai/skillshare/skills'), agents: path.join(root, 'ai/skillshare/agents'), mcp: options.mcpFile },
-    mode: 'merge', targets: { claude: target('claude'), codex: target('codex'), 'claude-gamma': target('claude-gamma', 'claude') },
+    sources: { skills: path.join(root, 'ai/skillshare/skills'), mcp: options.mcpFile },
+    mode: 'merge', targets: { claude: target('claude'), codex: target('codex'), 'claude-gamma': target('claude-gamma') },
     mcp: { targets: ['claude', 'codex', 'opencode', 'grok', 'claude-desktop'] },
   }, executables: { node: process.execPath }, external: [{ name: 'shared', kind: 'mcp', from: 'claude', path: path.join(home, '.claude.json') }] };
   // Separate intent files let two homes use the same canonical MCP definitions.
@@ -104,7 +100,7 @@ test('real CLI captures a local vendor update and another home holds its baselin
   assert.equal(fs.readFileSync(second.mcpFile, 'utf8'), before);
   assert.equal(fs.readFileSync(path.join(second.home, '.claude.json'), 'utf8'), secondClient);
   assert.deepEqual(JSON.parse(fs.readFileSync(canonicalFile)).servers.shared.args, ['server-v2']);
-  assert(sync.synchronize(first).agents.changed.length === 0);
+  assert(fs.lstatSync(path.join(first.home, '.claude/skills/example')).isSymbolicLink());
 });
 
 test('target skill filters keep excluded skills out without failing the link check', () => {
@@ -163,7 +159,7 @@ test('legacy node cleanup uses native ownership before changing the MCP source',
   assert(owners.includes(options.configFile));
   assert(!owners.includes(options.mcpFile));
   assert(!fs.readFileSync(path.join(options.root, 'ai/skillshare/mcp.json'), 'utf8').includes('node_repl'));
-  assert(sync.synchronize(options).agents.changed.length === 0);
+  assert(fs.lstatSync(path.join(options.home, '.claude/skills/example')).isSymbolicLink());
 });
 
 test('external local skill capture uses the native audit-preserving install path', () => {
@@ -188,7 +184,7 @@ test('missing external input stays pending without seeding the designated vendor
   const primary = JSON.parse(fs.readFileSync(path.join(options.home, '.claude.json')));
   assert.equal(primary.mcpServers.shared, undefined);
   assert.deepEqual(primary.mcpServers.other.args, ['other-v1']);
-  assert(fs.existsSync(path.join(options.home, '.claude/agents/worker.md')));
+  assert(fs.lstatSync(path.join(options.home, '.claude/skills/example')).isSymbolicLink());
   assert.equal(config.readState(options).external['mcp:shared'], undefined);
   assert.deepEqual(sync.synchronize(options).mcp.pending, ['shared']);
 });
@@ -217,7 +213,7 @@ test('unequal first adoption and conflicting changes stop without overwriting ei
   };
   changeVendor('different-first');
   assert.deepEqual(sync.synchronize({ ...options, bootstrap: true }).mcp.blocked, ['shared']);
-  assert(fs.existsSync(path.join(options.home, '.claude/agents/worker.md')));
+  assert(fs.lstatSync(path.join(options.home, '.claude/skills/example')).isSymbolicLink());
   changeVendor('server-v1');
   sync.synchronize({ ...options, bootstrap: true });
   const canonicalFile = path.join(options.root, 'ai/skillshare/mcp.json');
@@ -290,7 +286,7 @@ test('OpenCode JSONC and every selected destination are checked positively', () 
   assert.throws(() => sync.checkDestinations(plan('pi', path.join(options.home, 'wrong/mcp.json')), { ...options, intent }), /Unexpected/);
 });
 
-test('pending legacy input leaves inline ownership intact while agents continue', () => {
+test('pending legacy input leaves inline ownership intact while skills continue', () => {
   const options = fixture();
   const intent = config.loadIntent(options);
   write(options.configFile, config.parser(options).stringify({ sources: { skills: intent.config.sources.skills },
@@ -301,7 +297,7 @@ test('pending legacy input leaves inline ownership intact while agents continue'
   assert.deepEqual(result.mcp.blocked, ['shared']);
   assert(sync.yamlValue(options.configFile, options).mcp.servers.shared);
   assert(!fs.existsSync(path.join(options.home, '.claude.json')));
-  assert(fs.existsSync(path.join(options.home, '.claude/agents/worker.md')));
+  assert(fs.lstatSync(path.join(options.home, '.claude/skills/example')).isSymbolicLink());
   write(path.join(options.home, '.claude.json'), { mcpServers: { shared: { type: 'stdio', command: process.execPath, args: ['server-v1'] } } });
   const resumed = sync.synchronize(options);
   assert.equal(resumed.mcp.blocked, undefined);
@@ -316,10 +312,10 @@ test('first adoption of an existing inline setup requires bootstrap', () => {
   assert.throws(() => sync.synchronize(options), /Reconcile inline|explicit adoption/);
   assert.equal(fs.readFileSync(options.configFile, 'utf8'), before);
   assert(!fs.existsSync(options.stateFile));
-  assert(!fs.existsSync(path.join(options.home, '.claude/agents')));
+  assert(!fs.existsSync(path.join(options.home, '.claude/skills')));
 });
 
-test('a post-import native MCP block restores the source and ownership ledger while agents continue', () => {
+test('a post-import native MCP block restores the source and ownership ledger while skills continue', () => {
   const options = fixture();
   const intent = config.loadIntent(options);
   const legacy = { sources: { skills: intent.config.sources.skills }, targets: {
@@ -347,7 +343,7 @@ test('a post-import native MCP block restores the source and ownership ledger wh
   assert.deepEqual(sync.yamlValue(options.configFile, options).mcp, legacy.mcp);
   assert.equal(fs.readFileSync(ledger, 'utf8'), oldLedger);
   assert.deepEqual(paths.map(file => fs.readFileSync(file, 'utf8')), before);
-  assert(fs.existsSync(path.join(options.home, '.claude/agents/worker.md')));
+  assert(fs.lstatSync(path.join(options.home, '.claude/skills/example')).isSymbolicLink());
   assert.equal(sync.yamlValue(options.configFile, options).plugins.packages.browser, undefined);
   assert.equal(config.readState(options).external['mcp:shared'], undefined);
   sync.native(['mcp', 'import', 'personal', '--from', 'claude', '--target', 'claude', '--replace', '--json'], options, true);
@@ -376,7 +372,7 @@ test('legacy external refresh also stages a native HTTP definition without execu
   assert(result.mcp.omitted.some(item => item.server === 'shared' && item.target === 'claude-desktop' && item.reason === 'stdio-only'));
 });
 
-test('a missing established vendor input is held without reseeding it or blocking agents', () => {
+test('a missing established vendor input is held without reseeding it or blocking skills', () => {
   const options = fixture();
   sync.synchronize({ ...options, bootstrap: true });
   const primary = path.join(options.home, '.claude.json');
@@ -387,12 +383,12 @@ test('a missing established vendor input is held without reseeding it or blockin
   assert.equal(nativePlan.blocked, true);
   assert(nativePlan.changes.some(change => change.target === 'claude' && change.name === 'shared' && change.action === 'conflict'));
   const source = fs.readFileSync(options.mcpFile, 'utf8');
-  write(path.join(options.home, '.claude/agents/worker.md'), 'direct output edit');
+  write(path.join(options.root, 'ai/skillshare/skills/added/SKILL.md'), '---\nname: added\ndescription: Added skill.\n---\nAdded.\n');
   const result = sync.synchronize(options);
   assert.deepEqual(result.mcp.blocked, ['shared']);
   assert.equal(JSON.parse(fs.readFileSync(primary)).mcpServers.shared, undefined);
   assert.equal(fs.readFileSync(options.mcpFile, 'utf8'), source);
-  assert(!fs.readFileSync(path.join(options.home, '.claude/agents/worker.md'), 'utf8').includes('direct output edit'));
+  assert(fs.lstatSync(path.join(options.home, '.claude/skills/added')).isSymbolicLink());
 });
 
 test('dead lock owners recover, and an active owner remains protected', () => {
@@ -482,22 +478,18 @@ test('native target retirement and private per-server selections preserve their 
   assert.equal(JSON.parse(fs.readFileSync(path.join(options.home, '.pi/agent/mcp.json'))).mcpServers.personal.command, process.execPath);
 });
 
-test('managed migration rejects unowned source aliases and primary agent links before writes', () => {
-  for (const kind of ['skills', 'agents']) {
-    const options = fixture();
-    const foreign = path.join(options.home, 'vendor-owned');
-    write(path.join(foreign, 'private.md'), 'preserve');
-    const target = path.join(options.home, '.claude', kind);
-    fs.mkdirSync(path.dirname(target), { recursive: true });
-    if (kind === 'skills') {
-      const alias = path.join(options.configDir, 'skills');
-      fs.mkdirSync(options.configDir, { recursive: true }); fs.symlinkSync(foreign, alias); fs.symlinkSync(alias, target);
-    } else fs.symlinkSync(foreign, target);
-    assert.throws(() => sync.synchronize({ ...options, bootstrap: true }), /Unknown whole-directory link/);
-    assert(!fs.existsSync(options.configFile));
-    assert.equal(fs.readFileSync(path.join(foreign, 'private.md'), 'utf8'), 'preserve');
-    assert(fs.lstatSync(target).isSymbolicLink());
-  }
+test('managed migration rejects unowned source aliases before writes', () => {
+  const options = fixture();
+  const foreign = path.join(options.home, 'vendor-owned');
+  write(path.join(foreign, 'private.md'), 'preserve');
+  const target = path.join(options.home, '.claude/skills');
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  const alias = path.join(options.configDir, 'skills');
+  fs.mkdirSync(options.configDir, { recursive: true }); fs.symlinkSync(foreign, alias); fs.symlinkSync(alias, target);
+  assert.throws(() => sync.synchronize({ ...options, bootstrap: true }), /Unknown whole-directory link/);
+  assert(!fs.existsSync(options.configFile));
+  assert.equal(fs.readFileSync(path.join(foreign, 'private.md'), 'utf8'), 'preserve');
+  assert(fs.lstatSync(target).isSymbolicLink());
 });
 
 
