@@ -1,6 +1,6 @@
 interface:
   display_name: "Code Review Loop"
   short_description: "Review and fix code in bounded rounds"
-  default_prompt: "Use $code-review-loop to review and remediate the current change through bounded rounds."
+  default_prompt: "Use $code-review-loop to review and remediate the current change through bounded rounds (internal by default, or with requested external reviewer(s))."
 policy:
   allow_implicit_invocation: true

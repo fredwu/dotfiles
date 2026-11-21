@@ -7,7 +7,7 @@ metadata:
 
 # Gemini Review Loop
 
-Apply `code-review-loop` in full, using `gemini-review` as the reviewer for each round. This selects one Gemini loop; reading shared mechanics does not add an internal review loop. On direct invocation with a repeat request (such as `gemini x 2` or `twice`), run two sequential passes (Neon, then Carbon) under Two-pass review (`code-review/references/two-pass-review.md`); when a caller has already selected a pass family, run only that pass.
+Apply `code-review-loop` in full, using `gemini-review` as the reviewer for each Gemini round. Reading shared mechanics does not add an internal review loop. When a caller has already selected this loop or pass family, run only that assignment without re-parsing or expanding. On direct invocation, pass Gemini as the default reviewer together with the user's request to `code-review-loop` (`Select reviewers`), which resolves any additional external reviewers, `internal`, and repeat requests under Two-pass review (`code-review/references/two-pass-review.md`).
 
 Use a fresh T3 task per round when its orchestrator is available; otherwise use a fresh Gemini ACP session under the shared fallback policy (`code-review/references/external-runtime.md`). Preserve the requested provider and explicit model/options.
 

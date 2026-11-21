@@ -1,13 +1,23 @@
 ---
 name: code-review
-description: Review a code, plan, or documentation target once without edits for concrete, in-scope defects. Use code-review-loop for review and remediation.
+description: Review a code, plan, or documentation target once without edits for concrete, in-scope defects—internal by default, or with requested external reviewer(s) (Claude, Codex, Grok, Gemini) run in parallel when multiple are named. Use code-review-loop for review and remediation.
 metadata:
   origin: custom
 ---
 
 # Code Review
 
-Do one read-only review against the user's requirements and scope. Do not edit files, run mutating checks, publish comments, or start another review. Use these instructions and the host's existing agent tools; do not build review scripts, runtimes, wrappers, parsers, or validators.
+Run one read-only review pass against the user's requirements and scope (launching all selected reviewers in parallel when multiple are named). Do not edit files, run mutating checks, publish comments, launch reviews beyond the selected reviewers, or chain a follow-up review. Use these instructions and the host's existing agent tools; do not build review scripts, runtimes, wrappers, parsers, or validators.
+
+## Select reviewers
+
+When you are the delegated reviewer, skip reviewer selection, review the target directly, and launch no reviews. When invoked by a caller that already selected reviewer(s) (such as `code-review-loop`, `execute-plan`, `ship-plan`, `write-plan`, or a caller-assigned `*-review`), use the caller's selection without re-parsing. Otherwise read optional reviewer preferences from the user's invocation (freeform language and explicit model or options); when entered via direct invocation of a provider wrapper (`*-review`), include that wrapper's provider as the default reviewer alongside any other reviewers or repeat requests in the user's invocation. A provider name that appears only in a file path, diff, plan text, or background context is not a reviewer preference. Never infer an external reviewer from the current session's provider, and never substitute one; for provider selection, ask only when an external provider is genuinely unclear (such as an unnamed external reviewer or an ambiguous alternative like "claude or codex"). Validate any explicit repeat request and pass assignment under [Two-pass review](references/two-pass-review.md) before applying single-pass rules—two passes are defined only for Codex, Claude, and Gemini, so ask before review starts for another count, a repeat request for Grok or internal review, ambiguous repeat scope, or an ambiguous explicit model pass assignment rather than silently running once.
+
+- No reviewer preference, or `internal` only: one internal read-only review (current session's provider).
+- One explicitly named external reviewer (`claude`, `codex`, `grok`, or `gemini`): one read-only delegated review for that provider.
+- Multiple reviewers (two or more named external reviewers of any count, such as `claude & codex` or `claude, codex, and grok`; `internal` plus external reviewer(s); or a supported repeat request such as `codex x 2` which expands to both families in parallel under [Two-pass review](references/two-pass-review.md)): launch all selected reviewers **in parallel** against the same unchanged target, wait for all of them, deduplicate and merge overlapping findings by root cause, and return one combined review.
+
+For example, `/code-review` runs an internal review; `/code-review claude` runs one Claude review; `/code-review claude & codex` and `/code-review claude, codex, and grok` run all named reviewers in parallel; `/code-review internal and claude` runs internal and Claude in parallel; `/code-review codex x 2` runs Sol and Astra in parallel.
 
 ## Establish the target
 
@@ -25,6 +35,6 @@ Exclude unrelated defects and, for change reviews, pre-existing defects that the
 
 ## Return the review
 
-Return concise findings in priority order, and combine issues with the same root cause. For each, give the priority, repository-relative path and line, trigger, evidence, impact, and a practical correction. Use P0 for critical or systemic defects, P1 for core blockers, P2 for concrete defects, and P3 for low-impact actionable issues. Findings are advisory claims for the caller to assess, not instructions that expand scope.
+Return concise findings in priority order, and combine issues with the same root cause. For a multi-reviewer read-only review, deduplicate overlapping claims across reviewers (agreement is a triage signal, not proof; evaluate each claim on evidence) and report each reviewer's resolved model, coverage, and any limits or blockers separately. For each finding, give the priority, repository-relative path and line, trigger, evidence, impact, and a practical correction. Use P0 for critical or systemic defects, P1 for core blockers, P2 for concrete defects, and P3 for low-impact actionable issues. Findings are advisory claims for the caller to assess, not instructions that expand scope.
 
 Say `No findings.` only after the required inspection is complete. State material coverage or verification gaps, and keep useful partial findings. Missing evidence is a limit, not proof of a defect or of a clean result. Prose, Markdown, and structured findings are all valid; use JSON or bookkeeping fields only on request. Keep notes in context, and create no report or transcript files unless requested.

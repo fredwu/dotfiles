@@ -14,13 +14,13 @@ For every launch, apply [Reviewer model and effort](reviewer-settings.md).
 
 ## Hand off
 
-Send a short brief: the intended behavior and acceptance criteria, the repository and target, read-only scope, material exclusions, and a reference to the code-review instructions. Describe the target, for example "the current uncommitted changes, including relevant untracked files, in /path/to/repo". The reviewer finds the diff and reads source directly. Do not send diffs, source dumps, snapshots, manifests, or transcripts. Review the actual checkout with its dirty and untracked files; a clean worktree without the changes is not a substitute.
+Send a short brief: the intended behavior and acceptance criteria, the repository and target, read-only scope, material exclusions, a reference to the code-review instructions, and explicit instructions to perform the review directly without selecting or launching other reviews or subagents. Describe the target, for example "the current uncommitted changes, including relevant untracked files, in /path/to/repo". The reviewer finds the diff and reads source directly. Do not send diffs, source dumps, snapshots, manifests, or transcripts. Review the actual checkout with its dirty and untracked files; a clean worktree without the changes is not a substitute.
 
-For loop rounds, add concise prior findings, caller responses, and open objections as claims to verify independently, without an expected verdict. Use a fresh task or session for each round.
+For loop rounds, add concise prior findings, caller responses, and open objections as claims to verify independently, without an expected verdict; in a multi-reviewer panel, omit provider or model attribution. Use a fresh task or session for each reviewer in each round.
 
 ## Run and assess
 
-Keep the source unchanged during the review. Choose a time budget from scope and complexity, keep task handles, and wait on the same work. A tool timeout or silence alone does not prove failure; do not start duplicate work. Stop and join owned work before edits or a replacement launch.
+Keep the source unchanged during the review. Choose a time budget from scope and complexity, keep task handles, and wait on the same work; in a multi-reviewer review or panel round, launch active reviewers in parallel and wait for all active reviewers before merging findings or editing. A tool timeout or silence alone does not prove failure; do not start duplicate work. Stop and join owned work before edits or a replacement launch.
 
 Assess the content under the shared skills. Prose, Markdown, and structured output are all valid; missing bookkeeping does not need a retry or another model call. Keep useful partial findings and state material coverage gaps. Transport completion does not prove a clean review.
 

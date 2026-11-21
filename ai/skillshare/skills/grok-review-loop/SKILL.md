@@ -7,7 +7,7 @@ metadata:
 
 # Grok Review Loop
 
-Apply `code-review-loop` in full, using `grok-review` as the reviewer for each round. This selects one Grok loop; reading shared mechanics does not add an internal review loop.
+Apply `code-review-loop` in full, using `grok-review` as the reviewer for each Grok round. Reading shared mechanics does not add an internal review loop. When a caller has already selected this loop, run only that assignment without re-parsing or expanding. On direct invocation, pass Grok as the default reviewer together with the user's request to `code-review-loop` (`Select reviewers`), which resolves any additional external reviewers, `internal`, and repeat requests under Two-pass review (`code-review/references/two-pass-review.md`).
 
 Use a fresh T3 task per round when its orchestrator is available; otherwise use a fresh Grok ACP session under the shared fallback policy (`code-review/references/external-runtime.md`). Preserve the requested provider and explicit model/options.
 

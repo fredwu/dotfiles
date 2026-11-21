@@ -1,6 +1,6 @@
 interface:
   display_name: "Gemini Review"
-  short_description: "Run one external Gemini review"
-  default_prompt: "Use $gemini-review to run one read-only external Gemini review of the current change."
+  short_description: "Run a read-only external Gemini review pass"
+  default_prompt: "Use $gemini-review to run a read-only external Gemini review pass on the current change."
 policy:
   allow_implicit_invocation: false

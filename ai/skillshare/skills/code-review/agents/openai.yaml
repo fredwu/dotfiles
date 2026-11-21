@@ -1,6 +1,6 @@
 interface:
   display_name: "Code Review"
-  short_description: "Run one read-only internal code review"
-  default_prompt: "Use $code-review to review the current change once without modifying it."
+  short_description: "Run one read-only code review (internal or external)"
+  default_prompt: "Use $code-review to review the current change once without modifying it (internal by default, or with requested external reviewer(s))."
 policy:
   allow_implicit_invocation: true
