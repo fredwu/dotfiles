@@ -1,0 +1,6 @@
+interface:
+  display_name: "Write Audit Plan"
+  short_description: "Plan combined refactoring and performance improvements"
+  default_prompt: "Use $write-plan-audit to apply write-plan-refactor and write-plan-perf together and write a single, coherent, evidence-backed audit plan for project-owned code."
+policy:
+  allow_implicit_invocation: false
