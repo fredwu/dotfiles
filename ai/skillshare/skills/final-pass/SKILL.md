@@ -1,23 +1,23 @@
 ---
 name: final-pass
-description: Close a completed phase or execution; resolve omissions and residual issues, then establish passing evidence for the project's full testing and quality checks.
+description: Close a completed phase or execution; review changes, resolve omissions, and clean up first, then establish passing evidence for the project's full testing and quality checks.
 metadata:
   origin: custom
 ---
 
 # Final Pass
 
-Close a checkpoint: check the full change set against the original request and later updates, resolve what is missing, clean up, and establish passing evidence for the project's full checks.
+Close a checkpoint in strict order: review the full change set against the original request and later updates, finish all needed repairs, recovery, and cleanup first, and run the project's full checks only at the end once edits are settled.
 
 ## Checkpoint type
 
-- **Phase checkpoint**, during plan execution (`execute-plan`, `Completion and review checkpoints`): finish phase acceptance, integration with completed phases, cleanup, and required checks, then return to the executor. The selected reviews stay pending and do not block this checkpoint.
-- **Closing checkpoint**: after the selected review sequence returns, or after the active loop ends at its cap or a concrete blocker. Do everything below, including post-review recovery.
-- **Standalone**: a final check outside plan execution. Do everything below except post-review recovery, unless a review loop has ended.
+- **Phase checkpoint**, during plan execution (`execute-plan`, `Completion and review checkpoints`): finish phase acceptance, integration with completed phases, cleanup, and required checks in order, then return to the executor. The selected reviews stay pending and do not block this checkpoint.
+- **Closing checkpoint**: after the selected review sequence returns, or after the active loop ends at its cap or a concrete blocker. Do everything below in order, including post-review recovery.
+- **Standalone**: a final check outside plan execution. Do everything below in order except post-review recovery, unless a review loop has ended.
 
 ## Resolve issues
 
-Review code, documentation, tests, and configuration in the checkpoint scope, including integration with completed phases. Resolve task-relevant omissions and inconsistencies within scope. Reconcile execution and worker residuals, review findings, failed checks, and verification gaps. Fix every authorized task-relevant issue, including pre-existing failures found during the task, and reject unsupported findings with evidence. A review cap or a final read-only review round does not defer these repairs.
+Start by reviewing the full change set—code, documentation, tests, and configuration in the checkpoint scope, including integration with completed phases—before running full test or quality suites. Resolve task-relevant omissions and inconsistencies within scope. Reconcile execution and worker residuals, review findings, prior failed checks, and verification gaps. Fix every authorized task-relevant issue, including pre-existing failures found during the task, and reject unsupported findings with evidence. A review cap or a final read-only review round does not defer these repairs. Use fast targeted checks if needed while making edits; do not run full suites yet.
 
 ## Post-review recovery
 
@@ -27,9 +27,11 @@ When the loop has ended at its cap or a concrete blocker, list the missing cover
 
 ## Clean up
 
-Do one cleanup round over changed and directly affected files. Remove confirmed obsolete, duplicate, dead, or unnecessary compatibility code and the related tests, configuration, and documentation. Keep required behavior, explicit compatibility, and unrelated work. With read-only or documentation-only authority, report material implementation findings without editing them. A clean result is valid.
+Before running the full checks, do one cleanup round over changed and directly affected files. Remove confirmed obsolete, duplicate, dead, or unnecessary compatibility code and the related tests, configuration, and documentation. Keep required behavior, explicit compatibility, and unrelated work. With read-only or documentation-only authority, report material implementation findings without editing them. A clean result is valid.
 
 ## Run the full checks
+
+Run this step only after `Resolve issues`, applicable `Post-review recovery`, and `Clean up` are complete and no further edits are planned. Do not launch full test or quality suites speculatively at the start of `final-pass` or in parallel with review or cleanup.
 
 Find the project's full test and quality gates in repository instructions (including AGENTS.md), CI workflows, scripts, and contributor or testing documentation. In each invocation, establish passing evidence for every required gate on the final state, by running it or by reusing valid evidence under [Check evidence and reuse](references/check-evidence.md). Targeted tests, smoke tests, and document validators do not replace full suites or quality checks. Small changes and long run times do not reduce coverage. Add checks in proportion to risk where the required gates leave a gap.
 
@@ -41,7 +43,7 @@ Only these permit a skip:
 
 Missing access, services, or authority blocks a required check; it does not exempt it. Try reasonable authorized alternatives first, and keep authorization boundaries for external effects.
 
-Fix authorized in-scope failures and verify the repairs. After each relevant change, reassess the evidence and rerun invalidated gates. Repeat until no actionable task-relevant issue remains and required checks pass. A failed or blocked required gate keeps the checkpoint incomplete. For each required gate, record the command, the result (passed, failed, skipped, or blocked), whether a pass was executed or reused (with its origin), and the reason for any skip or blocker.
+If the full checks expose authorized in-scope failures, batch the repairs and any resulting cleanup first (using targeted checks if needed while fixing), then reassess evidence and rerun only the invalidated gates. Repeat until no actionable task-relevant issue remains and required checks pass. A failed or blocked required gate keeps the checkpoint incomplete. For each required gate, record the command, the result (passed, failed, skipped, or blocked), whether a pass was executed or reused (with its origin), and the reason for any skip or blocker.
 
 ## Finish
 
