@@ -4,7 +4,7 @@ Use this when a request asks for a Codex, Claude, or Gemini review or review loo
 
 ## Passes
 
-For review loops (`code-review-loop`, `*-review-loop`, `execute-plan`, `ship-plan`), a two-pass request expands a provider into two sequential waves. Each wave uses one model family for that provider:
+For review loops (`code-review-loop`, `*-review-loop`, `execute-plan`, and `ship-plan` execution), a two-pass request expands a provider into two sequential waves (`ship-plan` runs a single Wave-1 plan review by default and reserves two-pass waves for implementation unless the user explicitly asks for two-pass plan review). Each wave uses one model family for that provider:
 
 | Provider | Pass 1 | Pass 2 |
 | -------- | ------ | ------ |

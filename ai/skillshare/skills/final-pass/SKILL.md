@@ -11,7 +11,7 @@ Close a checkpoint in strict order: review the full change set against the origi
 
 ## Checkpoint type
 
-- **Phase checkpoint**, during plan execution (`execute-plan`, `Completion and review checkpoints`): finish phase acceptance, integration with completed phases, cleanup, and required checks in order, then return to the executor. The selected reviews stay pending and do not block this checkpoint.
+- **Phase checkpoint**, during plan execution (`execute-plan`, `Completion and review checkpoints`): finish phase acceptance, integration with completed phases, cleanup, and required checks in order, then return to the executor. For an intermediate phase (`1..T-1` of a multi-phase plan), run affected tests and fast static gates (compile, typecheck, lint) rather than slow full-repo suites unless a dependent phase explicitly requires full-suite verification first. For the final phase (`T`, or the single phase of a single-phase plan), establish all required full test and quality gates. The selected reviews stay pending and do not block this checkpoint.
 - **Closing checkpoint**: after the selected review sequence returns, or after the active loop ends at its cap or a concrete blocker. Do everything below in order, including post-review recovery.
 - **Standalone**: a final check outside plan execution. Do everything below in order except post-review recovery, unless a review loop has ended.
 
@@ -38,6 +38,7 @@ Find the project's full test and quality gates in repository instructions (inclu
 Only these permit a skip:
 
 - An explicit user instruction.
+- Intermediate phase checkpoint (`1..T-1` in `execute-plan`): run affected tests and fast static gates (compile, typecheck, lint) and reserve slow full-repo suites for the final phase (`T`) and closing checkpoint, unless a dependent phase explicitly requires full-suite verification first.
 - Documentation-only work: run the required document or skill validators and skip unrelated application suites. This does not apply when the checkpoint changes code, configuration, or tests anywhere.
 - Checks that incur real external charges, such as smoke tests that call billed APIs, unless already authorized. Local compute and run time are not charges.
 
