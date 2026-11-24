@@ -18,6 +18,8 @@ A saved plan stands alone, without chat history or comparison notes:
 
 Keep plans focused on goals, outcomes, invariants, boundary contracts, irreversible or high-risk decisions, phase sequencing, and observable acceptance criteria. Do not write prose pseudo-code, wire/byte-level parser specifications, exact internal helper signatures or arities, literal internal tags/keys, exact SQL predicates, or exhaustive test inventories into a plan unless an explicit user requirement or external contract fixes them. When revising a plan after review, tighten the invariant, boundary, or acceptance check instead of expanding low-level implementation detail.
 
+Aim for ≤25 KB for saved plans; when genuine multi-system scope requires a larger plan, note the reason in one line of the plan or response (never expand plans with copied code, exhaustive file listings, or narrative). Plans are re-read across review rounds and execution phases, so unnecessary prose compounds context cost.
+
 ## Execution contract
 
 A plan completes in one autonomous execution session unless the user explicitly asks otherwise. It covers implementation, cleanup, and verification, and it uses `execute-plan` (`Completion and review checkpoints`) for checkpoint order: `final-pass` after every phase, the selected review sequence over the whole integrated implementation, then a closing `final-pass`. Task-relevant issues found during execution are resolved in that session. Do not add per-phase review loops, and do not copy runtime, coverage, or check-evidence rules from the skills that own them.
