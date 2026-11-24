@@ -1,6 +1,6 @@
 interface:
   display_name: "Ship Plan"
   short_description: "Review a plan or session scope, then execute it"
-  default_prompt: "Use $ship-plan to prepare and review my plan or current session scope (running final-pass where needed), then execute-plan with the same reviewer preferences."
+  default_prompt: "Use $ship-plan to prepare and architecturally review my plan or current session scope, then execute-plan with the same reviewer preferences."
 policy:
   allow_implicit_invocation: true

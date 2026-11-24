@@ -1,6 +1,6 @@
 ---
 name: claude-review-loop
-description: Review and remediate code through bounded Claude rounds, preferring T3's orchestrator with ACP fallback. Use only when explicitly requested.
+description: Review and remediate code, plans, or documentation through bounded Claude rounds, preferring T3's orchestrator with ACP fallback. Use only when explicitly requested.
 metadata:
   origin: custom
 ---

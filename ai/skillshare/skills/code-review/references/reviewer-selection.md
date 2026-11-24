@@ -24,7 +24,7 @@ Single source for parsing reviewer preferences across `code-review`, `code-revie
   - Plan review (`ship-plan` Stage 2): omit the extra `internal` plan-review loop; carry `internal` into Stage 4 (`execute-plan`).
 - **Supported two-pass repeat (`x 2` / `twice`) for Codex, Claude, or Gemini:**
   - One-shot (`code-review`): launch both families **in parallel** alongside any other selected reviewers.
-  - Loop (`code-review-loop`, `execute-plan`): expand into two sequential waves under [Two-pass review](two-pass-review.md)—Wave 1 combines all Pass-1 external reviewers (Codex Sol, Claude Opus, Gemini Neon) plus any single-pass external peers (such as Grok) into one panel; Wave 2 runs all Pass-2 reviewers (Codex Astra, Claude Fable, Gemini Carbon, combined if multiple are two-pass). Each sequential stage (internal, Wave 1, Wave 2) has its own ten-round cap.
+  - Loop (`code-review-loop`, `execute-plan`): expand into two sequential waves under [Two-pass review](two-pass-review.md)—Wave 1 combines all Pass-1 external reviewers (Codex Sol, Claude Opus, Gemini Neon) plus any single-pass external peers (such as Grok) into one panel; Wave 2 runs all Pass-2 reviewers (Codex Astra, Claude Fable, Gemini Carbon, combined if multiple are two-pass). Each sequential stage (internal, Wave 1, Wave 2) follows `code-review-loop`'s target-based round cap (**5 rounds** for code/implementation targets; **3 rounds** for planning or documentation targets).
   - Plan review (`ship-plan` Stage 2): run **Wave 1 only** (single pass) on the plan by default and apply both waves in Stage 4 (`execute-plan`), unless the user explicitly asks for two-pass plan review.
 
 ## Skill availability

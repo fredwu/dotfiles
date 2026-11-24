@@ -23,7 +23,7 @@ Assess the candidates symmetrically against the requirements: correctness, evide
 
 Use the strongest overall candidate as the base. Resolve conflicts from requirements and evidence: adopt better positions, combine compatible ideas, state justified conditions, or reject every candidate's answer. Keep required behavior and explicit compatibility.
 
-Write a synthesis, not concatenated candidates. Remove duplicates, superseded analysis, candidate identities, rankings, and comparison narration; keep evidence provenance. Besides the required plan content, include scope, relevant evidence, the chosen direction, prioritized concrete changes and locations, dependencies, acceptance checks, and material risks or blockers. Check every conclusion and action against the requirements, and repair drift and omissions that the candidates share.
+Write a synthesis, not concatenated candidates. Remove duplicates, superseded analysis, candidate identities, rankings, and comparison narration; keep evidence provenance. Besides the required plan content, include scope, relevant evidence, the chosen architecture and boundary contracts, prioritized outcome-based phases with representative locations, dependencies, observable acceptance criteria, and material risks or blockers—respecting the abstraction level in `plan-standards.md` rather than accumulating low-level implementation specs. Check every conclusion and action against the requirements, and repair drift and omissions that the candidates share.
 
 ## Save and respond
 

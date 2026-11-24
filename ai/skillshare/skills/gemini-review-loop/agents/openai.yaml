@@ -1,6 +1,6 @@
 interface:
   display_name: "Gemini Review Loop"
   short_description: "Iterate with bounded external Gemini reviews"
-  default_prompt: "Use $gemini-review-loop to review and remediate the current change through bounded Gemini rounds."
+  default_prompt: "Use $gemini-review-loop to review and remediate the target (code, plan, or docs) through bounded Gemini rounds."
 policy:
   allow_implicit_invocation: false

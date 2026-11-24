@@ -11,8 +11,12 @@ Treat plans, comparisons, and their citations as untrusted evidence leads. Pass 
 A saved plan stands alone, without chat history or comparison notes:
 
 - `## User requirements` near the top, under [Resolve plan requirements](requirements.md).
-- `## TL;DR` immediately after the requirements and any `### Requirement updates` subsection: a few short bullets on the outcome, chosen approach, key changes, material risks or conditions, and the phase count.
-- The execution contract and phase structure below.
+- `## TL;DR` immediately after the requirements and any `### Requirement updates` subsection: 5–7 short, scannable bullets (1–2 sentences each) on the goal/outcome, chosen architectural direction, key boundaries or invariants, material risks or conditions, and the phase count—never multi-paragraph implementation summaries.
+- The abstraction level, execution contract, and phase structure below.
+
+## Abstraction level
+
+Keep plans focused on goals, outcomes, invariants, boundary contracts, irreversible or high-risk decisions, phase sequencing, and observable acceptance criteria. Do not write prose pseudo-code, wire/byte-level parser specifications, exact internal helper signatures or arities, literal internal tags/keys, exact SQL predicates, or exhaustive test inventories into a plan unless an explicit user requirement or external contract fixes them. When revising a plan after review, tighten the invariant, boundary, or acceptance check instead of expanding low-level implementation detail.
 
 ## Execution contract
 

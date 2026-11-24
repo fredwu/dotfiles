@@ -5,7 +5,7 @@ Apply this policy to every review, internal or external, including each loop rou
 ## Select
 
 - **Model:** use the requested model. For an internal delegated review, target the current session's provider (for example T3's `inheritedProviderInstanceId`) and resolve its model and effort under this policy. For Codex, Claude, Grok, and Gemini, resolve a [model family](#resolve-a-model-family): in a [two-pass review](two-pass-review.md), the pass's family; in a single pass, Sol for Codex, Opus for Claude, Grok for Grok (which has no separate families), and Neon for Gemini. For other providers, choose an appropriate model from the live model list (preferring the current session model when targeting the same provider) and state material limits.
-- **Codex and Claude effort:** `medium` or `high` only. Use `medium` for a narrow, well-understood target with limited interactions. Use `high` for broad coverage, uncertain behavior, or consequential security, concurrency, data-integrity, or architectural interactions. Judge risk and uncertainty, not file count. If unsure, use `high`.
+- **Codex and Claude effort:** `medium` or `high` only. Use `high` for Round 1 broad reviews of non-trivial targets, uncertain behavior, structural refactors, or consequential security, concurrency, data-integrity, or architectural interactions. Use `medium` for narrow, well-understood targets with limited interactions and for **focused repair-verification rounds (Rounds 2+)** in a review loop when edits are localized and straightforward. Judge risk and uncertainty, not file count. If unsure on a broad or high-risk pass, use `high`.
 - **Grok effort:** always `xhigh`.
 - **Gemini effort:** always `high`.
 
