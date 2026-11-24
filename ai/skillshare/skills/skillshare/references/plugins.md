@@ -130,7 +130,7 @@ no Agent holds it, drops the package from Skillshare entirely.
 
 Claude supports native updates; Codex re-adds the reviewed snapshot unless the plugin is disabled in Codex. Cursor/Antigravity replace managed
 local copies; Pi/OpenCode refresh reviewed source snapshots; OMP removes its scoped registration and reinstalls the reviewed commit. Imported Codex plugins update by upgrading their marketplace; imported Pi packages through `pi update`, global only. Imported OpenCode v1 packages must be updated natively. OpenCode v2 global
-package imports may use native update; imported local directories and project imports may not. Copilot and Antigravity CLI source updates
+package imports may use native update, retried while OpenCode is still loading its plugins (it then reports `Plugin is not configured`; packages its settings no longer list are skipped); imported local directories and project imports may not. Copilot and Antigravity CLI source updates
 require known native enabled state; Grok updates natively. Project mode supports Claude, Antigravity, Pi,
 OMP and OpenCode, never falling back to global scope. An update reports failed targets and continues healthy targets; intentional skips remain pending. Dry runs print the complete plan and exit nonzero on failure; isolated failures include `failed: true` in JSON.
 
@@ -139,11 +139,14 @@ OMP and OpenCode, never falling back to global scope. An update reports failed t
 - Cursor: `.cursor-plugin/plugin.json` or Agent Plugins root manifest; copy to
   `~/.cursor/plugins/local/`. Local imports must be allowed; marketplace copies can
   take precedence. No CLI required. Reload and verify in Cursor.
-- Antigravity: root `plugin.json` with explicit `name`; copy to
-  `~/.gemini/config/plugins/`, or project `.agents/plugins/` (existing `_agents/plugins/`
-  is supported). This targets desktop/workspace discovery, not the separate
-  standalone agy CLI plugin store. Use `antigravity-cli` for that store; `agy`
-  remains the desktop alias. No Gemini CLI adapter is provided.
+- Antigravity: `.antigravity-plugin/plugin.json`, `.gemini-plugin/plugin.json`, or root
+  `plugin.json` with explicit `name` (in that precedence order); native
+  `.antigravity-plugin/marketplace.json` catalogs take precedence over
+  `.claude-plugin/marketplace.json` (which is a fallback for `antigravity-cli` only when no
+  Antigravity catalog exists); copy to `~/.gemini/config/plugins/`, or project
+  `.agents/plugins/` (existing `_agents/plugins/` is supported). This targets desktop/workspace
+  discovery, not the separate standalone agy CLI plugin store. Use `antigravity-cli` for that
+  store; `agy` remains the desktop alias. No Gemini CLI adapter is provided.
 - Pi: `package.json` with a `pi` resource manifest or `pi-package` conventions. Native install/remove; read-only
   settings inventory honors `PI_CODING_AGENT_DIR`. Project trust must be completed
   in Pi; do not bypass it with automatic approval flags.
