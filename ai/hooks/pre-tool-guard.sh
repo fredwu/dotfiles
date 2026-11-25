@@ -1093,9 +1093,10 @@ def resolve_tmux_pane_cwd(target, server_opts):
     return None
 
 
-def unwrap_tokens(tokens, cwd, inherited_wrappers=None):
-    """Unwrap env assignments and exec wrappers. Returns (tokens, wrappers_seen, effective_cwd, err)."""
+def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
+    """Unwrap env assignments and exec wrappers. Returns (tokens, wrappers_seen, env_assigns, effective_cwd, err)."""
     wrappers = set(inherited_wrappers or ())
+    env_assigns = list(inherited_env or ())
     eff_cwd = cwd
     idx = 0
     n = len(tokens)
@@ -1103,6 +1104,7 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None):
     while idx < n:
         tok = tokens[idx]
         if ENV_ASSIGN_RE.match(tok):
+            env_assigns.append(tok)
             idx += 1
             continue
 
@@ -1120,7 +1122,7 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None):
                     if t == "-C" and idx + 1 < n:
                         resolved = resolve_dir_arg(eff_cwd, tokens[idx + 1])
                         if not resolved:
-                            return [], wrappers, eff_cwd, "Cannot determine execution directory for `env -C`."
+                            return [], wrappers, env_assigns, eff_cwd, "Cannot determine execution directory for `env -C`."
                         eff_cwd = resolved
                     idx += 2
                     continue
@@ -1130,7 +1132,11 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None):
                     tokens = tokens[:idx] + spliced + tokens[idx + 2 :]
                     n = len(tokens)
                     break
-                if t.startswith("-") or ENV_ASSIGN_RE.match(t):
+                if ENV_ASSIGN_RE.match(t):
+                    env_assigns.append(t)
+                    idx += 1
+                    continue
+                if t.startswith("-"):
                     idx += 1
                     continue
                 break
@@ -1233,12 +1239,16 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None):
                     sudo_shell = True
                     idx += 1
                     continue
-                if t.startswith("-") or ENV_ASSIGN_RE.match(t):
+                if ENV_ASSIGN_RE.match(t):
+                    env_assigns.append(t)
+                    idx += 1
+                    continue
+                if t.startswith("-"):
                     idx += 1
                     continue
                 break
             if sudo_shell and idx >= n:
-                return ["sh"], wrappers, eff_cwd, None
+                return ["sh"], wrappers, env_assigns, eff_cwd, None
             continue
 
         if base in SIMPLE_WRAPPERS:
@@ -1270,21 +1280,21 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None):
                 if t in ("-C", "--cd") and j + 1 < n:
                     resolved = resolve_dir_arg(mise_cwd, tokens[j + 1])
                     if not resolved:
-                        return [], wrappers, eff_cwd, "Cannot determine execution directory for `mise -C`."
+                        return [], wrappers, env_assigns, eff_cwd, "Cannot determine execution directory for `mise -C`."
                     mise_cwd = resolved
                     j += 2
                     continue
                 if t.startswith("-C="):
                     resolved = resolve_dir_arg(mise_cwd, t[3:])
                     if not resolved:
-                        return [], wrappers, eff_cwd, "Cannot determine execution directory for `mise -C`."
+                        return [], wrappers, env_assigns, eff_cwd, "Cannot determine execution directory for `mise -C`."
                     mise_cwd = resolved
                     j += 1
                     continue
                 if t.startswith("--cd="):
                     resolved = resolve_dir_arg(mise_cwd, t[5:])
                     if not resolved:
-                        return [], wrappers, eff_cwd, "Cannot determine execution directory for `mise --cd`."
+                        return [], wrappers, env_assigns, eff_cwd, "Cannot determine execution directory for `mise --cd`."
                     mise_cwd = resolved
                     j += 1
                     continue
@@ -1307,7 +1317,7 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None):
                     if t in ("-C", "--cd") and idx + 1 < n:
                         resolved = resolve_dir_arg(eff_cwd, tokens[idx + 1])
                         if not resolved:
-                            return [], wrappers, eff_cwd, "Cannot determine execution directory for `mise exec -C`."
+                            return [], wrappers, env_assigns, eff_cwd, "Cannot determine execution directory for `mise exec -C`."
                         eff_cwd = resolved
                         idx += 2
                         continue
@@ -1328,7 +1338,7 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None):
 
         break
 
-    return tokens[idx:], wrappers, eff_cwd, None
+    return tokens[idx:], wrappers, env_assigns, eff_cwd, None
 
 
 def is_data_command(tokens):
@@ -1569,12 +1579,13 @@ def extract_subpayloads(tokens, cwd, prev_op, wrappers, attached_heredocs=None, 
     return results
 
 
-def evaluate_policy(tokens, wrappers, raw_segment, policy):
+def evaluate_policy(tokens, wrappers, raw_segment, policy, env_assigns=None):
     """Returns (decision, reason) or None."""
     if not policy or not tokens:
         return None
 
     unwrapped_str = " ".join(tokens)
+    with_env_str = " ".join(list(env_assigns) + tokens) if env_assigns else unwrapped_str
     clean_raw = strip_unquoted_comment(raw_segment)
     data_cmd = is_data_command(tokens)
     best = None
@@ -1599,7 +1610,7 @@ def evaluate_policy(tokens, wrappers, raw_segment, policy):
         else:
             if data_cmd and not rule["match_data_commands"]:
                 continue
-            if rule["cmd_re"].search(unwrapped_str):
+            if rule["cmd_re"].search(unwrapped_str) or (env_assigns and rule["cmd_re"].search(with_env_str)):
                 matched = True
 
         if matched:
@@ -1623,7 +1634,16 @@ def merge_decisions(worst, res):
     return worst
 
 
-def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None, heredoc_map=None, stdin_heredocs=None):
+def eval_command(
+    cmd,
+    start_cwds,
+    policy_cache,
+    depth=0,
+    inherited_wrappers=None,
+    heredoc_map=None,
+    stdin_heredocs=None,
+    inherited_env=None,
+):
     """Evaluate `cmd` and return `(worst_decision_or_None, final_active_cwds)`."""
     if depth > 6:
         return ("deny", "Command nesting depth exceeded guardrail inspection limit."), set(start_cwds)
@@ -1671,13 +1691,13 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
                     body = entry["body"] if isinstance(entry, dict) else (entry or "")
                     if body.strip():
                         res, _sc = eval_command(
-                            body, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs
+                            body, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs, None, inherited_env
                         )
                         worst = merge_decisions(worst, res)
                         if worst and worst[0] == "deny":
                             return worst, active_cwds
             res, _sub_cwds = eval_command(
-                content, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs, stdin_heredocs
+                content, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs, stdin_heredocs, inherited_env
             )
             worst = merge_decisions(worst, res)
             if worst and worst[0] == "deny":
@@ -1691,7 +1711,7 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
         if kind == "group":
             # Brace group runs in parent shell unless piped or backgrounded.
             res, group_cwds = eval_command(
-                content, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs, stdin_heredocs
+                content, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs, stdin_heredocs, inherited_env
             )
             worst = merge_decisions(worst, res)
             if not runs_in_child_shell:
@@ -1722,7 +1742,7 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
                 if isinstance(entry, dict) and not entry.get("quoted", True):
                     for subst_cmd in extract_unquoted_heredoc_substs(entry.get("body", "")):
                         res, _sc = eval_command(
-                            subst_cmd, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs
+                            subst_cmd, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs, None, inherited_env
                         )
                         worst = merge_decisions(worst, res)
                         if worst and worst[0] == "deny":
@@ -1766,7 +1786,9 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
             ), active_cwds
 
         for c in sorted(active_cwds):
-            unwrapped, wrappers, seg_cwd, unwrap_err = unwrap_tokens(tokens, c, inherited_wrappers)
+            unwrapped, wrappers, env_assigns, seg_cwd, unwrap_err = unwrap_tokens(
+                tokens, c, inherited_wrappers, inherited_env
+            )
             if unwrap_err:
                 return ("deny", unwrap_err), active_cwds
             if not unwrapped:
@@ -1786,7 +1808,7 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
                         return ("deny", p_err), active_cwds
                     if p_cmd:
                         res, _p_cwds = eval_command(
-                            p_cmd, p_cwd, policy_cache, depth + 1, p_wrappers, merged_heredocs, p_stdin
+                            p_cmd, p_cwd, policy_cache, depth + 1, p_wrappers, merged_heredocs, p_stdin, env_assigns
                         )
                         worst = merge_decisions(worst, res)
                         if worst and worst[0] == "deny":
@@ -1795,7 +1817,7 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
 
             repo_root = find_git_root(seg_cwd)
             policy = load_policy(repo_root, policy_cache)
-            worst = merge_decisions(worst, evaluate_policy(unwrapped, wrappers, content, policy))
+            worst = merge_decisions(worst, evaluate_policy(unwrapped, wrappers, content, policy, env_assigns))
             if worst and worst[0] == "deny":
                 return worst, active_cwds
 
