@@ -1,6 +1,6 @@
 ---
 name: gemini-review-loop
-description: Review and remediate code, plans, or documentation through bounded Gemini rounds, preferring T3's orchestrator with ACP fallback. Use only when explicitly requested.
+description: Bounded Gemini review-and-remediation loop for code, plans, or docs (explicit requests only).
 metadata:
   origin: custom
 ---

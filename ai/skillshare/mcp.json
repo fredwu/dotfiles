@@ -63,18 +63,6 @@
         "-y",
         "@playwright/mcp@0.0.83"
       ]
-    },
-    "terraform": {
-      "transport": "stdio",
-      "command": {
-        "executable": "docker"
-      },
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "hashicorp/terraform-mcp-server@sha256:11dd418bba6003dd5777e9d0979b68de59929a155b355f338f407947e00e9d80"
-      ]
     }
   }
 }

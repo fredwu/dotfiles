@@ -44,6 +44,7 @@ install_ai_links() {
     fi
     ensure_symlink "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$HOME/.$name/$instructions"
   done
+  ensure_symlink "$DOTFILES_ROOT/ai/hooks/pre-tool-guard.sh" "$HOME/.claude/hooks/pre-tool-guard.sh"
 }
 
 install_dotfiles() {

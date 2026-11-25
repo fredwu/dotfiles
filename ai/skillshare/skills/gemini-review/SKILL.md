@@ -1,6 +1,6 @@
 ---
 name: gemini-review
-description: Run a read-only Gemini review pass through T3's orchestrator when available, with ACP fallback (one Gemini review by default; direct multi-reviewer or repeat requests run selected reviewers in parallel). Use only when explicitly requested. Use gemini-review-loop for review and remediation.
+description: Read-only Gemini review pass (explicit requests only; parallel for direct multi-reviewer or repeat requests). Use gemini-review-loop for remediation.
 metadata:
   origin: custom
 ---

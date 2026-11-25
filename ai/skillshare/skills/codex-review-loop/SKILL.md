@@ -1,6 +1,6 @@
 ---
 name: codex-review-loop
-description: Review and remediate code, plans, or documentation through bounded Codex rounds, preferring T3's orchestrator with ACP fallback. Use only when explicitly requested.
+description: Bounded Codex review-and-remediation loop for code, plans, or docs (explicit requests only).
 metadata:
   origin: custom
 ---

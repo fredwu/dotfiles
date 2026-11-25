@@ -1,6 +1,6 @@
 ---
 name: claude-review
-description: Run a read-only Claude review pass through T3's orchestrator when available, with ACP fallback (one Claude review by default; direct multi-reviewer or repeat requests run selected reviewers in parallel). Use only when explicitly requested. Use claude-review-loop for review and remediation.
+description: Read-only Claude review pass (explicit requests only; parallel for direct multi-reviewer or repeat requests). Use claude-review-loop for remediation.
 metadata:
   origin: custom
 ---

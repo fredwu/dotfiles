@@ -92,10 +92,8 @@
       "name": "pr-review-toolkit",
       "target": "claude",
       "nativeId": "pr-review-toolkit@claude-plugins-official",
-      "classification": "portable",
-      "source": "https://github.com/anthropics/claude-plugins-official.git",
-      "sourceRef": "f8c5e7a1dcb71b10cb74586224b5401f3de5db28",
-      "plugin": "pr-review-toolkit"
+      "classification": "local",
+      "reason": "Native plugin is disabled; retired in favor of custom code-review skills"
     },
     {
       "name": "claude-code-wakatime",

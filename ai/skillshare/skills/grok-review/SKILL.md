@@ -1,6 +1,6 @@
 ---
 name: grok-review
-description: Run a read-only Grok review pass through T3's orchestrator when available, with ACP fallback (one Grok review by default; direct multi-reviewer requests run selected reviewers in parallel). Use only when explicitly requested. Use grok-review-loop for review and remediation.
+description: Read-only Grok review pass (explicit requests only; parallel for direct multi-reviewer requests). Use grok-review-loop for remediation.
 metadata:
   origin: custom
 ---
