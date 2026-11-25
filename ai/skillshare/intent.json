@@ -36,7 +36,5 @@
     "mcp": {"targets": ["claude", "codex", "opencode", "grok", "claude-desktop"]}
   },
   "executables": {"uvx": "uvx", "npx": "npx", "docker": "docker"},
-  "external": [
-    {"name": "godot-ai", "kind": "mcp", "from": "claude", "path": "${home}/.claude.json"}
-  ]
+  "external": []
 }

@@ -94,7 +94,7 @@ try {
       m.loadIntent({ ...b, platform: process.platform }).config.mcp.targets);
     const intent = m.loadIntent({ ...b, platform: 'darwin' });
     const servers = {
-      'godot-ai': m.loadCanonicalMcp(b)['godot-ai'],
+      'chrome-devtools': m.loadCanonicalMcp(b)['chrome-devtools'],
       remote: { url: 'https://example.com/mcp' },
       env: { command: { executable: 'uvx' }, env: { FIXTURE_VALUE: { fromEnv: 'FIXTURE_VALUE' } } },
       explicit: { url: 'https://example.com/explicit', targets: ['claude-desktop', 'codex'] },
@@ -103,7 +103,7 @@ try {
     };
     const prepared = m.prepare({ ...b, intent, servers, platform: 'darwin' });
     const generated = yaml.parse(prepared.mcp.text).servers;
-    assert(!Object.hasOwn(generated['godot-ai'], 'targets'));
+    assert(!Object.hasOwn(generated['chrome-devtools'], 'targets'));
     assert.deepEqual(generated.remote.targets, compatible);
     assert.deepEqual(generated.env.targets, compatible);
     assert.deepEqual(generated.explicit.targets, ['codex']);
@@ -130,7 +130,7 @@ try {
       native(b, ['sync', 'mcp', '--json', '-g']);
       const desktop = JSON.parse(fs.readFileSync(path.join(b.home,
         'Library/Application Support/Claude/claude_desktop_config.json'))).mcpServers;
-      assert(Object.hasOwn(desktop, 'godot-ai'));
+      assert(Object.hasOwn(desktop, 'chrome-devtools'));
       assert(!Object.hasOwn(desktop, 'remote'));
       assert(!Object.hasOwn(desktop, 'env'));
     }
@@ -140,16 +140,16 @@ try {
     assert.deepEqual(next.remote.targets, [...compatible, 'pi']);
     assert.deepEqual(next.env.targets, [...compatible, 'pi']);
     assert.deepEqual(next.explicit.targets, ['codex']);
-    assert(!Object.hasOwn(next['godot-ai'], 'targets'));
+    assert(!Object.hasOwn(next['chrome-devtools'], 'targets'));
     assert.deepEqual(snapshot([canonicalFile, intentFile]), before);
   });
   check('simulated Linux source syncs to four compatible clients through the host CLI', () => {
     const b = { ...fixture('linux-delivery'), platform: 'linux' };
-    const servers = { 'godot-ai': m.loadCanonicalMcp(b)['godot-ai'], remote: { url: 'https://example.com/mcp' } };
+    const servers = { 'chrome-devtools': m.loadCanonicalMcp(b)['chrome-devtools'], remote: { url: 'https://example.com/mcp' } };
     const prepared = m.prepare({ ...b, servers });
     assert.deepEqual(prepared.intent.metadata.omittedMcpDefaults, [{ target: 'claude-desktop', reason: 'unsupported-platform' }]);
     const generated = yaml.parse(prepared.mcp.text).servers;
-    assert(!Object.hasOwn(generated['godot-ai'], 'targets'));
+    assert(!Object.hasOwn(generated['chrome-devtools'], 'targets'));
     assert(!Object.hasOwn(generated.remote, 'targets'));
     m.applyPrepared(prepared); m.writeState(b, prepared.state);
     native(b, ['sync', 'mcp', '--json', '-g']);
@@ -159,7 +159,7 @@ try {
     ]) {
       const text = fs.readFileSync(path.join(b.home, relative), 'utf8');
       assert(text.includes(needle));
-      assert(text.includes('godot-ai'));
+      assert(text.includes('chrome-devtools'));
     }
     for (const relative of ['Library/Application Support/Claude/claude_desktop_config.json',
       '.config/Claude/claude_desktop_config.json', 'AppData/Roaming/Claude/claude_desktop_config.json']) {
@@ -236,7 +236,7 @@ try {
   });
   check('canonical capture and render round trip across homes and executable paths with spaces', () => {
     const b = fixture('second-home');
-    const canonical = m.loadCanonicalMcp(a)['godot-ai'];
+    const canonical = m.loadCanonicalMcp(a)['chrome-devtools'];
     const one = m.renderServer(canonical, a);
     assert(one.command.includes('tools with spaces'));
     const captured = m.captureServer({ ...one, timeout: 500, private_client_field: 'local', targets: ['claude'] }, a);
@@ -248,7 +248,7 @@ try {
     assert.throws(() => m.captureServer({ command: '/some/unknown', args: [] }, a), /binding/);
     assert.throws(() => m.captureServer({ ...one, args: ['/home/private/model'] }, a), /Machine-specific/);
     assert.throws(() => m.captureServer({ ...one, args: ['/workspace/private/model'] }, a), /Machine-specific/);
-    assert.equal(m.captureServer(one, { executables: { absent: '/does/not/exist', uvx: a.executables.uvx } }).command.executable, 'uvx');
+    assert.equal(m.captureServer(one, { executables: { absent: '/does/not/exist', npx: a.executables.npx } }).command.executable, 'npx');
     assert.throws(() => m.captureServer({ ...one, env: { TOKEN: 'secret' } }, a), /environment references/);
     assert.throws(() => m.captureServer({ ...one, extra: '/native' }, { ...a, fields: ['command', 'args', 'extra'] }), /Unsupported MCP field/);
   });
@@ -256,12 +256,12 @@ try {
     const p = m.paths(a);
     const value = yaml.parse(fs.readFileSync(p.mcpFile, 'utf8'));
     value.servers.local = { command: '/local/tool', args: ['private'] };
-    value.servers['godot-ai'].options = { claude: { timeout: 500 } };
+    value.servers['chrome-devtools'].options = { claude: { timeout: 500 } };
     file(p.mcpFile, yaml.stringify(value));
     const projected = m.prepare(a);
     assert.equal(yaml.parse(projected.mcp.text).servers.local.command, '/local/tool');
-    assert.equal(yaml.parse(projected.mcp.text).servers['godot-ai'].options.claude.timeout, 500);
-    value.servers['godot-ai'].args.push('--local-edit');
+    assert.equal(yaml.parse(projected.mcp.text).servers['chrome-devtools'].options.claude.timeout, 500);
+    value.servers['chrome-devtools'].args.push('--local-edit');
     file(p.mcpFile, yaml.stringify(value));
     assert.throws(() => m.prepare(a), /Local edit/);
   });
@@ -501,7 +501,7 @@ try {
     }
     file(b.configFile, unchanged);
     const edited = yaml.parse(deferred.mcp.text);
-    edited.servers['godot-ai'].args.push('owned-edit');
+    edited.servers['chrome-devtools'].args.push('owned-edit');
     file(b.mcpFile, yaml.stringify(edited));
     assert.throws(() => m.prepare({ ...b, intent, deferMcp: true }), /Local edit/);
     file(b.mcpFile, deferred.mcp.text);
@@ -516,7 +516,7 @@ try {
       if (kind === 'old') { b.skillshare = path.join(b.home, 'old-cli'); file(b.skillshare, '#!/bin/sh\necho "skillshare v0.20.25"\n', 0o755); }
       if (kind === 'missing') b.skillshare = path.join(b.home, 'absent');
       if (kind === 'parser') b.depsDir = path.join(b.home, 'absent');
-      if (kind === 'launcher') b.executables.uvx = path.join(b.home, 'absent');
+      if (kind === 'launcher') b.executables.npx = path.join(b.home, 'absent');
       assert.throws(() => m.prepare(b));
       const p = m.paths(b);
       assert(!fs.existsSync(p.configFile)); assert(!fs.existsSync(p.mcpFile)); assert(!fs.existsSync(p.stateFile));
@@ -544,7 +544,7 @@ try {
     const b = fixture('state'); const p = m.prepare(b);
     m.applyPrepared(p);
     assert(!fs.existsSync(p.paths.stateFile));
-    p.state.external['godot-ai'] = { portable: m.loadCanonicalMcp(b)['godot-ai'] };
+    p.state.external['chrome-devtools'] = { portable: m.loadCanonicalMcp(b)['chrome-devtools'] };
     m.writeState(b, p.state);
     const next = m.prepare(b);
     assert.deepEqual(next.state.external, p.state.external);
