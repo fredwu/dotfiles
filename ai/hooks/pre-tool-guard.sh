@@ -155,14 +155,31 @@ def load_policy(repo_root, cache):
 
 
 def normalize_continuations(cmd):
-    """Join backslash-newline continuations outside single quotes."""
+    """Join backslash-newline continuations outside single quotes and $'...' ANSI-C quotes."""
     out = []
     i = 0
     n = len(cmd)
     in_sq = False
     in_dq = False
+    in_ansic = False
     while i < n:
         ch = cmd[i]
+        if in_ansic:
+            if ch == "\\" and i + 1 < n:
+                out.append(ch)
+                out.append(cmd[i + 1])
+                i += 2
+                continue
+            if ch == "'":
+                in_ansic = False
+            out.append(ch)
+            i += 1
+            continue
+        if not in_sq and not in_dq and ch == "$" and i + 1 < n and cmd[i + 1] == "'":
+            in_ansic = True
+            out.append("$'")
+            i += 2
+            continue
         if ch == "'" and not in_dq:
             in_sq = not in_sq
             out.append(ch)
@@ -192,19 +209,22 @@ def normalize_continuations(cmd):
 def parse_heredoc_delimiter(line, j):
     """
     Parse a POSIX/Bash heredoc delimiter word starting at `j` with shell
-    quote-removal rules. Returns (delim, next_idx, error_reason).
+    quote-removal rules. Returns (delim, quoted_delim, saw_word, next_idx, error_reason).
     """
     n = len(line)
     delim_chars = []
     delim_sq = False
     delim_dq = False
     delim_esc = False
+    quoted_delim = False
+    saw_word = False
     meta = (" ", "\t", "\r", ";", "&", "|", "<", ">", "(", ")")
     while j < n:
         ch = line[j]
         if delim_esc:
             delim_chars.append(ch)
             delim_esc = False
+            saw_word = True
             j += 1
             continue
         if delim_sq:
@@ -212,48 +232,60 @@ def parse_heredoc_delimiter(line, j):
                 delim_sq = False
             else:
                 delim_chars.append(ch)
+            saw_word = True
             j += 1
             continue
         if delim_dq:
             if ch == '"':
                 delim_dq = False
+                saw_word = True
                 j += 1
                 continue
-            if ch == "\\" and j + 1 < n and line[j + 1] in ('"', "\\"):
+            if ch == "\\" and j + 1 < n and line[j + 1] in ('"', "\\", "$", "`"):
                 delim_chars.append(line[j + 1])
+                saw_word = True
                 j += 2
                 continue
             delim_chars.append(ch)
+            saw_word = True
             j += 1
             continue
         if ch in meta:
             break
         if ch == "\\":
             delim_esc = True
+            quoted_delim = True
+            saw_word = True
             j += 1
             continue
         if ch == "'":
             delim_sq = True
+            quoted_delim = True
+            saw_word = True
             j += 1
             continue
         if ch == '"':
             delim_dq = True
+            quoted_delim = True
+            saw_word = True
             j += 1
             continue
         delim_chars.append(ch)
+        saw_word = True
         j += 1
 
     if delim_sq or delim_dq or delim_esc:
-        return None, j, "Unterminated quote in heredoc delimiter; refusing fail-closed."
-    return "".join(delim_chars), j, None
+        return None, quoted_delim, saw_word, j, "Unterminated quote in heredoc delimiter; refusing fail-closed."
+    return "".join(delim_chars), quoted_delim, saw_word, j, None
 
 
-def find_heredoc_ops_on_line(line, in_sq=False, in_dq=False):
+def find_heredoc_ops_on_line(line, in_sq=False, in_dq=False, in_ansic=False, arith_depth=0, arith_parens=0):
     """
-    Scan a single line carrying quote state across lines, skipping single/double
-    quoted text, unquoted `#` comments, and here-strings (`<<<`).
-    Returns (ops, end_in_sq, end_in_dq, error_reason), where each op is
-    (start_idx, end_idx, strip_tabs, delimiter).
+    Scan a single line carrying quote/arithmetic state across lines, skipping
+    single/double/ANSI-C quoted text, unquoted `#` comments, arithmetic `((...))`,
+    and here-strings (`<<<`).
+    Returns (ops, end_in_sq, end_in_dq, end_in_ansic, end_arith_depth, end_arith_parens, error_reason),
+    where each op is (start_idx, end_idx, strip_tabs, delimiter, quoted_delim).
     """
     ops = []
     i = 0
@@ -261,6 +293,15 @@ def find_heredoc_ops_on_line(line, in_sq=False, in_dq=False):
     esc = False
     while i < n:
         ch = line[i]
+        if in_ansic:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == "'":
+                in_ansic = False
+            i += 1
+            continue
         if esc:
             esc = False
             i += 1
@@ -268,6 +309,10 @@ def find_heredoc_ops_on_line(line, in_sq=False, in_dq=False):
         if ch == "\\" and not in_sq:
             esc = True
             i += 1
+            continue
+        if not in_sq and not in_dq and ch == "$" and i + 1 < n and line[i + 1] == "'":
+            in_ansic = True
+            i += 2
             continue
         if ch == "'" and not in_dq:
             in_sq = not in_sq
@@ -278,8 +323,32 @@ def find_heredoc_ops_on_line(line, in_sq=False, in_dq=False):
             i += 1
             continue
         if not in_sq and not in_dq:
-            if ch == "#" and (i == 0 or line[i - 1] in (" ", "\t", ";", "(", "{")):
+            if ch == "#" and arith_depth == 0 and (i == 0 or line[i - 1] in (" ", "\t", ";", "(", "{")):
                 break
+            if ch == "$" and i + 2 < n and line[i + 1 : i + 3] == "((":
+                arith_depth += 1
+                i += 3
+                continue
+            if ch == "(" and i + 1 < n and line[i + 1] == "(" and arith_depth == 0:
+                arith_depth += 1
+                i += 2
+                continue
+            if arith_depth > 0:
+                if ch == "(":
+                    arith_parens += 1
+                    i += 1
+                    continue
+                if ch == ")":
+                    if arith_parens > 0:
+                        arith_parens -= 1
+                        i += 1
+                        continue
+                    if i + 1 < n and line[i + 1] == ")":
+                        arith_depth -= 1
+                        i += 2
+                        continue
+                i += 1
+                continue
             if ch == "<" and i + 1 < n and line[i + 1] == "<":
                 # Skip here-string `<<<`
                 if i + 2 < n and line[i + 2] == "<":
@@ -296,15 +365,15 @@ def find_heredoc_ops_on_line(line, in_sq=False, in_dq=False):
                 if j >= n:
                     i = j
                     continue
-                delim, j, err = parse_heredoc_delimiter(line, j)
+                delim, quoted_delim, saw_word, j, err = parse_heredoc_delimiter(line, j)
                 if err:
-                    return [], in_sq, in_dq, err
-                if delim:
-                    ops.append((op_start, j, strip_tabs, delim))
+                    return [], in_sq, in_dq, in_ansic, arith_depth, arith_parens, err
+                if saw_word:
+                    ops.append((op_start, j, strip_tabs, delim, quoted_delim))
                 i = j
                 continue
         i += 1
-    return ops, in_sq, in_dq, None
+    return ops, in_sq, in_dq, in_ansic, arith_depth, arith_parens, None
 
 
 def strip_heredocs(cmd, token_offset=0):
@@ -312,13 +381,8 @@ def strip_heredocs(cmd, token_offset=0):
     Quote- and comment-aware heredoc stripper that preserves multiline quote
     state and replaces each `<<[-]?DELIM` operator in place with a unique
     marker token (`__PRE_TOOL_GUARD_HEREDOC_<N>__`).
-    - Because the `<<` operator is removed in place, nested `{ ... }` / `( ... )`
-      evaluations never misread already-stripped heredocs as unterminated.
-    - Because the marker sits directly on the owning command (before trailing
-      comments or later `; cd ...` commands), shell-fed heredoc bodies are
-      inspected in the exact effective `cwd` of the command that owns the
-      redirection.
-    - An unclosed heredoc fails closed (`error_reason`).
+    Stores `{"body": body_text, "quoted": quoted_delim}` in `heredoc_map`.
+    An unclosed heredoc fails closed (`error_reason`).
     """
     lines = cmd.split("\n")
     out_lines = []
@@ -327,10 +391,15 @@ def strip_heredocs(cmd, token_offset=0):
     n = len(lines)
     in_sq = False
     in_dq = False
+    in_ansic = False
+    arith_depth = 0
+    arith_parens = 0
     next_id = token_offset
     while i < n:
         line = lines[i]
-        ops, in_sq, in_dq, op_err = find_heredoc_ops_on_line(line, in_sq, in_dq)
+        ops, in_sq, in_dq, in_ansic, arith_depth, arith_parens, op_err = find_heredoc_ops_on_line(
+            line, in_sq, in_dq, in_ansic, arith_depth, arith_parens
+        )
         if op_err:
             return "", {}, op_err
         if not ops:
@@ -339,7 +408,7 @@ def strip_heredocs(cmd, token_offset=0):
             continue
 
         replacements = []
-        for op_start, op_end, strip_tabs, delim in ops:
+        for op_start, op_end, strip_tabs, delim, quoted_delim in ops:
             body = []
             found_end = False
             i += 1
@@ -354,7 +423,7 @@ def strip_heredocs(cmd, token_offset=0):
                 return "", {}, f"Unterminated heredoc (missing delimiter `{delim}`); refusing fail-closed."
             token_id = f"__PRE_TOOL_GUARD_HEREDOC_{next_id}__"
             next_id += 1
-            heredoc_map[token_id] = "\n".join(body)
+            heredoc_map[token_id] = {"body": "\n".join(body), "quoted": quoted_delim}
             replacements.append((op_start, op_end, f" {token_id} "))
 
         rebuilt = []
@@ -369,33 +438,135 @@ def strip_heredocs(cmd, token_offset=0):
     return "\n".join(out_lines), heredoc_map, None
 
 
+def extract_unquoted_heredoc_substs(body):
+    """Extract `$(...)` and backtick command substitutions from an unquoted heredoc body."""
+    substs = []
+    i = 0
+    n = len(body)
+    while i < n:
+        ch = body[i]
+        if ch == "\\" and i + 1 < n:
+            i += 2
+            continue
+        if ch == "$" and i + 1 < n and body[i + 1] == "(":
+            # Skip arithmetic $((...))
+            if i + 2 < n and body[i + 2] == "(":
+                i += 3
+                continue
+            depth = 1
+            j = i + 2
+            sub_sq = False
+            sub_dq = False
+            sub_ansic = False
+            sub_esc = False
+            while j < n and depth > 0:
+                c2 = body[j]
+                if sub_ansic:
+                    if sub_esc:
+                        sub_esc = False
+                    elif c2 == "\\":
+                        sub_esc = True
+                    elif c2 == "'":
+                        sub_ansic = False
+                elif sub_esc:
+                    sub_esc = False
+                elif c2 == "\\" and not sub_sq:
+                    sub_esc = True
+                elif not sub_sq and not sub_dq and c2 == "$" and j + 1 < n and body[j + 1] == "'":
+                    sub_ansic = True
+                    j += 2
+                    continue
+                elif c2 == "'" and not sub_dq:
+                    sub_sq = not sub_sq
+                elif c2 == '"' and not sub_sq:
+                    sub_dq = not sub_dq
+                elif not sub_sq and not sub_dq:
+                    if c2 == "(":
+                        depth += 1
+                    elif c2 == ")":
+                        depth -= 1
+                j += 1
+            inner = body[i + 2 : j - 1].strip() if depth == 0 else body[i + 2 :].strip()
+            if inner:
+                substs.append(inner)
+            i = j
+            continue
+        if ch == "`":
+            j = i + 1
+            sub_esc = False
+            while j < n:
+                c2 = body[j]
+                if sub_esc:
+                    sub_esc = False
+                elif c2 == "\\":
+                    sub_esc = True
+                elif c2 == "`":
+                    break
+                j += 1
+            inner = body[i + 1 : j].strip()
+            if inner:
+                substs.append(inner)
+            i = min(j + 1, n)
+            continue
+        i += 1
+    return substs
+
+
 def strip_unquoted_comment(segment):
     """Strip unquoted `#...` comments that start at beginning or after whitespace."""
     out = []
     in_sq = False
     in_dq = False
+    in_ansic = False
     esc = False
-    for idx, ch in enumerate(segment):
+    i = 0
+    n = len(segment)
+    while i < n:
+        ch = segment[i]
+        if in_ansic:
+            if esc:
+                out.append(ch)
+                esc = False
+            elif ch == "\\":
+                out.append(ch)
+                esc = True
+            elif ch == "'":
+                in_ansic = False
+                out.append(ch)
+            else:
+                out.append(ch)
+            i += 1
+            continue
         if esc:
             out.append(ch)
             esc = False
+            i += 1
             continue
         if ch == "\\" and not in_sq:
             out.append(ch)
             esc = True
+            i += 1
+            continue
+        if not in_sq and not in_dq and ch == "$" and i + 1 < n and segment[i + 1] == "'":
+            in_ansic = True
+            out.append("$'")
+            i += 2
             continue
         if ch == "'" and not in_dq:
             in_sq = not in_sq
             out.append(ch)
+            i += 1
             continue
         if ch == '"' and not in_sq:
             in_dq = not in_dq
             out.append(ch)
+            i += 1
             continue
         if not in_sq and not in_dq and ch == "#":
-            if idx == 0 or segment[idx - 1] in (" ", "\t", ";", "(", "{"):
+            if i == 0 or segment[i - 1] in (" ", "\t", ";", "(", "{"):
                 break
         out.append(ch)
+        i += 1
     return "".join(out).strip()
 
 
@@ -412,6 +583,7 @@ def split_top_level(cmd):
     n = len(cmd)
     in_sq = False
     in_dq = False
+    in_ansic = False
     esc = False
     prev_op = None
 
@@ -426,12 +598,32 @@ def split_top_level(cmd):
             if items and items[-1][0] in ("group", "subshell") and items[-1][3] is None:
                 items[-1][3] = next_op
             items.append(["cmd", s, prev_op, next_op])
-        elif items and items[-1][3] is None:
-            items[-1][3] = next_op
-        prev_op = next_op
+            prev_op = next_op
+        else:
+            # In Bash, newlines immediately after `|`, `&&`, or `||` continue
+            # the pending operator rather than acting as a new list separator.
+            if next_op == "\n" and prev_op in ("|", "&&", "||") and (not items or items[-1][3] is not None):
+                return
+            if items and items[-1][3] is None:
+                items[-1][3] = next_op
+            prev_op = next_op
 
     while i < n:
         ch = cmd[i]
+        if in_ansic:
+            if esc:
+                buf.append(ch)
+                esc = False
+            elif ch == "\\":
+                buf.append(ch)
+                esc = True
+            elif ch == "'":
+                in_ansic = False
+                buf.append(ch)
+            else:
+                buf.append(ch)
+            i += 1
+            continue
         if esc:
             buf.append(ch)
             esc = False
@@ -441,6 +633,11 @@ def split_top_level(cmd):
             buf.append(ch)
             esc = True
             i += 1
+            continue
+        if not in_sq and not in_dq and ch == "$" and i + 1 < n and cmd[i + 1] == "'":
+            in_ansic = True
+            buf.append("$'")
+            i += 2
             continue
         if ch == "'" and not in_dq:
             in_sq = not in_sq
@@ -459,19 +656,31 @@ def split_top_level(cmd):
                 i += 1
             continue
 
-        # Command substitution $(...) outside single quotes
-        if not in_sq and ch == "$" and i + 1 < n and cmd[i + 1] == "(":
+        # Command substitution $(...) outside single quotes (skip $((...)) arithmetic)
+        if not in_sq and ch == "$" and i + 1 < n and cmd[i + 1] == "(" and not (i + 2 < n and cmd[i + 2] == "("):
             depth = 1
             j = i + 2
             sub_sq = False
             sub_dq = False
+            sub_ansic = False
             sub_esc = False
             while j < n and depth > 0:
                 c2 = cmd[j]
-                if sub_esc:
+                if sub_ansic:
+                    if sub_esc:
+                        sub_esc = False
+                    elif c2 == "\\":
+                        sub_esc = True
+                    elif c2 == "'":
+                        sub_ansic = False
+                elif sub_esc:
                     sub_esc = False
                 elif c2 == "\\" and not sub_sq:
                     sub_esc = True
+                elif not sub_sq and not sub_dq and c2 == "$" and j + 1 < n and cmd[j + 1] == "'":
+                    sub_ansic = True
+                    j += 2
+                    continue
                 elif c2 == "'" and not sub_dq:
                     sub_sq = not sub_sq
                 elif c2 == '"' and not sub_sq:
@@ -511,18 +720,30 @@ def split_top_level(cmd):
 
         if not in_sq and not in_dq:
             # Top-level subshell (...)
-            if ch == "(" and not "".join(buf).strip():
+            if ch == "(" and not "".join(buf).strip() and not (i + 1 < n and cmd[i + 1] == "("):
                 depth = 1
                 j = i + 1
                 sub_sq = False
                 sub_dq = False
+                sub_ansic = False
                 sub_esc = False
                 while j < n and depth > 0:
                     c2 = cmd[j]
-                    if sub_esc:
+                    if sub_ansic:
+                        if sub_esc:
+                            sub_esc = False
+                        elif c2 == "\\":
+                            sub_esc = True
+                        elif c2 == "'":
+                            sub_ansic = False
+                    elif sub_esc:
                         sub_esc = False
                     elif c2 == "\\" and not sub_sq:
                         sub_esc = True
+                    elif not sub_sq and not sub_dq and c2 == "$" and j + 1 < n and cmd[j + 1] == "'":
+                        sub_ansic = True
+                        j += 2
+                        continue
                     elif c2 == "'" and not sub_dq:
                         sub_sq = not sub_sq
                     elif c2 == '"' and not sub_sq:
@@ -547,13 +768,25 @@ def split_top_level(cmd):
                 j = i + 1
                 sub_sq = False
                 sub_dq = False
+                sub_ansic = False
                 sub_esc = False
                 while j < n and depth > 0:
                     c2 = cmd[j]
-                    if sub_esc:
+                    if sub_ansic:
+                        if sub_esc:
+                            sub_esc = False
+                        elif c2 == "\\":
+                            sub_esc = True
+                        elif c2 == "'":
+                            sub_ansic = False
+                    elif sub_esc:
                         sub_esc = False
                     elif c2 == "\\" and not sub_sq:
                         sub_esc = True
+                    elif not sub_sq and not sub_dq and c2 == "$" and j + 1 < n and cmd[j + 1] == "'":
+                        sub_ansic = True
+                        j += 2
+                        continue
                     elif c2 == "'" and not sub_dq:
                         sub_sq = not sub_sq
                     elif c2 == '"' and not sub_sq:
@@ -609,10 +842,131 @@ def split_top_level(cmd):
 
 
 def tokenize(segment):
-    try:
-        return shlex.split(segment, posix=True)
-    except ValueError:
-        return segment.split()
+    """POSIX + Bash ANSI-C ($'...') aware shell word tokenizer."""
+    tokens = []
+    buf = []
+    has_token = False
+    i = 0
+    n = len(segment)
+    in_sq = False
+    in_dq = False
+    in_ansic = False
+    ansic_map = {"n": "\n", "t": "\t", "r": "\r", "\\": "\\", "'": "'", '"': '"', "a": "\a", "b": "\b", "f": "\f", "v": "\v"}
+
+    while i < n:
+        ch = segment[i]
+        if in_ansic:
+            if ch == "\\" and i + 1 < n:
+                nxt = segment[i + 1]
+                if nxt == "x" and i + 3 < n:
+                    try:
+                        buf.append(chr(int(segment[i + 2 : i + 4], 16)))
+                        i += 4
+                        continue
+                    except ValueError:
+                        pass
+                buf.append(ansic_map.get(nxt, nxt))
+                i += 2
+                continue
+            if ch == "'":
+                in_ansic = False
+                i += 1
+                continue
+            buf.append(ch)
+            i += 1
+            continue
+        if in_sq:
+            if ch == "'":
+                in_sq = False
+            else:
+                buf.append(ch)
+            i += 1
+            continue
+        if in_dq:
+            if ch == '"':
+                in_dq = False
+                i += 1
+                continue
+            if ch == "\\" and i + 1 < n and segment[i + 1] in ('"', "\\", "$", "`"):
+                buf.append(segment[i + 1])
+                i += 2
+                continue
+            buf.append(ch)
+            i += 1
+            continue
+        if ch in (" ", "\t", "\r", "\n"):
+            if has_token:
+                tokens.append("".join(buf))
+                buf = []
+                has_token = False
+            i += 1
+            continue
+        if ch == "$" and i + 1 < n and segment[i + 1] == "'":
+            in_ansic = True
+            has_token = True
+            i += 2
+            continue
+        if ch == "'":
+            in_sq = True
+            has_token = True
+            i += 1
+            continue
+        if ch == '"':
+            in_dq = True
+            has_token = True
+            i += 1
+            continue
+        if ch == "\\" and i + 1 < n:
+            buf.append(segment[i + 1])
+            has_token = True
+            i += 2
+            continue
+        buf.append(ch)
+        has_token = True
+        i += 1
+
+    if has_token:
+        tokens.append("".join(buf))
+    return tokens
+
+
+SHELL_RESERVED_PREFIXES = {"!", "if", "then", "elif", "else", "do", "while", "until", "coproc"}
+
+
+def strip_shell_prefixes(tokens):
+    """Strip leading shell reserved words, `time`, and `case ... in pat)` prefixes."""
+    toks = list(tokens)
+    while toks:
+        head = toks[0]
+        if head in SHELL_RESERVED_PREFIXES:
+            toks = toks[1:]
+            continue
+        if head == "time":
+            toks = toks[1:]
+            while toks and toks[0] in ("-p", "--"):
+                toks = toks[1:]
+            continue
+        if head == "case":
+            if "in" in toks[1:]:
+                in_idx = toks.index("in", 1)
+                rest = toks[in_idx + 1 :]
+                close_idx = None
+                for k, tok in enumerate(rest):
+                    if tok.endswith(")"):
+                        close_idx = k
+                        break
+                if close_idx is not None:
+                    toks = rest[close_idx + 1 :]
+                    continue
+            break
+        if head.endswith(")") and not head.startswith(("(", "$(")):
+            toks = toks[1:]
+            continue
+        if len(toks) >= 2 and toks[1] == ")":
+            toks = toks[2:]
+            continue
+        break
+    return toks
 
 
 def resolve_dir_arg(base_cwd, target):
@@ -759,6 +1113,24 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None):
                     idx += 2
                     continue
                 if t.startswith("-"):
+                    idx += 1
+                    continue
+                break
+            continue
+
+        if base in ("sudo", "doas"):
+            wrappers.add(base)
+            idx += 1
+            arg_flags = ("-u", "-g", "-C", "-D", "-h", "-p", "-r", "-t", "-T", "-U") if base == "sudo" else ("-u", "-C")
+            while idx < n:
+                t = tokens[idx]
+                if t == "--":
+                    idx += 1
+                    break
+                if t in arg_flags:
+                    idx += 2
+                    continue
+                if t.startswith("-") or ENV_ASSIGN_RE.match(t):
                     idx += 1
                     continue
                 break
@@ -970,10 +1342,11 @@ def extract_subpayloads(tokens, cwd, prev_op, wrappers, attached_heredocs=None, 
         i = 1
         found_c = False
         has_script_file = False
+        reads_stdin_flag = False
         while i < len(tokens):
             t = tokens[i]
             if t == "--":
-                if i + 1 < len(tokens):
+                if not reads_stdin_flag and i + 1 < len(tokens):
                     has_script_file = True
                 break
             if t == "-c" or (t.startswith("-") and not t.startswith("--") and "c" in t[1:]):
@@ -981,13 +1354,19 @@ def extract_subpayloads(tokens, cwd, prev_op, wrappers, attached_heredocs=None, 
                 if i + 1 < len(tokens):
                     results.append((tokens[i + 1], cwd, wrappers, None))
                 break
+            if t == "-s" or (t.startswith("-") and not t.startswith("--") and "s" in t[1:]):
+                reads_stdin_flag = True
+                i += 1
+                continue
             if not t.startswith("-"):
-                has_script_file = True
+                if not reads_stdin_flag:
+                    has_script_file = True
                 break
             i += 1
-        if attached_heredocs and heredoc_map:
+        if not found_c and not has_script_file and attached_heredocs and heredoc_map:
             for tok in attached_heredocs:
-                body = heredoc_map.get(tok, "")
+                entry = heredoc_map.get(tok)
+                body = entry["body"] if isinstance(entry, dict) else (entry or "")
                 if body.strip():
                     results.append((body, cwd, wrappers, None))
         if not found_c and not has_script_file and not attached_heredocs and prev_op == "|":
@@ -1197,7 +1576,20 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
             continue
 
         attached_heredocs = [t for t in tokens if t in merged_heredocs]
-        tokens = [t for t in tokens if t not in merged_heredocs]
+        tokens = strip_shell_prefixes([t for t in tokens if t not in merged_heredocs])
+        # Unquoted heredoc bodies still expand `$(...)` and backticks in Bash
+        # even when attached to non-shell commands (e.g. `cat <<EOF`).
+        if attached_heredocs:
+            for tok in attached_heredocs:
+                entry = merged_heredocs.get(tok)
+                if isinstance(entry, dict) and not entry.get("quoted", True):
+                    for subst_cmd in extract_unquoted_heredoc_substs(entry.get("body", "")):
+                        res, _sc = eval_command(
+                            subst_cmd, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs
+                        )
+                        worst = merge_decisions(worst, res)
+                        if worst and worst[0] == "deny":
+                            return worst, active_cwds
         if not tokens:
             if next_op == "&":
                 active_cwds = set(list_start_cwds)
