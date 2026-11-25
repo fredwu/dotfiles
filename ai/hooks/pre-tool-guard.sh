@@ -1093,19 +1093,34 @@ def resolve_tmux_pane_cwd(target, server_opts):
     return None
 
 
-DB_SELECTOR_ENV_VARS = {"PGDATABASE", "DATABASE_URL", "PGSERVICE", "PGOPTIONS"}
+DB_SELECTOR_ENV_VARS = {"PGDATABASE", "DATABASE_URL", "PGSERVICE"}
+SIMPLE_VAR_REF_RE = re.compile(r"^\$(?:([A-Za-z_][A-Za-z0-9_]*)|\{([A-Za-z_][A-Za-z0-9_]*)\})$")
 
 
 def _record_env_assign(env_map, token):
-    if "=" in token:
-        key, val = token.split("=", 1)
-        env_map[key] = val
+    if "=" not in token:
+        return
+    key, val = token.split("=", 1)
+    m = SIMPLE_VAR_REF_RE.match(val)
+    if m:
+        ref = m.group(1) or m.group(2)
+        if ref in env_map:
+            env_map[key] = set(env_map[ref])
+            return
+        # Unresolved reference: retain any prior known candidate values
+        env_map[key] = set(env_map.get(key, ())) | {val}
+        return
+    if "$" in val or "`" in val:
+        # Unresolved shell expansion: keep prior candidates so known targets are never erased
+        env_map[key] = set(env_map.get(key, ())) | {val}
+        return
+    env_map[key] = {val}
 
 
 def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
     """Unwrap env assignments and exec wrappers. Returns (tokens, wrappers_seen, env_map, effective_cwd, err)."""
     wrappers = set(inherited_wrappers or ())
-    env_map = dict(inherited_env or {})
+    env_map = {k: set(v) for k, v in (inherited_env or {}).items()}
     eff_cwd = cwd
     idx = 0
     n = len(tokens)
@@ -1131,9 +1146,13 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
                     env_map.clear()
                     idx += 1
                     continue
-                if t == "-u" and idx + 1 < n:
+                if t in ("-u", "--unset") and idx + 1 < n:
                     env_map.pop(tokens[idx + 1], None)
                     idx += 2
+                    continue
+                if t.startswith("-u") and len(t) > 2:
+                    env_map.pop(t[2:], None)
+                    idx += 1
                     continue
                 if t.startswith("--unset="):
                     env_map.pop(t.split("=", 1)[1], None)
@@ -1605,8 +1624,12 @@ def evaluate_policy(tokens, wrappers, raw_segment, policy, env_map=None):
         return None
 
     unwrapped_str = " ".join(tokens)
-    db_env_vals = [f"{k}={v}" for k, v in (env_map or {}).items() if k in DB_SELECTOR_ENV_VARS and v]
-    db_env_str = " ".join(db_env_vals)
+    db_env_tokens = []
+    for k, vals in (env_map or {}).items():
+        if k in DB_SELECTOR_ENV_VARS:
+            for v in vals:
+                if v:
+                    db_env_tokens.extend(v.split())
     clean_raw = strip_unquoted_comment(raw_segment)
     data_cmd = is_data_command(tokens)
     best = None
@@ -1631,7 +1654,7 @@ def evaluate_policy(tokens, wrappers, raw_segment, policy, env_map=None):
         else:
             if data_cmd and not rule["match_data_commands"]:
                 continue
-            if rule["cmd_re"].search(unwrapped_str) or (db_env_str and rule["cmd_re"].search(db_env_str)):
+            if rule["cmd_re"].search(unwrapped_str) or any(rule["cmd_re"].search(tok) for tok in db_env_tokens):
                 matched = True
 
         if matched:
