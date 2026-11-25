@@ -206,21 +206,96 @@ def normalize_continuations(cmd):
     return "".join(out)
 
 
+ANSIC_SIMPLE_ESCAPES = {
+    "a": "\a",
+    "b": "\b",
+    "e": "\x1b",
+    "E": "\x1b",
+    "f": "\f",
+    "n": "\n",
+    "r": "\r",
+    "t": "\t",
+    "v": "\v",
+    "\\": "\\",
+    "'": "'",
+    '"': '"',
+    "?": "?",
+}
+
+
+def decode_ansic_escape(s, idx):
+    """
+    Decode one Bash ANSI-C (`$'...'`) escape sequence starting at `idx`
+    (the character immediately following `\\`). Returns (decoded_str, next_idx).
+    Supports simple escapes, 1-3 digit octal `\\NNN`, 1-2 digit hex `\\xHH`,
+    1-4 digit `\\uHHHH`, 1-8 digit `\\UHHHHHHHH`, and `\\cX`.
+    """
+    n = len(s)
+    if idx >= n:
+        return "\\", idx
+    nxt = s[idx]
+    if nxt in ANSIC_SIMPLE_ESCAPES:
+        return ANSIC_SIMPLE_ESCAPES[nxt], idx + 1
+    if nxt in "01234567":
+        j = idx
+        while j < n and j - idx < 3 and s[j] in "01234567":
+            j += 1
+        return chr(int(s[idx:j], 8) & 0xFF), j
+    if nxt == "x":
+        j = idx + 1
+        while j < n and j - (idx + 1) < 2 and s[j] in "0123456789abcdefABCDEF":
+            j += 1
+        if j > idx + 1:
+            return chr(int(s[idx + 1 : j], 16)), j
+        return "\\x", idx + 1
+    if nxt in ("u", "U"):
+        max_len = 4 if nxt == "u" else 8
+        j = idx + 1
+        while j < n and j - (idx + 1) < max_len and s[j] in "0123456789abcdefABCDEF":
+            j += 1
+        if j > idx + 1:
+            codepoint = int(s[idx + 1 : j], 16)
+            if 0 <= codepoint <= 0x10FFFF:
+                return chr(codepoint), j
+        return "\\" + nxt, idx + 1
+    if nxt == "c" and idx + 1 < n:
+        ctrl = ord(s[idx + 1].upper()) ^ 0x40
+        return chr(ctrl & 0x7F), idx + 2
+    return "\\" + nxt, idx + 1
+
+
 def parse_heredoc_delimiter(line, j):
     """
     Parse a POSIX/Bash heredoc delimiter word starting at `j` with shell
-    quote-removal rules. Returns (delim, quoted_delim, saw_word, next_idx, error_reason).
+    quote-removal rules (including `$'...'` ANSI-C quotes).
+    Returns (delim, quoted_delim, saw_word, next_idx, error_reason).
     """
     n = len(line)
     delim_chars = []
     delim_sq = False
     delim_dq = False
+    delim_ansic = False
     delim_esc = False
     quoted_delim = False
     saw_word = False
     meta = (" ", "\t", "\r", ";", "&", "|", "<", ">", "(", ")")
     while j < n:
         ch = line[j]
+        if delim_ansic:
+            if ch == "\\" and j + 1 < n:
+                dec, j = decode_ansic_escape(line, j + 1)
+                delim_chars.append(dec)
+                saw_word = True
+                continue
+            if ch == "'":
+                delim_ansic = False
+                saw_word = True
+                j += 1
+                continue
+            delim_chars.append(ch)
+            saw_word = True
+            j += 1
+            continue
         if delim_esc:
             delim_chars.append(ch)
             delim_esc = False
@@ -252,6 +327,12 @@ def parse_heredoc_delimiter(line, j):
             continue
         if ch in meta:
             break
+        if ch == "$" and j + 1 < n and line[j + 1] == "'":
+            delim_ansic = True
+            quoted_delim = True
+            saw_word = True
+            j += 2
+            continue
         if ch == "\\":
             delim_esc = True
             quoted_delim = True
@@ -274,7 +355,7 @@ def parse_heredoc_delimiter(line, j):
         saw_word = True
         j += 1
 
-    if delim_sq or delim_dq or delim_esc:
+    if delim_sq or delim_dq or delim_ansic or delim_esc:
         return None, quoted_delim, saw_word, j, "Unterminated quote in heredoc delimiter; refusing fail-closed."
     return "".join(delim_chars), quoted_delim, saw_word, j, None
 
@@ -481,6 +562,10 @@ def extract_unquoted_heredoc_substs(body):
                 elif c2 == '"' and not sub_sq:
                     sub_dq = not sub_dq
                 elif not sub_sq and not sub_dq:
+                    if c2 == "#" and (j == i + 2 or body[j - 1] in (" ", "\t", "\n", ";", "(", "{", "|", "&")):
+                        while j < n and body[j] != "\n":
+                            j += 1
+                        continue
                     if c2 == "(":
                         depth += 1
                     elif c2 == ")":
@@ -686,6 +771,10 @@ def split_top_level(cmd):
                 elif c2 == '"' and not sub_sq:
                     sub_dq = not sub_dq
                 elif not sub_sq and not sub_dq:
+                    if c2 == "#" and (j == i + 2 or cmd[j - 1] in (" ", "\t", "\n", ";", "(", "{", "|", "&")):
+                        while j < n and cmd[j] != "\n":
+                            j += 1
+                        continue
                     if c2 == "(":
                         depth += 1
                     elif c2 == ")":
@@ -719,8 +808,12 @@ def split_top_level(cmd):
             continue
 
         if not in_sq and not in_dq:
-            # Top-level subshell (...)
-            if ch == "(" and not "".join(buf).strip() and not (i + 1 < n and cmd[i + 1] == "("):
+            prefix_str = "".join(buf).strip()
+            coproc_prefix = bool(re.match(r"^coproc(?:\s+[A-Za-z_][A-Za-z0-9_]*)?$", prefix_str))
+            compound_prefix_ok = (not prefix_str) or coproc_prefix or (prefix_str in SHELL_RESERVED_PREFIXES)
+
+            # Top-level subshell (...) (also handles `coproc [NAME] (...)` and `! (...)`)
+            if ch == "(" and compound_prefix_ok and not (i + 1 < n and cmd[i + 1] == "("):
                 depth = 1
                 j = i + 1
                 sub_sq = False
@@ -749,6 +842,10 @@ def split_top_level(cmd):
                     elif c2 == '"' and not sub_sq:
                         sub_dq = not sub_dq
                     elif not sub_sq and not sub_dq:
+                        if c2 == "#" and (j == i + 1 or cmd[j - 1] in (" ", "\t", "\n", ";", "(", "{", "|", "&")):
+                            while j < n and cmd[j] != "\n":
+                                j += 1
+                            continue
                         if c2 == "(":
                             depth += 1
                         elif c2 == ")":
@@ -762,8 +859,8 @@ def split_top_level(cmd):
                     i = j
                     continue
 
-            # Top-level brace group { ...; }
-            if ch == "{" and not "".join(buf).strip() and (i + 1 < n and cmd[i + 1] in (" ", "\t", "\n")):
+            # Top-level brace group { ...; } (also handles `coproc [NAME] { ...; }` and `! { ...; }`)
+            if ch == "{" and compound_prefix_ok and (i + 1 < n and cmd[i + 1] in (" ", "\t", "\n")):
                 depth = 1
                 j = i + 1
                 sub_sq = False
@@ -792,6 +889,10 @@ def split_top_level(cmd):
                     elif c2 == '"' and not sub_sq:
                         sub_dq = not sub_dq
                     elif not sub_sq and not sub_dq:
+                        if c2 == "#" and (j == i + 1 or cmd[j - 1] in (" ", "\t", "\n", ";", "(", "{", "|", "&")):
+                            while j < n and cmd[j] != "\n":
+                                j += 1
+                            continue
                         if c2 == "{":
                             depth += 1
                         elif c2 == "}":
@@ -801,7 +902,8 @@ def split_top_level(cmd):
                     inner = cmd[i + 1 : j - 1].strip()
                     buf.clear()
                     if inner:
-                        items.append(["group", inner, prev_op, None])
+                        kind_out = "subshell" if coproc_prefix else "group"
+                        items.append([kind_out, inner, prev_op, None])
                     i = j
                     continue
 
@@ -851,22 +953,13 @@ def tokenize(segment):
     in_sq = False
     in_dq = False
     in_ansic = False
-    ansic_map = {"n": "\n", "t": "\t", "r": "\r", "\\": "\\", "'": "'", '"': '"', "a": "\a", "b": "\b", "f": "\f", "v": "\v"}
 
     while i < n:
         ch = segment[i]
         if in_ansic:
             if ch == "\\" and i + 1 < n:
-                nxt = segment[i + 1]
-                if nxt == "x" and i + 3 < n:
-                    try:
-                        buf.append(chr(int(segment[i + 2 : i + 4], 16)))
-                        i += 4
-                        continue
-                    except ValueError:
-                        pass
-                buf.append(ansic_map.get(nxt, nxt))
-                i += 2
+                dec, i = decode_ansic_escape(segment, i + 1)
+                buf.append(dec)
                 continue
             if ch == "'":
                 in_ansic = False
@@ -950,17 +1043,19 @@ def strip_shell_prefixes(tokens):
             if "in" in toks[1:]:
                 in_idx = toks.index("in", 1)
                 rest = toks[in_idx + 1 :]
-                close_idx = None
+                found_arm = False
                 for k, tok in enumerate(rest):
-                    if tok.endswith(")"):
-                        close_idx = k
+                    if ")" in tok:
+                        after = tok.split(")", 1)[1]
+                        toks = ([after] if after else []) + rest[k + 1 :]
+                        found_arm = True
                         break
-                if close_idx is not None:
-                    toks = rest[close_idx + 1 :]
+                if found_arm:
                     continue
             break
-        if head.endswith(")") and not head.startswith(("(", "$(")):
-            toks = toks[1:]
+        if ")" in head and not head.startswith(("(", "$(")) and not head.endswith("()"):
+            after = head.split(")", 1)[1]
+            toks = ([after] if after else []) + toks[1:]
             continue
         if len(toks) >= 2 and toks[1] == ")":
             toks = toks[2:]
@@ -1121,6 +1216,7 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None):
         if base in ("sudo", "doas"):
             wrappers.add(base)
             idx += 1
+            sudo_shell = False
             arg_flags = ("-u", "-g", "-C", "-D", "-h", "-p", "-r", "-t", "-T", "-U") if base == "sudo" else ("-u", "-C")
             while idx < n:
                 t = tokens[idx]
@@ -1130,10 +1226,19 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None):
                 if t in arg_flags:
                     idx += 2
                     continue
+                if base == "sudo" and (
+                    t in ("-s", "-i", "--shell", "--login")
+                    or (t.startswith("-") and not t.startswith("--") and ("s" in t[1:] or "i" in t[1:]))
+                ):
+                    sudo_shell = True
+                    idx += 1
+                    continue
                 if t.startswith("-") or ENV_ASSIGN_RE.match(t):
                     idx += 1
                     continue
                 break
+            if sudo_shell and idx >= n:
+                return ["sh"], wrappers, eff_cwd, None
             continue
 
         if base in SIMPLE_WRAPPERS:
@@ -1331,53 +1436,70 @@ def split_tmux_send_keys(args):
     return target, lines, None
 
 
-def extract_subpayloads(tokens, cwd, prev_op, wrappers, attached_heredocs=None, heredoc_map=None):
-    """Extract list of (payload_cmd, payload_cwd, inherited_wrappers, error_reason)."""
+def extract_subpayloads(tokens, cwd, prev_op, wrappers, attached_heredocs=None, heredoc_map=None, stdin_heredocs=None):
+    """Extract list of (payload_cmd, payload_cwd, inherited_wrappers, error_reason, child_stdin_heredocs)."""
     if not tokens:
         return []
     base = os.path.basename(tokens[0])
     results = []
+    effective_stdin = list(attached_heredocs or []) or list(stdin_heredocs or [])
 
     if base in SHELL_BINARIES:
         i = 1
         found_c = False
         has_script_file = False
         reads_stdin_flag = False
+        shell_arg_opts = ("-o", "+o", "-O", "+O", "--rcfile", "--init-file")
         while i < len(tokens):
             t = tokens[i]
             if t == "--":
                 if not reads_stdin_flag and i + 1 < len(tokens):
                     has_script_file = True
                 break
+            if t in shell_arg_opts:
+                i += 2
+                continue
             if t == "-c" or (t.startswith("-") and not t.startswith("--") and "c" in t[1:]):
                 found_c = True
                 if i + 1 < len(tokens):
-                    results.append((tokens[i + 1], cwd, wrappers, None))
+                    results.append((tokens[i + 1], cwd, wrappers, None, effective_stdin))
                 break
             if t == "-s" or (t.startswith("-") and not t.startswith("--") and "s" in t[1:]):
                 reads_stdin_flag = True
                 i += 1
                 continue
-            if not t.startswith("-"):
-                if not reads_stdin_flag:
-                    has_script_file = True
-                break
-            i += 1
-        if not found_c and not has_script_file and attached_heredocs and heredoc_map:
-            for tok in attached_heredocs:
+            if t.startswith("-") or t.startswith("+"):
+                i += 1
+                continue
+            if not reads_stdin_flag:
+                has_script_file = True
+            break
+        if not found_c and not has_script_file and effective_stdin and heredoc_map:
+            for tok in effective_stdin:
                 entry = heredoc_map.get(tok)
                 body = entry["body"] if isinstance(entry, dict) else (entry or "")
                 if body.strip():
-                    results.append((body, cwd, wrappers, None))
-        if not found_c and not has_script_file and not attached_heredocs and prev_op == "|":
+                    results.append((body, cwd, wrappers, None, None))
+        if not found_c and not has_script_file and not effective_stdin and prev_op == "|":
             # Piped input into sh/bash/zsh cannot be safely inspected in a guarded repo
             if load_policy(find_git_root(cwd), {}):
-                results.append((None, None, None, f"Piping commands into `{base}` is blocked in guarded repositories."))
+                results.append(
+                    (None, None, None, f"Piping commands into `{base}` is blocked in guarded repositories.", None)
+                )
         return results
 
     if base == "eval" and len(tokens) > 1:
-        results.append((" ".join(tokens[1:]), cwd, wrappers, None))
+        results.append((" ".join(tokens[1:]), cwd, wrappers, None, effective_stdin))
         return results
+
+    if base in ("source", ".") and effective_stdin and heredoc_map:
+        if any("/dev/stdin" in t or "/dev/fd/0" in t for t in tokens[1:]):
+            for tok in effective_stdin:
+                entry = heredoc_map.get(tok)
+                body = entry["body"] if isinstance(entry, dict) else (entry or "")
+                if body.strip():
+                    results.append((body, cwd, wrappers, None, None))
+            return results
 
     if base == "find":
         i = 1
@@ -1501,7 +1623,7 @@ def merge_decisions(worst, res):
     return worst
 
 
-def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None, heredoc_map=None):
+def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None, heredoc_map=None, stdin_heredocs=None):
     """Evaluate `cmd` and return `(worst_decision_or_None, final_active_cwds)`."""
     if depth > 6:
         return ("deny", "Command nesting depth exceeded guardrail inspection limit."), set(start_cwds)
@@ -1543,7 +1665,20 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
 
         if kind in ("subshell", "subst"):
             # Subshell / command substitution keeps its cwd strictly local
-            res, _sub_cwds = eval_command(content, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs)
+            if kind == "subst" and stdin_heredocs and re.search(r"\bcat\b", content):
+                for tok in stdin_heredocs:
+                    entry = merged_heredocs.get(tok)
+                    body = entry["body"] if isinstance(entry, dict) else (entry or "")
+                    if body.strip():
+                        res, _sc = eval_command(
+                            body, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs
+                        )
+                        worst = merge_decisions(worst, res)
+                        if worst and worst[0] == "deny":
+                            return worst, active_cwds
+            res, _sub_cwds = eval_command(
+                content, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs, stdin_heredocs
+            )
             worst = merge_decisions(worst, res)
             if worst and worst[0] == "deny":
                 return worst, active_cwds
@@ -1555,7 +1690,9 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
 
         if kind == "group":
             # Brace group runs in parent shell unless piped or backgrounded.
-            res, group_cwds = eval_command(content, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs)
+            res, group_cwds = eval_command(
+                content, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs, stdin_heredocs
+            )
             worst = merge_decisions(worst, res)
             if not runs_in_child_shell:
                 active_cwds = group_cwds
@@ -1635,13 +1772,22 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
             if not unwrapped:
                 continue
 
-            subpayloads = extract_subpayloads(unwrapped, seg_cwd, prev_op, wrappers, attached_heredocs, merged_heredocs)
+            subpayloads = extract_subpayloads(
+                unwrapped, seg_cwd, prev_op, wrappers, attached_heredocs, merged_heredocs, stdin_heredocs
+            )
             if subpayloads:
-                for p_cmd, p_cwd, p_wrappers, p_err in subpayloads:
+                for entry in subpayloads:
+                    if len(entry) == 5:
+                        p_cmd, p_cwd, p_wrappers, p_err, p_stdin = entry
+                    else:
+                        p_cmd, p_cwd, p_wrappers, p_err = entry
+                        p_stdin = None
                     if p_err:
                         return ("deny", p_err), active_cwds
                     if p_cmd:
-                        res, _p_cwds = eval_command(p_cmd, p_cwd, policy_cache, depth + 1, p_wrappers, merged_heredocs)
+                        res, _p_cwds = eval_command(
+                            p_cmd, p_cwd, policy_cache, depth + 1, p_wrappers, merged_heredocs, p_stdin
+                        )
                         worst = merge_decisions(worst, res)
                         if worst and worst[0] == "deny":
                             return worst, active_cwds
