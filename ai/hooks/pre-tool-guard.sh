@@ -189,36 +189,129 @@ def normalize_continuations(cmd):
     return "".join(out)
 
 
+def find_heredoc_ops_on_line(line):
+    """
+    Scan a single line outside single/double quotes and unquoted `#` comments for
+    heredoc operators (`<<` / `<<-`), explicitly skipping here-strings (`<<<`).
+    Returns list of (strip_tabs, delimiter) tuples.
+    """
+    ops = []
+    i = 0
+    n = len(line)
+    in_sq = False
+    in_dq = False
+    esc = False
+    while i < n:
+        ch = line[i]
+        if esc:
+            esc = False
+            i += 1
+            continue
+        if ch == "\\" and not in_sq:
+            esc = True
+            i += 1
+            continue
+        if ch == "'" and not in_dq:
+            in_sq = not in_sq
+            i += 1
+            continue
+        if ch == '"' and not in_sq:
+            in_dq = not in_dq
+            i += 1
+            continue
+        if not in_sq and not in_dq:
+            if ch == "#" and (i == 0 or line[i - 1] in (" ", "\t", ";", "(", "{")):
+                break
+            if ch == "<" and i + 1 < n and line[i + 1] == "<":
+                # Skip here-string `<<<`
+                if i + 2 < n and line[i + 2] == "<":
+                    i += 3
+                    continue
+                j = i + 2
+                strip_tabs = False
+                if j < n and line[j] == "-":
+                    strip_tabs = True
+                    j += 1
+                while j < n and line[j] in (" ", "\t"):
+                    j += 1
+                if j >= n:
+                    i = j
+                    continue
+                # Parse delimiter token (quoted or unquoted word)
+                if line[j] in ("'", '"'):
+                    q = line[j]
+                    j += 1
+                    start = j
+                    while j < n and line[j] != q:
+                        j += 1
+                    delim = line[start:j]
+                    if j < n:
+                        j += 1
+                else:
+                    if line[j] == "\\":
+                        j += 1
+                    start = j
+                    while j < n and (line[j].isalnum() or line[j] in ("_", "-")):
+                        j += 1
+                    delim = line[start:j]
+                if delim:
+                    ops.append((strip_tabs, delim))
+                i = j
+                continue
+        i += 1
+    return ops
+
+
 def strip_heredocs(cmd):
-    """Strip heredoc bodies from line-oriented shell text, returning (cleaned_cmd, shell_heredoc_bodies)."""
+    """
+    Quote- and comment-aware heredoc stripper.
+    Returns (cleaned_cmd, heredoc_map, error_reason).
+    - Non-shell heredoc bodies (e.g. `git commit -m "$(cat <<'EOF'...EOF)"`) are stripped.
+    - Shell-fed heredoc bodies (`sh`/`bash`/`zsh <<EOF`) are stored in `heredoc_map`
+      and replaced inline with a placeholder so they are evaluated at the command's
+      exact active `cwd`.
+    - An unclosed heredoc fails closed (`error_reason`).
+    """
     lines = cmd.split("\n")
     out_lines = []
-    shell_bodies = []
+    heredoc_map = {}
     i = 0
     n = len(lines)
     while i < n:
         line = lines[i]
-        out_lines.append(line)
-        # Find heredoc operators outside single/double quotes on this line
-        matches = list(HEREDOC_OP_RE.finditer(line))
-        # Check if this line feeds a shell binary directly (e.g. bash <<'EOF')
+        ops = find_heredoc_ops_on_line(line)
+        if not ops:
+            out_lines.append(line)
+            i += 1
+            continue
+
         feeds_shell = bool(re.search(r"(?:^|[;&|(\s])(?:sh|bash|zsh)\b[^#]*<<", line))
-        if matches:
-            for m in matches:
-                strip_tabs = m.group(1) == "-"
-                delim = m.group(2) or m.group(3) or m.group(4)
-                body = []
+        captured_bodies = []
+        for strip_tabs, delim in ops:
+            body = []
+            found_end = False
+            i += 1
+            while i < n:
+                candidate = lines[i].lstrip("\t") if strip_tabs else lines[i]
+                if candidate == delim:
+                    found_end = True
+                    break
+                body.append(lines[i])
                 i += 1
-                while i < n:
-                    candidate = lines[i].lstrip("\t") if strip_tabs else lines[i]
-                    if candidate == delim:
-                        break
-                    body.append(lines[i])
-                    i += 1
-                if feeds_shell and body:
-                    shell_bodies.append("\n".join(body))
+            if not found_end:
+                return "", {}, f"Unterminated heredoc (missing delimiter `{delim}`); refusing fail-closed."
+            if feeds_shell and body:
+                captured_bodies.append("\n".join(body))
+
+        if feeds_shell and captured_bodies:
+            token_id = f"__PRE_TOOL_GUARD_HEREDOC_{len(heredoc_map)}__"
+            heredoc_map[token_id] = "\n".join(captured_bodies)
+            # Keep any leading `cd ... &&` on the same line, and attach the placeholder command
+            out_lines.append(f"{line} ; {token_id}")
+        else:
+            out_lines.append(line)
         i += 1
-    return "\n".join(out_lines), shell_bodies
+    return "\n".join(out_lines), heredoc_map, None
 
 
 def strip_unquoted_comment(segment):
@@ -902,8 +995,9 @@ def extract_subpayloads(tokens, cwd, prev_op, wrappers):
                         f"Cannot resolve target tmux pane working directory for `tmux send-keys` (target={target or 'current'}); refusing fail-closed.",
                     ))
                 else:
-                    for line in lines:
-                        results.append((line, pane_cwd, set(), None))
+                    # Join submitted lines with `\n` so sequential `cd` / `pushd`
+                    # commands across tmux submissions propagate cwd forward.
+                    results.append(("\n".join(lines), pane_cwd, set(), None))
     return results
 
 
@@ -961,36 +1055,34 @@ def merge_decisions(worst, res):
     return worst
 
 
-def check_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None):
+def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None, heredoc_map=None):
+    """Evaluate `cmd` and return `(worst_decision_or_None, final_active_cwds)`."""
     if depth > 6:
-        return ("deny", "Command nesting depth exceeded guardrail inspection limit.")
+        return ("deny", "Command nesting depth exceeded guardrail inspection limit."), set(start_cwds)
 
     if isinstance(start_cwds, str):
         active_cwds = {start_cwds}
     else:
         active_cwds = set(start_cwds)
 
-    # Track fallback cwds if a conditional branch (`&&`/`||`) runs `cd`
     fallback_cwds = set()
     in_conditional = False
     worst = None
 
     norm = normalize_continuations(cmd)
-    cleaned, shell_heredocs = strip_heredocs(norm)
+    cleaned, local_heredocs, hd_err = strip_heredocs(norm)
+    if hd_err:
+        return ("deny", hd_err), active_cwds
 
-    for body in shell_heredocs:
-        worst = merge_decisions(worst, check_command(body, active_cwds, policy_cache, depth + 1, inherited_wrappers))
-        if worst and worst[0] == "deny":
-            return worst
+    merged_heredocs = dict(heredoc_map or {})
+    merged_heredocs.update(local_heredocs)
 
     for kind, content, prev_op in split_top_level(cleaned):
-        # Update conditional tracking on operator transitions
         if prev_op in ("&&", "||"):
             if not in_conditional:
                 fallback_cwds = set(active_cwds)
                 in_conditional = True
             elif prev_op == "||":
-                # Alternative branch may start from fallback cwds
                 active_cwds = active_cwds | fallback_cwds
         elif prev_op in (";", "\n", "&"):
             if in_conditional:
@@ -1000,29 +1092,35 @@ def check_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=Non
 
         if kind in ("subshell", "subst"):
             # Subshell / command substitution keeps its cwd strictly local
-            worst = merge_decisions(
-                worst,
-                check_command(content, active_cwds, policy_cache, depth + 1, inherited_wrappers),
-            )
+            res, _sub_cwds = eval_command(content, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs)
+            worst = merge_decisions(worst, res)
             if worst and worst[0] == "deny":
-                return worst
+                return worst, active_cwds
             continue
 
         if kind == "group":
-            # Brace group shares parent shell state; evaluate with current cwds and merge conservatively
-            worst = merge_decisions(
-                worst,
-                check_command(content, active_cwds, policy_cache, depth + 1, inherited_wrappers),
-            )
+            # Brace group runs in parent shell: carry its final cwds forward!
+            res, group_cwds = eval_command(content, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs)
+            worst = merge_decisions(worst, res)
+            active_cwds = group_cwds
             if worst and worst[0] == "deny":
-                return worst
+                return worst, active_cwds
+            continue
+
+        # Inline shell heredoc body evaluated at this exact active_cwds!
+        if content in merged_heredocs:
+            res, _hd_cwds = eval_command(
+                merged_heredocs[content], active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs
+            )
+            worst = merge_decisions(worst, res)
+            if worst and worst[0] == "deny":
+                return worst, active_cwds
             continue
 
         tokens = tokenize(content)
         if not tokens:
             continue
 
-        # Track directory-changing builtins (`cd`, `pushd`, `popd`)
         first_base = os.path.basename(tokens[0])
         if first_base in ("cd", "pushd"):
             target = None
@@ -1038,7 +1136,7 @@ def check_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=Non
                     return (
                         "deny",
                         f"Cannot determine target directory for `{first_base} {target or ''}`. Use an explicit path so repository guardrails can be verified.",
-                    )
+                    ), active_cwds
                 next_cwds.add(resolved)
             active_cwds = next_cwds
             continue
@@ -1047,13 +1145,12 @@ def check_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=Non
             return (
                 "deny",
                 "Cannot determine target directory for `popd`; use an explicit `cd <path>` so repository guardrails can be verified.",
-            )
+            ), active_cwds
 
-        # Evaluate command across every possible active cwd
         for c in sorted(active_cwds):
             unwrapped, wrappers, seg_cwd, unwrap_err = unwrap_tokens(tokens, c, inherited_wrappers)
             if unwrap_err:
-                return ("deny", unwrap_err)
+                return ("deny", unwrap_err), active_cwds
             if not unwrapped:
                 continue
 
@@ -1061,23 +1158,28 @@ def check_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=Non
             if subpayloads:
                 for p_cmd, p_cwd, p_wrappers, p_err in subpayloads:
                     if p_err:
-                        return ("deny", p_err)
+                        return ("deny", p_err), active_cwds
                     if p_cmd:
-                        worst = merge_decisions(
-                            worst,
-                            check_command(p_cmd, p_cwd, policy_cache, depth + 1, p_wrappers),
-                        )
+                        res, _p_cwds = eval_command(p_cmd, p_cwd, policy_cache, depth + 1, p_wrappers, merged_heredocs)
+                        worst = merge_decisions(worst, res)
                         if worst and worst[0] == "deny":
-                            return worst
+                            return worst, active_cwds
                 continue
 
             repo_root = find_git_root(seg_cwd)
             policy = load_policy(repo_root, policy_cache)
             worst = merge_decisions(worst, evaluate_policy(unwrapped, wrappers, content, policy))
             if worst and worst[0] == "deny":
-                return worst
+                return worst, active_cwds
 
-    return worst
+    if in_conditional:
+        active_cwds = active_cwds | fallback_cwds
+    return worst, active_cwds
+
+
+def check_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None):
+    res, _cwds = eval_command(cmd, start_cwds, policy_cache, depth, inherited_wrappers)
+    return res
 
 
 def can_prompt_interactively(payload):

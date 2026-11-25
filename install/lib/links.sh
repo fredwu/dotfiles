@@ -48,40 +48,56 @@ if os.path.exists(settings_path):
     try:
         with open(settings_path, "r", encoding="utf-8") as f:
             loaded = json.load(f)
-        if isinstance(loaded, dict):
-            data = loaded
-    except Exception:
+        if not isinstance(loaded, dict):
+            sys.stderr.write(f"[dotfiles] warning: {settings_path} is not a JSON object; skipping pre-tool-guard hook registration\n")
+            sys.exit(0)
+        data = loaded
+    except Exception as exc:
+        sys.stderr.write(f"[dotfiles] warning: could not parse {settings_path} ({exc}); skipping pre-tool-guard hook registration\n")
         sys.exit(0)
 
 hooks = data.setdefault("hooks", {})
 if not isinstance(hooks, dict):
+    sys.stderr.write(f"[dotfiles] warning: {settings_path} 'hooks' is not a JSON object; skipping pre-tool-guard hook registration\n")
     sys.exit(0)
 pre_list = hooks.setdefault("PreToolUse", [])
 if not isinstance(pre_list, list):
+    sys.stderr.write(f"[dotfiles] warning: {settings_path} 'hooks.PreToolUse' is not a JSON list; skipping pre-tool-guard hook registration\n")
     sys.exit(0)
 
+changed = False
+found = False
 for entry in pre_list:
     if isinstance(entry, dict) and entry.get("matcher") == "Bash":
         for h in entry.get("hooks", []):
             if isinstance(h, dict) and "pre-tool-guard.sh" in str(h.get("command", "")):
-                sys.exit(0)
+                found = True
+                if h.get("onFailure") != "block":
+                    h["onFailure"] = "block"
+                    changed = True
+                if "timeout" not in h:
+                    h["timeout"] = 10
+                    changed = True
 
-pre_list.append({
-    "matcher": "Bash",
-    "hooks": [
-        {
-            "type": "command",
-            "command": hook_cmd,
-            "timeout": 10,
-            "onFailure": "block",
-        }
-    ],
-})
+if not found:
+    pre_list.append({
+        "matcher": "Bash",
+        "hooks": [
+            {
+                "type": "command",
+                "command": hook_cmd,
+                "timeout": 10,
+                "onFailure": "block",
+            }
+        ],
+    })
+    changed = True
 
-os.makedirs(os.path.dirname(settings_path), exist_ok=True)
-with open(settings_path, "w", encoding="utf-8") as f:
-    json.dump(data, f, indent=2)
-    f.write("\n")
+if changed:
+    os.makedirs(os.path.dirname(settings_path), exist_ok=True)
+    with open(settings_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+        f.write("\n")
 PY
 }
 

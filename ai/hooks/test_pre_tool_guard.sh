@@ -143,6 +143,13 @@ check("deny find -exec ecto.reset", "deny", mk("find . -exec mise exec -- mix ec
 check("deny awk system()", "deny", mk("awk 'BEGIN{system(\"mise exec -- mix ecto.drop\")}'"), INTERACTIVE_CLI)
 check("deny pipe into sh", "deny", mk("echo 'mise exec -- mix ecto.drop' | sh"), INTERACTIVE_CLI)
 check("deny bash heredoc", "deny", mk("bash <<'EOF'\nmise exec -- mix ecto.drop\nEOF"), INTERACTIVE_CLI)
+check("deny quoted <<EOF does not hide next line", "deny", mk("echo \"<<EOF\"\nmix test"), INTERACTIVE_CLI)
+check("deny here-string <<< does not hide next line", "deny", mk("grep foo <<<bar\nmise exec -- mix ecto.drop"), INTERACTIVE_CLI)
+check("deny unterminated heredoc fails closed", "deny", mk("cat <<'EOF'\nnever closed"), INTERACTIVE_CLI)
+check("deny cd + bash heredoc uses active cwd", "deny", mk(f"cd {repo_a} && bash <<'EOF'\nmise exec -- mix ecto.drop\nEOF", cwd=repo_b), INTERACTIVE_CLI)
+check("deny newline cd + bash -s heredoc uses active cwd", "deny", mk(f"cd {repo_a}\nbash -s <<'EOF'\nmise exec -- mix ecto.drop\nEOF", cwd=repo_b), INTERACTIVE_CLI)
+check("deny brace group cd propagates out", "deny", mk(f"{{ cd {repo_a}; }}; mix test", cwd=repo_b), INTERACTIVE_CLI)
+check("deny tmux send-keys sequential cd propagates", "deny", mk(f"tmux send-keys -t dev 'cd {repo_a}' Enter 'mix test' Enter", cwd=repo_b), {**INTERACTIVE_CLI, "PRE_TOOL_GUARD_TMUX_PANE_PATH": repo_b})
 
 # 3. Shell scope, cd, pushd, popd, conditional chains, mise -C, direnv exec
 check("deny cross-repo cd into repo_a", "deny", mk(f"cd {repo_a} && mise exec -- mix ecto.drop", cwd=repo_b), INTERACTIVE_CLI)
@@ -212,6 +219,11 @@ hourbun = "/Users/fredwu/Code/Wuit/hourbun"
 if os.path.exists(os.path.join(hourbun, ".claude", "guardrails.json")):
     check("hourbun: deny ecto.drop", "deny", mk("mise exec -- mix ecto.drop", cwd=hourbun), INTERACTIVE_CLI)
     check("hourbun: deny mix do ecto.reset", "deny", mk("mise exec -- mix do compile, ecto.reset", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: deny mix do ecto.drop, ecto.create", "deny", mk("mise exec -- mix do ecto.drop, ecto.create", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: deny mix do ecto.rollback, ecto.migrate", "deny", mk("mise exec -- mix do ecto.rollback, ecto.migrate", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: deny mix do setup, test", "deny", mk("mise exec -- mix do setup, test", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: allow documented container pg_dump", "allow", mk("docker compose exec -T db pg_dump --username postgres --format custom hourbun_dev > backups/x.partial", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: deny arbitrary container pg_dump", "deny", mk("docker compose exec -T db pg_dump -h otherhost otherdb", cwd=hourbun), INTERACTIVE_CLI)
     check("hourbun: deny rollback --to", "deny", mk("mise exec -- mix ecto.rollback --to 20261008102253", cwd=hourbun), INTERACTIVE_CLI)
     check("hourbun: deny rollback --step 1 --all", "deny", mk("mise exec -- mix ecto.rollback --step 1 --all", cwd=hourbun), INTERACTIVE_CLI)
     check("hourbun: deny rollback --step 1 --to", "deny", mk("mise exec -- mix ecto.rollback --step 1 --to 20261008102253", cwd=hourbun), INTERACTIVE_CLI)

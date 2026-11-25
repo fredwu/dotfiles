@@ -415,8 +415,17 @@ test_repository_path_with_spaces() {
     "shared instruction links should preserve repository paths containing spaces"
   assert_eq "$DOTFILES_ROOT/ai/hooks/pre-tool-guard.sh" "$(readlink "$HOME/.claude/hooks/pre-tool-guard.sh")" \
     "pre-tool-guard hook link should preserve repository paths containing spaces"
-  assert_true "pre-tool-guard hook should be registered in Claude settings" \
-    grep -Fq "pre-tool-guard.sh" "$HOME/.claude/settings.json"
+  assert_true "pre-tool-guard hook should be registered in Claude settings with onFailure block" \
+    grep -Fq '"onFailure": "block"' "$HOME/.claude/settings.json"
+  # Simulate an older registration lacking onFailure and verify in-place upgrade + idempotent second install
+  printf '{"hooks":{"PreToolUse":[{"matcher":"Bash","hooks":[{"type":"command","command":"%s"}]}]}}\n' \
+    "'$HOME/.claude/hooks/pre-tool-guard.sh'" > "$HOME/.claude/settings.json"
+  install_dotfiles
+  assert_true "reinstalling upgrades existing pre-tool-guard entry to onFailure block" \
+    grep -Fq '"onFailure": "block"' "$HOME/.claude/settings.json"
+  install_dotfiles
+  assert_eq "1" "$(grep -c 'pre-tool-guard.sh' "$HOME/.claude/settings.json")" \
+    "second install should not duplicate pre-tool-guard hook entry"
   assert_false "repository skills should not be installed" \
     test -e "$HOME/.codex/skills/example"
   finish_test "repository and HOME paths containing spaces"
