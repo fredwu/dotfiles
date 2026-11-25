@@ -1129,7 +1129,8 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
     while idx < n:
         tok = tokens[idx]
         if ENV_ASSIGN_RE.match(tok):
-            _record_env_assign(env_map, tok, expansion_env)
+            # Shell prefix assignments evaluate left-to-right against prior prefix assignments.
+            _record_env_assign(env_map, tok, env_map)
             idx += 1
             continue
 
