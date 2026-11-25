@@ -1093,10 +1093,19 @@ def resolve_tmux_pane_cwd(target, server_opts):
     return None
 
 
+DB_SELECTOR_ENV_VARS = {"PGDATABASE", "DATABASE_URL", "PGSERVICE", "PGOPTIONS"}
+
+
+def _record_env_assign(env_map, token):
+    if "=" in token:
+        key, val = token.split("=", 1)
+        env_map[key] = val
+
+
 def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
-    """Unwrap env assignments and exec wrappers. Returns (tokens, wrappers_seen, env_assigns, effective_cwd, err)."""
+    """Unwrap env assignments and exec wrappers. Returns (tokens, wrappers_seen, env_map, effective_cwd, err)."""
     wrappers = set(inherited_wrappers or ())
-    env_assigns = list(inherited_env or ())
+    env_map = dict(inherited_env or {})
     eff_cwd = cwd
     idx = 0
     n = len(tokens)
@@ -1104,7 +1113,7 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
     while idx < n:
         tok = tokens[idx]
         if ENV_ASSIGN_RE.match(tok):
-            env_assigns.append(tok)
+            _record_env_assign(env_map, tok)
             idx += 1
             continue
 
@@ -1118,12 +1127,23 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
                 if t == "--":
                     idx += 1
                     break
-                if t in ("-u", "-C"):
-                    if t == "-C" and idx + 1 < n:
-                        resolved = resolve_dir_arg(eff_cwd, tokens[idx + 1])
-                        if not resolved:
-                            return [], wrappers, env_assigns, eff_cwd, "Cannot determine execution directory for `env -C`."
-                        eff_cwd = resolved
+                if t in ("-i", "--ignore-environment", "-"):
+                    env_map.clear()
+                    idx += 1
+                    continue
+                if t == "-u" and idx + 1 < n:
+                    env_map.pop(tokens[idx + 1], None)
+                    idx += 2
+                    continue
+                if t.startswith("--unset="):
+                    env_map.pop(t.split("=", 1)[1], None)
+                    idx += 1
+                    continue
+                if t == "-C" and idx + 1 < n:
+                    resolved = resolve_dir_arg(eff_cwd, tokens[idx + 1])
+                    if not resolved:
+                        return [], wrappers, env_map, eff_cwd, "Cannot determine execution directory for `env -C`."
+                    eff_cwd = resolved
                     idx += 2
                     continue
                 if t == "-S" and idx + 1 < n:
@@ -1133,7 +1153,7 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
                     n = len(tokens)
                     break
                 if ENV_ASSIGN_RE.match(t):
-                    env_assigns.append(t)
+                    _record_env_assign(env_map, t)
                     idx += 1
                     continue
                 if t.startswith("-"):
@@ -1240,7 +1260,7 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
                     idx += 1
                     continue
                 if ENV_ASSIGN_RE.match(t):
-                    env_assigns.append(t)
+                    _record_env_assign(env_map, t)
                     idx += 1
                     continue
                 if t.startswith("-"):
@@ -1248,7 +1268,7 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
                     continue
                 break
             if sudo_shell and idx >= n:
-                return ["sh"], wrappers, env_assigns, eff_cwd, None
+                return ["sh"], wrappers, env_map, eff_cwd, None
             continue
 
         if base in SIMPLE_WRAPPERS:
@@ -1280,21 +1300,21 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
                 if t in ("-C", "--cd") and j + 1 < n:
                     resolved = resolve_dir_arg(mise_cwd, tokens[j + 1])
                     if not resolved:
-                        return [], wrappers, env_assigns, eff_cwd, "Cannot determine execution directory for `mise -C`."
+                        return [], wrappers, env_map, eff_cwd, "Cannot determine execution directory for `mise -C`."
                     mise_cwd = resolved
                     j += 2
                     continue
                 if t.startswith("-C="):
                     resolved = resolve_dir_arg(mise_cwd, t[3:])
                     if not resolved:
-                        return [], wrappers, env_assigns, eff_cwd, "Cannot determine execution directory for `mise -C`."
+                        return [], wrappers, env_map, eff_cwd, "Cannot determine execution directory for `mise -C`."
                     mise_cwd = resolved
                     j += 1
                     continue
                 if t.startswith("--cd="):
                     resolved = resolve_dir_arg(mise_cwd, t[5:])
                     if not resolved:
-                        return [], wrappers, env_assigns, eff_cwd, "Cannot determine execution directory for `mise --cd`."
+                        return [], wrappers, env_map, eff_cwd, "Cannot determine execution directory for `mise --cd`."
                     mise_cwd = resolved
                     j += 1
                     continue
@@ -1317,7 +1337,7 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
                     if t in ("-C", "--cd") and idx + 1 < n:
                         resolved = resolve_dir_arg(eff_cwd, tokens[idx + 1])
                         if not resolved:
-                            return [], wrappers, env_assigns, eff_cwd, "Cannot determine execution directory for `mise exec -C`."
+                            return [], wrappers, env_map, eff_cwd, "Cannot determine execution directory for `mise exec -C`."
                         eff_cwd = resolved
                         idx += 2
                         continue
@@ -1338,7 +1358,7 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
 
         break
 
-    return tokens[idx:], wrappers, env_assigns, eff_cwd, None
+    return tokens[idx:], wrappers, env_map, eff_cwd, None
 
 
 def is_data_command(tokens):
@@ -1579,13 +1599,14 @@ def extract_subpayloads(tokens, cwd, prev_op, wrappers, attached_heredocs=None, 
     return results
 
 
-def evaluate_policy(tokens, wrappers, raw_segment, policy, env_assigns=None):
+def evaluate_policy(tokens, wrappers, raw_segment, policy, env_map=None):
     """Returns (decision, reason) or None."""
     if not policy or not tokens:
         return None
 
     unwrapped_str = " ".join(tokens)
-    with_env_str = " ".join(list(env_assigns) + tokens) if env_assigns else unwrapped_str
+    db_env_vals = [f"{k}={v}" for k, v in (env_map or {}).items() if k in DB_SELECTOR_ENV_VARS and v]
+    db_env_str = " ".join(db_env_vals)
     clean_raw = strip_unquoted_comment(raw_segment)
     data_cmd = is_data_command(tokens)
     best = None
@@ -1610,7 +1631,7 @@ def evaluate_policy(tokens, wrappers, raw_segment, policy, env_assigns=None):
         else:
             if data_cmd and not rule["match_data_commands"]:
                 continue
-            if rule["cmd_re"].search(unwrapped_str) or (env_assigns and rule["cmd_re"].search(with_env_str)):
+            if rule["cmd_re"].search(unwrapped_str) or (db_env_str and rule["cmd_re"].search(db_env_str)):
                 matched = True
 
         if matched:
