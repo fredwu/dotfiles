@@ -305,6 +305,68 @@ if os.path.exists(os.path.join(inspiria, ".claude", "guardrails.json")):
     check("inspiria: ask flyctl deploy", "ask", mk("flyctl deploy", cwd=inspiria), INTERACTIVE_CLI)
     check("inspiria: ask fly -a inspiria pg connect", "ask", mk("fly -a inspiria pg connect", cwd=inspiria), INTERACTIVE_CLI)
 
+keeper = "/Users/fredwu/Code/Wuit/keeper"
+if os.path.exists(os.path.join(keeper, ".claude", "guardrails.json")):
+    check("keeper: ask rm Godot userdata", "ask", mk('rm -rf "$HOME/Library/Application Support/Godot/app_userdata/Keeper"', cwd=keeper), INTERACTIVE_CLI)
+    check("keeper: ask godot --export-release", "ask", mk("godot --headless --export-release macOS build/keeper.dmg", cwd=keeper), INTERACTIVE_CLI)
+    check("keeper: allow tools/run_gate.sh headless", "allow", mk("bash tools/run_gate.sh headless", cwd=keeper), INTERACTIVE_CLI)
+
+feedbun = "/Users/fredwu/Code/Wuit/feedbun"
+if os.path.exists(os.path.join(feedbun, ".claude", "guardrails.json")):
+    check("feedbun: deny mix phx.gen.live", "deny", mk("mix phx.gen.live Blog Post posts title:string", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: allow mix phx.gen.secret 32", "allow", mk("mix phx.gen.secret 32", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: deny wrong app db hourbun_dev", "deny", mk("psql -d hourbun_dev -c 'select 1'", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: ask mix ecto.reset", "ask", mk("mix ecto.reset", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: ask mix ecto.setup", "ask", mk("mix ecto.setup", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: ask mix seed", "ask", mk("mix seed", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: ask mix run priv/repo/seeds.exs", "ask", mk("mix run priv/repo/seeds.exs", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: ask feedbun.reset_item_data confirm", "ask", mk("mix feedbun.reset_item_data --confirm yes", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: ask feedbun.reset_item_data preview+confirm", "ask", mk("mix feedbun.reset_item_data --preview --confirm yes", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: allow feedbun.reset_item_data --preview", "allow", mk("mix feedbun.reset_item_data --preview", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: ask bare mix feedbun.llm_smoke", "ask", mk("mix feedbun.llm_smoke", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: ask mix feedbun.llm_rank --mode dev", "ask", mk("mix feedbun.llm_rank --mode dev", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: allow mix feedbun.llm_rank --dry-run --mode live", "allow", mk("mix feedbun.llm_rank --dry-run --mode live", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: allow mix feedbun.llm_smoke --dry-run --mode live", "allow", mk("mix feedbun.llm_smoke --dry-run --mode live", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: ask mix feedbun.workflow_smoke", "ask", mk("mix feedbun.workflow_smoke --base-url http://127.0.0.1:4002", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: ask mix feedbun.ingredient_research_smoke", "ask", mk("mix feedbun.ingredient_research_smoke --ingredient-id 123", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: ask mix feedbun.launch_smoke --queue-extractions", "ask", mk("mix feedbun.launch_smoke --base-url https://feedbun.com --queue-extractions", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: allow read-only mix feedbun.launch_smoke", "allow", mk("mix feedbun.launch_smoke --base-url https://feedbun.com", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: ask mix feedbun.rebuild_knowledge_embeddings --execute", "ask", mk("mix feedbun.rebuild_knowledge_embeddings --scope ingredients --execute", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: allow preview mix feedbun.rebuild_knowledge_embeddings", "allow", mk("mix feedbun.rebuild_knowledge_embeddings --scope ingredients", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: ask extension smoke:api with inherited env", "ask", mk("export FEEDBUN_SMOKE_SUBMIT_EXTRACTION=true && npm run smoke:api --prefix browser_extension", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: ask extension smoke:api --submit-extraction", "ask", mk("npm run smoke:api --prefix browser_extension -- --require-token --submit-extraction", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: ask fly deploy", "ask", mk("fly deploy", cwd=feedbun), INTERACTIVE_CLI)
+    check("feedbun: allow ./scripts/verify changed", "allow", mk("./scripts/verify changed", cwd=feedbun), INTERACTIVE_CLI)
+
+feedbun_mobile = "/Users/fredwu/Code/Wuit/feedbun-mobile"
+if os.path.exists(os.path.join(feedbun_mobile, ".claude", "guardrails.json")):
+    check("feedbun-mobile: deny npm audit fix --force", "deny", mk("npm audit fix --force", cwd=feedbun_mobile), INTERACTIVE_CLI)
+    check("feedbun-mobile: deny open Insta360 Link Controller", "deny", mk('open -a "Insta360 Link Controller"', cwd=feedbun_mobile), INTERACTIVE_CLI)
+    check("feedbun-mobile: deny rm -rf patches", "deny", mk("rm -rf patches", cwd=feedbun_mobile), INTERACTIVE_CLI)
+    check("feedbun-mobile: ask expo prebuild --clean", "ask", mk("npx expo prebuild --clean", cwd=feedbun_mobile), INTERACTIVE_CLI)
+    check("feedbun-mobile: ask eas build", "ask", mk("eas build --platform ios", cwd=feedbun_mobile), INTERACTIVE_CLI)
+    check("feedbun-mobile: allow npm run quality.check", "allow", mk("npm run quality.check", cwd=feedbun_mobile), INTERACTIVE_CLI)
+
+rizzfarm = "/Users/fredwu/Code/Wuit/rizzfarm"
+if os.path.exists(os.path.join(rizzfarm, ".claude", "guardrails.json")):
+    check("rizzfarm: deny wrong app db hourbun_dev", "deny", mk("psql -d hourbun_dev", cwd=rizzfarm), INTERACTIVE_CLI)
+    check("rizzfarm: ask mix ecto.reset", "ask", mk("mix ecto.reset", cwd=rizzfarm), INTERACTIVE_CLI)
+    check("rizzfarm: ask mix ecto.setup", "ask", mk("mix ecto.setup", cwd=rizzfarm), INTERACTIVE_CLI)
+    check("rizzfarm: ask mix seed", "ask", mk("mix seed", cwd=rizzfarm), INTERACTIVE_CLI)
+    check("rizzfarm: ask mix run priv/repo/seeds.exs", "ask", mk("mix run priv/repo/seeds.exs", cwd=rizzfarm), INTERACTIVE_CLI)
+    check("rizzfarm: ask fly deploy", "ask", mk("fly deploy", cwd=rizzfarm), INTERACTIVE_CLI)
+    check("rizzfarm: allow mix phx.gen.context", "allow", mk("mix phx.gen.context Analytics Event events type:string", cwd=rizzfarm), INTERACTIVE_CLI)
+
+persumi = "/Users/fredwu/Code/Wuit/persumi"
+if os.path.exists(os.path.join(persumi, ".claude", "guardrails.json")):
+    check("persumi: deny wrong app db rizzfarm_dev", "deny", mk("psql -d rizzfarm_dev", cwd=persumi), INTERACTIVE_CLI)
+    check("persumi: ask mix ecto.reset", "ask", mk("mix ecto.reset", cwd=persumi), INTERACTIVE_CLI)
+    check("persumi: ask mix ecto.setup", "ask", mk("mix ecto.setup", cwd=persumi), INTERACTIVE_CLI)
+    check("persumi: ask mix seed", "ask", mk("mix seed", cwd=persumi), INTERACTIVE_CLI)
+    check("persumi: ask mix run priv/repo/seeds.exs", "ask", mk("mix run priv/repo/seeds.exs", cwd=persumi), INTERACTIVE_CLI)
+    check("persumi: ask fly deploy", "ask", mk("fly deploy", cwd=persumi), INTERACTIVE_CLI)
+    check("persumi: allow mix test --exclude ci_skip", "allow", mk("mix test --exclude ci_skip", cwd=persumi), INTERACTIVE_CLI)
+
 # 9. Latency budget (< 50ms average across 5 ordinary runs)
 times = [check(f"latency run {i}", "allow", mk("mise exec -- mix test"), INTERACTIVE_CLI) for i in range(5)]
 avg_ms = sum(times) / len(times)
