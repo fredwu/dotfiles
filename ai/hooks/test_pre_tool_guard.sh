@@ -1,154 +1,251 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-HOOK="$SCRIPT_DIR/pre-tool-guard.sh"
-TMPDIR_TEST="$(mktemp -d)"
-trap 'rm -rf "$TMPDIR_TEST"' EXIT
+HOOK="$(cd "$(dirname "$0")" && pwd)/pre-tool-guard.sh"
+TMPDIR_BASE="$(mktemp -d)"
+trap 'rm -rf "$TMPDIR_BASE"' EXIT
 
-# Build two temporary git repos: repo_a (guarded) and repo_b (unrestricted)
-REPO_A="$TMPDIR_TEST/repo_a"
-REPO_B="$TMPDIR_TEST/repo_b"
-REPO_BAD="$TMPDIR_TEST/repo_bad"
-mkdir -p "$REPO_A/.git" "$REPO_A/sub/dir" "$REPO_A/.claude" "$REPO_B/.git" "$REPO_BAD/.git" "$REPO_BAD/.claude"
+# Create synthetic repos:
+# - repo_a: strict guardrails (deny, ask, allowlist, require_wrapper)
+# - repo_b: unguarded git repo (no .claude/guardrails.json)
+# - repo_bad_json: malformed JSON
+# - repo_bad_schema: valid JSON but bad rule schema / regex / string allow_if_regex
+REPO_A="$TMPDIR_BASE/repo_a"
+REPO_B="$TMPDIR_BASE/repo_b"
+REPO_BAD="$TMPDIR_BASE/repo_bad"
+mkdir -p "$REPO_A/.git" "$REPO_A/.claude" "$REPO_B/.git" "$REPO_BAD/.git" "$REPO_BAD/.claude"
 
-cat > "$REPO_A/.claude/guardrails.json" <<'JSON'
+cat >"$REPO_A/.claude/guardrails.json" <<'JSON'
 {
   "rules": [
     {
-      "id": "no-drop",
+      "id": "no-ecto-drop",
       "decision": "deny",
-      "cmd_regex": "(^|\\s)mix\\s+ecto\\.drop(\\s|$)",
-      "reason": "Never drop the real database.",
-      "instead": "mise exec -- mix hourbun.drop_test_db"
+      "cmd_regex": "(^|\\s)mix\\s+(do\\s+)?([^;|&]*[\\s,+])?ecto\\.(drop|reset)(\\s|$)",
+      "reason": "Never drop or reset the dev database.",
+      "instead": "mise exec -- mix drop_test_db"
     },
     {
       "id": "no-raw-pg-dump",
       "decision": "deny",
-      "cmd_regex": "(^|\\s)pg_(dump|restore)(\\s|$)",
-      "allow_if_regex": ["docker\\s+compose\\s+exec\\s+-T\\s+db\\s+pg_(dump|restore)"],
-      "reason": "Use mix hourbun.backup or the documented container-tools block."
-    },
-    {
-      "id": "ask-restore",
-      "decision": "ask",
-      "cmd_regex": "(^|\\s)mix\\s+hourbun\\.restore(\\s|$)",
-      "reason": "Restore overwrites the dev database; requires explicit user confirmation."
+      "cmd_regex": "(^|\\s)(pg_dump|pg_restore)(\\s|$)",
+      "allow_if_regex": ["^docker\\s+compose\\s+exec\\s+-T\\s+db\\s+pg_dump\\b"],
+      "reason": "Use the backup Mix task instead of raw pg_dump/pg_restore."
     },
     {
       "id": "require-mise",
       "decision": "deny",
-      "require_wrapper": { "commands": ["mix", "iex"], "wrapper": "mise" },
+      "require_wrapper": {
+        "wrapper": "mise",
+        "commands": ["mix", "iex"]
+      },
       "reason": "Run Elixir commands through mise exec --."
+    },
+    {
+      "id": "ask-restore",
+      "decision": "ask",
+      "cmd_regex": "(^|\\s)mix\\s+(do\\s+)?([^;|&]*[\\s,+])?hourbun\\.restore(\\s|$)",
+      "reason": "Restore replaces the dev database and requires explicit user approval."
+    },
+    {
+      "id": "ask-fly",
+      "decision": "ask",
+      "cmd_regex": "(^|\\s)(fly|flyctl)\\s+([^;|&]*\\s)?(deploy|secrets|ssh|postgres|pg|proxy)(\\s|$)",
+      "reason": "Fly production command requires explicit user approval."
     }
   ]
 }
 JSON
 
-printf '{malformed json\n' > "$REPO_BAD/.claude/guardrails.json"
+printf '{bad json' >"$REPO_BAD/.claude/guardrails.json"
 
-PASS=0
-FAIL=0
+python3 - "$HOOK" "$REPO_A" "$REPO_B" "$REPO_BAD" "$TMPDIR_BASE" <<'PY'
+import json
+import os
+import subprocess
+import sys
+import time
 
-run_case() {
-  local name="$1"
-  local expect="$2" # allow | deny | ask
-  local json_payload="$3"
-  local extra_env="${4:-}"
-  local out decision
+hook, repo_a, repo_b, repo_bad, tmp_base = sys.argv[1:6]
+passed = 0
+failed = 0
 
-  if [[ -n "$extra_env" ]]; then
-    out="$(env $extra_env "$HOOK" <<< "$json_payload")"
-  else
-    out="$("$HOOK" <<< "$json_payload")"
-  fi
+def run_hook(payload, env_extra=None):
+    # Clean ambient Claude/T3 env so tests control interactivity deterministically
+    env = {k: v for k, v in os.environ.items() if not k.startswith("CLAUDE_") and not k.startswith("PRE_TOOL_GUARD_")}
+    if env_extra:
+        env.update(env_extra)
+    t0 = time.perf_counter()
+    proc = subprocess.run(
+        [hook],
+        input=payload if isinstance(payload, str) else json.dumps(payload),
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+    elapsed_ms = (time.perf_counter() - t0) * 1000.0
+    out = proc.stdout.strip()
+    decision = "allow"
+    reason = ""
+    if out:
+        parsed = json.loads(out)
+        hso = parsed["hookSpecificOutput"]
+        decision = hso["permissionDecision"]
+        reason = hso.get("permissionDecisionReason", "")
+    return proc.returncode, decision, reason, elapsed_ms, proc.stderr
 
-  if [[ -z "$out" ]]; then
-    decision="allow"
-  else
-    decision="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["hookSpecificOutput"]["permissionDecision"])' "$out")"
-  fi
+def check(name, expected_decision, payload, env_extra=None, reason_substr=None):
+    global passed, failed
+    rc, decision, reason, ms, stderr = run_hook(payload, env_extra)
+    ok = rc == 0 and decision == expected_decision
+    if ok and reason_substr:
+        ok = reason_substr in reason
+    if ok:
+        passed += 1
+    else:
+        failed += 1
+        print(f"FAIL [{name}]: expected={expected_decision!r} got={decision!r} rc={rc} reason={reason!r} stderr={stderr!r}")
+    return ms
 
-  if [[ "$decision" == "$expect" ]]; then
-    PASS=$((PASS + 1))
-  else
-    echo "FAIL [$name]: expected=$expect got=$decision output=$out" >&2
-    FAIL=$((FAIL + 1))
-  fi
-}
+INTERACTIVE_CLI = {"CLAUDE_CODE_ENTRYPOINT": "cli"}
 
-payload() {
-  python3 -c 'import json,sys
-d = {"tool_name": "Bash", "cwd": sys.argv[1], "permission_mode": sys.argv[2], "tool_input": {"command": sys.argv[3]}}
-if len(sys.argv) > 4 and sys.argv[4]:
-    d.update(json.loads(sys.argv[4]))
-print(json.dumps(d))' "$@"
-}
+def mk(cmd, cwd=repo_a, mode="default", extra=None):
+    d = {
+        "tool_name": "Bash",
+        "cwd": cwd,
+        "permission_mode": mode,
+        "tool_input": {"command": cmd},
+    }
+    if extra:
+        d.update(extra)
+    return d
 
-# 1. Basic allow/deny/wrapper cases
-run_case "unwrapped mix denied" deny "$(payload "$REPO_A" default "mix test")"
-run_case "mise wrapped mix test allowed" allow "$(payload "$REPO_A" default "mise exec -- mix test")"
-run_case "env-var before mise allowed" allow "$(payload "$REPO_A" default "PW_BROWSER=firefox mise exec -- mix test.browser")"
-run_case "mise exec env VAR allowed" allow "$(payload "$REPO_A" default "mise exec -- env MIX_ENV=test mix test")"
-run_case "subdir inherits repo root policy" deny "$(payload "$REPO_A/sub/dir" default "mix test")"
-run_case "unguarded repo allows mix ecto.drop" allow "$(payload "$REPO_B" default "mix ecto.drop")"
+# 1. Basic deny / allow / wrapper / mix do
+check("deny ecto.drop", "deny", mk("mise exec -- mix ecto.drop"), INTERACTIVE_CLI)
+check("deny ecto.reset", "deny", mk("mise exec -- mix ecto.reset"), INTERACTIVE_CLI)
+check("deny mix do ecto.drop", "deny", mk("mise exec -- mix do compile + ecto.drop"), INTERACTIVE_CLI)
+check("deny unprefixed mix", "deny", mk("mix test"), INTERACTIVE_CLI, "require-mise")
+check("deny timeout unprefixed mix", "deny", mk("timeout 60 mix test"), INTERACTIVE_CLI, "require-mise")
+check("deny brace group unprefixed mix", "deny", mk("{ mix test; }"), INTERACTIVE_CLI, "require-mise")
+check("allow mise wrapped mix", "allow", mk("mise exec -- mix test"), INTERACTIVE_CLI)
+check("allow env var + mise", "allow", mk("PW_BROWSER=firefox mise exec -- mix test.browser"), INTERACTIVE_CLI)
+check("allow mise exec bash -c mix test", "allow", mk("mise exec -- bash -c 'mix test'"), INTERACTIVE_CLI)
+check("allow command -v mix", "allow", mk("command -v mix"), INTERACTIVE_CLI)
+check("allow unguarded repo", "allow", mk("mix ecto.reset", cwd=repo_b), INTERACTIVE_CLI)
 
-# 2. Wrapper unwrapping & nested payloads
-run_case "mise wrapped ecto.drop denied" deny "$(payload "$REPO_A" default "mise exec -- mix ecto.drop")"
-run_case "direnv wrapped ecto.drop denied" deny "$(payload "$REPO_A" default "direnv exec . mix ecto.drop")"
-run_case "nohup wrapped ecto.drop denied" deny "$(payload "$REPO_A" default "nohup mise exec -- mix ecto.drop")"
-run_case "time wrapped ecto.drop denied" deny "$(payload "$REPO_A" default "time mise exec -- mix ecto.drop")"
-run_case "command wrapped ecto.drop denied" deny "$(payload "$REPO_A" default "command mise exec -- mix ecto.drop")"
-run_case "exec wrapped ecto.drop denied" deny "$(payload "$REPO_A" default "exec mise exec -- mix ecto.drop")"
-run_case "xargs wrapped ecto.drop denied" deny "$(payload "$REPO_A" default "xargs -I{} mise exec -- mix ecto.drop")"
-run_case "bash -c payload denied" deny "$(payload "$REPO_A" default "bash -c 'mise exec -- mix ecto.drop'")"
-run_case "sh -lc payload denied" deny "$(payload "$REPO_A" default "sh -lc 'mix ecto.drop'")"
-run_case "eval payload denied" deny "$(payload "$REPO_A" default "eval 'mise exec -- mix ecto.drop'")"
-run_case "subshell substitution denied" deny "$(payload "$REPO_A" default "echo \$(mise exec -- mix ecto.drop)")"
-run_case "tmux new-session payload denied" deny "$(payload "$REPO_A" default "tmux new-session -d -s app 'mise exec -- mix ecto.drop'")"
+# 2. Wrappers, continuations, nested shells, exec-capable utilities
+check("deny bash -c ecto.drop", "deny", mk("bash -c 'mise exec -- mix ecto.drop'"), INTERACTIVE_CLI)
+check("deny nohup unprefixed mix", "deny", mk("nohup mix setup"), INTERACTIVE_CLI)
+check("deny env -S mix ecto.drop", "deny", mk("env -S 'mise exec -- mix ecto.drop'"), INTERACTIVE_CLI)
+check("deny eval ecto.reset", "deny", mk("eval 'mise exec -- mix ecto.reset'"), INTERACTIVE_CLI)
+check("deny backslash-newline continuation", "deny", mk("mix \\\ntest"), INTERACTIVE_CLI)
+check("deny find -exec ecto.reset", "deny", mk("find . -exec mise exec -- mix ecto.reset \\;"), INTERACTIVE_CLI)
+check("deny awk system()", "deny", mk("awk 'BEGIN{system(\"mise exec -- mix ecto.drop\")}'"), INTERACTIVE_CLI)
+check("deny pipe into sh", "deny", mk("echo 'mise exec -- mix ecto.drop' | sh"), INTERACTIVE_CLI)
+check("deny bash heredoc", "deny", mk("bash <<'EOF'\nmise exec -- mix ecto.drop\nEOF"), INTERACTIVE_CLI)
 
-# 3. Cross-repo cd chains & tmux send-keys target pane resolution
-run_case "cross-repo cd into repo_a denied" deny "$(payload "$REPO_B" default "echo ok && cd '$REPO_A' && mise exec -- mix ecto.drop")"
-run_case "cross-repo cd into repo_b allowed" allow "$(payload "$REPO_A" default "cd '$REPO_B' && mix ecto.drop")"
-run_case "tmux send-keys into repo_a pane denied" deny "$(payload "$REPO_B" default "tmux send-keys -t app 'mise exec -- mix ecto.drop' Enter")" "PRE_TOOL_GUARD_TMUX_PANE_PATH=$REPO_A"
-run_case "tmux send-keys into repo_b pane allowed" allow "$(payload "$REPO_A" default "tmux send-keys -t app 'mix ecto.drop' Enter")" "PRE_TOOL_GUARD_TMUX_PANE_PATH=$REPO_B"
-run_case "tmux send-keys unresolved pane fails closed" deny "$(payload "$REPO_B" default "tmux send-keys -t missing 'mix test' Enter")" "PRE_TOOL_GUARD_TMUX_PANE_PATH="
+# 3. Shell scope, cd, pushd, popd, conditional chains, mise -C, direnv exec
+check("deny cross-repo cd into repo_a", "deny", mk(f"cd {repo_a} && mise exec -- mix ecto.drop", cwd=repo_b), INTERACTIVE_CLI)
+check("deny cross-repo pushd into repo_a", "deny", mk(f"pushd {repo_a} && mise exec -- mix ecto.drop", cwd=repo_b), INTERACTIVE_CLI)
+check("deny dynamic cd $UNKNOWN", "deny", mk("cd \"$UNKNOWN_DIR\" && mix test", cwd=repo_b), INTERACTIVE_CLI)
+check("deny popd unknown cwd", "deny", mk("popd && mix test", cwd=repo_b), INTERACTIVE_CLI)
+check("deny cd - unknown cwd", "deny", mk("cd - && mix test", cwd=repo_a), INTERACTIVE_CLI)
+check("deny subshell cd does not leak out", "deny", mk(f"(cd {repo_b}) ; mix test", cwd=repo_a), INTERACTIVE_CLI)
+check("deny skipped conditional cd still enforces original repo", "deny", mk(f"false && cd {repo_b}; mix test", cwd=repo_a), INTERACTIVE_CLI)
+check("deny mise -C repo_a exec mix ecto.drop", "deny", mk(f"mise -C {repo_a} exec -- mix ecto.drop", cwd=repo_b), INTERACTIVE_CLI)
+check("deny direnv exec repo_b does not escape repo_a cwd", "deny", mk(f"direnv exec {repo_b} mix test", cwd=repo_a), INTERACTIVE_CLI)
 
-# 4. Quoted data arguments & allowlist exceptions
-run_case "rg quoting forbidden text allowed" allow "$(payload "$REPO_A" default "rg 'mix ecto.drop' docs/")"
-run_case "git commit message mentioning forbidden text allowed" allow "$(payload "$REPO_A" default "git commit -m 'block mix ecto.drop and pg_dump'")"
-run_case "raw pg_dump denied" deny "$(payload "$REPO_A" default "pg_dump hourbun_dev")"
-run_case "container-tools pg_dump allowlisted" allow "$(payload "$REPO_A" default "docker compose exec -T db pg_dump --username postgres hourbun_dev")"
+# 4. Data commands, heredocs, comment stripping, allowlists
+check("allow rg mention", "allow", mk("rg 'mix ecto.drop' docs/"), INTERACTIVE_CLI)
+check("allow git commit -m", "allow", mk("git commit -m 'never run mix ecto.drop'"), INTERACTIVE_CLI)
+check("allow git commit heredoc", "allow", mk("git commit -m \"$(cat <<'EOF'\nUpdate rules\n\nmix ecto.drop is blocked\nEOF\n)\""), INTERACTIVE_CLI)
+check("allow cat heredoc to file", "allow", mk("cat > notes.md <<'EOF'\nmix ecto.drop\nEOF"), INTERACTIVE_CLI)
+check("allow gh pr create body mention", "allow", mk("gh pr create --title 'docs' --body 'never run mix ecto.drop'"), INTERACTIVE_CLI)
+check("allow anchored allowlist pg_dump", "allow", mk("docker compose exec -T db pg_dump -U postgres hourbun_dev > /tmp/x"), INTERACTIVE_CLI)
+check("deny raw pg_dump", "deny", mk("pg_dump hourbun_dev > /tmp/x"), INTERACTIVE_CLI)
+check("deny comment spoofing allow_if_regex", "deny", mk("pg_dump hourbun_dev # docker compose exec -T db pg_dump"), INTERACTIVE_CLI)
 
-# 5. All 6 permission_modes + child/headless ask -> deny fail-closed
-for mode in default acceptEdits plan auto; do
-  run_case "ask stays ask in interactive $mode" ask "$(payload "$REPO_A" "$mode" "mise exec -- mix hourbun.restore x.dump")"
-done
-for mode in bypassPermissions dontAsk ""; do
-  run_case "ask fails closed to deny in mode='$mode'" deny "$(payload "$REPO_A" "$mode" "mise exec -- mix hourbun.restore x.dump")"
-done
-run_case "ask fails closed for subagent agent_id" deny "$(payload "$REPO_A" default "mise exec -- mix hourbun.restore x.dump" '{"agent_id":"sub-1"}')"
-run_case "ask fails closed for subagent agent_type" deny "$(payload "$REPO_A" default "mise exec -- mix hourbun.restore x.dump" '{"agent_type":"research"}')"
-run_case "ask fails closed for sdk-cli headless" deny "$(payload "$REPO_A" default "mise exec -- mix hourbun.restore x.dump")" "CLAUDE_CODE_ENTRYPOINT=sdk-cli"
-run_case "ask fails closed for CLAUDE_NONINTERACTIVE=1" deny "$(payload "$REPO_A" default "mise exec -- mix hourbun.restore x.dump")" "CLAUDE_NONINTERACTIVE=1"
+# 5. tmux global options, multi-line send-keys, pane resolution
+check("deny tmux send-keys into repo_a pane", "deny", mk("tmux send-keys -t dev 'mise exec -- mix ecto.drop' Enter", cwd=repo_b), {**INTERACTIVE_CLI, "PRE_TOOL_GUARD_TMUX_PANE_PATH": repo_a})
+check("deny tmux -L sock send-keys with embedded Enter", "deny", mk("tmux -L alt send-keys -t dev 'echo ok' Enter 'mise exec -- mix ecto.drop' Enter", cwd=repo_b), {**INTERACTIVE_CLI, "PRE_TOOL_GUARD_TMUX_PANE_PATH": repo_a})
+check("deny tmux send-keys -H hex", "deny", mk("tmux send-keys -H 6d 69 78", cwd=repo_b), {**INTERACTIVE_CLI, "PRE_TOOL_GUARD_TMUX_PANE_PATH": repo_a})
+check("deny tmux send-keys unknown pane fails closed", "deny", mk("tmux send-keys -t missing 'mix test' Enter", cwd=repo_b), {**INTERACTIVE_CLI, "PRE_TOOL_GUARD_TMUX_PANE_PATH": ""})
+check("allow tmux send-keys into repo_b pane", "allow", mk("tmux send-keys -t dev 'mix ecto.reset' Enter", cwd=repo_a), {**INTERACTIVE_CLI, "PRE_TOOL_GUARD_TMUX_PANE_PATH": repo_b})
 
-# 6. Malformed policy fails closed
-run_case "malformed guardrails.json fails closed" deny "$(payload "$REPO_BAD" default "ls -la")"
+# 6. Interactivity & permission_mode fail-closed matrix
+for mode in ("default", "acceptEdits", "plan", "auto"):
+    check(f"ask in interactive CLI {mode}", "ask", mk("mise exec -- mix hourbun.restore a.dump", mode=mode), INTERACTIVE_CLI)
 
-# 7. Latency check (<50 ms avg over 5 runs)
-LATENCY_MS="$(python3 - "$HOOK" "$REPO_A" <<'PY'
-import json, subprocess, sys, time
-hook, cwd = sys.argv[1], sys.argv[2]
-p = json.dumps({"tool_name": "Bash", "cwd": cwd, "permission_mode": "default", "tool_input": {"command": "mise exec -- mix test"}})
-t0 = time.perf_counter()
-for _ in range(5):
-    subprocess.run([hook], input=p, text=True, check=True, stdout=subprocess.PIPE)
-avg_ms = (time.perf_counter() - t0) * 1000 / 5
-print(f"{avg_ms:.1f}")
-if avg_ms >= 100.0:
-    sys.exit(1)
+check("ask in attended T3 session", "ask", mk("mise exec -- mix hourbun.restore a.dump", mode="default"), {"CLAUDE_CODE_ENTRYPOINT": "t3-code", "CLAUDE_CODE_SESSION_ATTENDED": "1"})
+check("deny in unattended T3 session", "deny", mk("mise exec -- mix hourbun.restore a.dump", mode="default"), {"CLAUDE_CODE_ENTRYPOINT": "t3-code", "CLAUDE_CODE_SESSION_ATTENDED": "0"})
+check("deny in T3 child session", "deny", mk("mise exec -- mix hourbun.restore a.dump", mode="default"), {"CLAUDE_CODE_ENTRYPOINT": "t3-code", "CLAUDE_CODE_CHILD_SESSION": "1"})
+check("deny detached default mode with no entrypoint", "deny", mk("mise exec -- mix hourbun.restore a.dump", mode="default"), {})
+check("deny in bypassPermissions", "deny", mk("mise exec -- mix hourbun.restore a.dump", mode="bypassPermissions"), INTERACTIVE_CLI)
+check("deny in dontAsk", "deny", mk("mise exec -- mix hourbun.restore a.dump", mode="dontAsk"), INTERACTIVE_CLI)
+check("deny with unknown mode", "deny", mk("mise exec -- mix hourbun.restore a.dump", mode="mystery"), INTERACTIVE_CLI)
+check("deny with agent_id", "deny", mk("mise exec -- mix hourbun.restore a.dump", mode="default", extra={"agent_id": "sub-1"}), INTERACTIVE_CLI)
+check("deny with agent_type", "deny", mk("mise exec -- mix hourbun.restore a.dump", mode="default", extra={"agent_type": "Explore"}), INTERACTIVE_CLI)
+check("deny with sdk-cli entrypoint", "deny", mk("mise exec -- mix hourbun.restore a.dump", mode="default"), {"CLAUDE_CODE_ENTRYPOINT": "sdk-cli"})
+
+# 7. Malformed policy / bad schema / malformed hook payload fail closed
+check("deny malformed JSON policy", "deny", mk("ls", cwd=repo_bad), INTERACTIVE_CLI, "Malformed guardrails policy")
+for bad_name, bad_content in [
+    ("bad regex", {"rules": [{"id": "r", "decision": "deny", "cmd_regex": "(unclosed"}]}),
+    ("non-dict rule", {"rules": ["oops"]}),
+    ("string allow_if_regex", {"rules": [{"id": "r", "decision": "deny", "cmd_regex": "mix", "allow_if_regex": "db"}]}),
+    ("typo key", {"rules": [{"id": "r", "decision": "deny", "cmd_rgx": "mix"}]}),
+    ("missing rules", {"version": 1}),
+    ("bad require_wrapper", {"rules": [{"id": "r", "decision": "deny", "require_wrapper": ["mix"]}]}),
+]:
+    bad_dir = os.path.join(tmp_base, f"bad_{bad_name.replace(' ', '_')}")
+    os.makedirs(os.path.join(bad_dir, ".git"), exist_ok=True)
+    os.makedirs(os.path.join(bad_dir, ".claude"), exist_ok=True)
+    with open(os.path.join(bad_dir, ".claude", "guardrails.json"), "w") as f:
+        json.dump(bad_content, f)
+    check(f"deny schema error ({bad_name})", "deny", mk("ls", cwd=bad_dir), INTERACTIVE_CLI, "Malformed guardrails policy")
+
+check("deny non-dict hook payload", "deny", "[1, 2, 3]", INTERACTIVE_CLI)
+check("deny non-dict tool_input", "deny", json.dumps({"tool_input": "x"}), INTERACTIVE_CLI)
+
+# 8. Real repository policy acceptance tests (when repos exist locally)
+hourbun = "/Users/fredwu/Code/Wuit/hourbun"
+if os.path.exists(os.path.join(hourbun, ".claude", "guardrails.json")):
+    check("hourbun: deny ecto.drop", "deny", mk("mise exec -- mix ecto.drop", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: deny mix do ecto.reset", "deny", mk("mise exec -- mix do compile, ecto.reset", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: deny rollback --to", "deny", mk("mise exec -- mix ecto.rollback --to 20261008102253", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: deny rollback --step 1 --all", "deny", mk("mise exec -- mix ecto.rollback --step 1 --all", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: deny rollback --step 1 --to", "deny", mk("mise exec -- mix ecto.rollback --step 1 --to 20261008102253", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: ask exact rollback --step 1", "ask", mk("mise exec -- mix ecto.rollback --step 1", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: deny docker-compose down -v", "deny", mk("docker-compose down -v", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: deny docker compose -f down --volumes", "deny", mk("docker compose -f docker-compose.yaml down --volumes", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: deny docker volume rm hourbun_db", "deny", mk("docker volume rm hourbun_db", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: ask docker volume rm other", "ask", mk("docker volume rm old_pg15_vol", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: ask flyctl -a hourbun deploy", "ask", mk("flyctl -a hourbun deploy", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: ask fly pg connect", "ask", mk("fly pg connect", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: allow hourbun.backup", "allow", mk("mise exec -- mix hourbun.backup", cwd=hourbun), INTERACTIVE_CLI)
+    check("hourbun: allow scripts/verify changed", "allow", mk("./scripts/verify changed", cwd=hourbun), INTERACTIVE_CLI)
+
+inspiria = "/Users/fredwu/Code/Clients/Inspire/inspiria"
+if os.path.exists(os.path.join(inspiria, ".claude", "guardrails.json")):
+    check("inspiria: deny mix phx.gen.live", "deny", mk("mix phx.gen.live Blog Post posts title:string", cwd=inspiria), INTERACTIVE_CLI)
+    check("inspiria: deny mix do phx.gen.html", "deny", mk("mix do compile + phx.gen.html Accounts User users", cwd=inspiria), INTERACTIVE_CLI)
+    check("inspiria: deny comment spoof phx.gen.secret", "deny", mk("mix phx.gen.live A B cs # mix phx.gen.secret", cwd=inspiria), INTERACTIVE_CLI)
+    check("inspiria: allow mix phx.gen.secret", "allow", mk("mix phx.gen.secret", cwd=inspiria), INTERACTIVE_CLI)
+    check("inspiria: allow mix phx.gen.secret 32", "allow", mk("mix phx.gen.secret 32", cwd=inspiria), INTERACTIVE_CLI)
+    check("inspiria: allow direnv mix phx.gen.secret 32", "allow", mk("direnv exec . mix phx.gen.secret 32", cwd=inspiria), INTERACTIVE_CLI)
+    check("inspiria: allow mix ecto.reset", "allow", mk("mix ecto.reset", cwd=inspiria), INTERACTIVE_CLI)
+    check("inspiria: ask flyctl deploy", "ask", mk("flyctl deploy", cwd=inspiria), INTERACTIVE_CLI)
+    check("inspiria: ask fly -a inspiria pg connect", "ask", mk("fly -a inspiria pg connect", cwd=inspiria), INTERACTIVE_CLI)
+
+# 9. Latency budget (< 50ms average across 5 ordinary runs)
+times = [check(f"latency run {i}", "allow", mk("mise exec -- mix test"), INTERACTIVE_CLI) for i in range(5)]
+avg_ms = sum(times) / len(times)
+if avg_ms >= 50.0:
+    failed += 1
+    print(f"FAIL [latency]: avg {avg_ms:.1f}ms exceeded 50ms budget")
+else:
+    passed += 1
+
+print(f"pre-tool-guard tests: {passed} passed, {failed} failed (avg {avg_ms:.1f}ms)")
+sys.exit(0 if failed == 0 else 1)
 PY
-)"
-
-echo "pre-tool-guard tests: $PASS passed, $FAIL failed (avg ${LATENCY_MS}ms)"
-[[ "$FAIL" -eq 0 ]]

@@ -387,9 +387,11 @@ test_repository_path_with_spaces() {
 
   mkdir -p "$DOTFILES_ROOT/config/nvim" "$DOTFILES_ROOT/zsh" \
     "$DOTFILES_ROOT/ai/shared" \
+    "$DOTFILES_ROOT/ai/hooks" \
     "$DOTFILES_ROOT/ai/skillshare/skills/example"
   printf 'repository skill\n' > "$DOTFILES_ROOT/ai/skillshare/skills/example/SKILL.md"
   printf 'instructions\n' > "$DOTFILES_ROOT/ai/shared/AGENTS.md"
+  printf '#!/usr/bin/env python3\n' > "$DOTFILES_ROOT/ai/hooks/pre-tool-guard.sh"
   cp -R "$source_root/templates" "$DOTFILES_ROOT/"
   cp "$source_root/zsh/custom.example" "$DOTFILES_ROOT/zsh/custom.example"
 
@@ -411,6 +413,10 @@ test_repository_path_with_spaces() {
     "XDG paths containing spaces should be preserved"
   assert_eq "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$(readlink "$HOME/.codex/AGENTS.md")" \
     "shared instruction links should preserve repository paths containing spaces"
+  assert_eq "$DOTFILES_ROOT/ai/hooks/pre-tool-guard.sh" "$(readlink "$HOME/.claude/hooks/pre-tool-guard.sh")" \
+    "pre-tool-guard hook link should preserve repository paths containing spaces"
+  assert_true "pre-tool-guard hook should be registered in Claude settings" \
+    grep -Fq "pre-tool-guard.sh" "$HOME/.claude/settings.json"
   assert_false "repository skills should not be installed" \
     test -e "$HOME/.codex/skills/example"
   finish_test "repository and HOME paths containing spaces"

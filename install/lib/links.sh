@@ -31,6 +31,60 @@ ensure_ai_directory() {
   mkdir -p "$target"
 }
 
+ensure_claude_pre_tool_guard_registered() {
+  local settings="$HOME/.claude/settings.json"
+  local hook_cmd="'$HOME/.claude/hooks/pre-tool-guard.sh'"
+
+  if ! command -v python3 >/dev/null 2>&1; then
+    return 0
+  fi
+
+  python3 - "$settings" "$hook_cmd" <<'PY'
+import json, os, sys
+
+settings_path, hook_cmd = sys.argv[1], sys.argv[2]
+data = {}
+if os.path.exists(settings_path):
+    try:
+        with open(settings_path, "r", encoding="utf-8") as f:
+            loaded = json.load(f)
+        if isinstance(loaded, dict):
+            data = loaded
+    except Exception:
+        sys.exit(0)
+
+hooks = data.setdefault("hooks", {})
+if not isinstance(hooks, dict):
+    sys.exit(0)
+pre_list = hooks.setdefault("PreToolUse", [])
+if not isinstance(pre_list, list):
+    sys.exit(0)
+
+for entry in pre_list:
+    if isinstance(entry, dict) and entry.get("matcher") == "Bash":
+        for h in entry.get("hooks", []):
+            if isinstance(h, dict) and "pre-tool-guard.sh" in str(h.get("command", "")):
+                sys.exit(0)
+
+pre_list.append({
+    "matcher": "Bash",
+    "hooks": [
+        {
+            "type": "command",
+            "command": hook_cmd,
+            "timeout": 10,
+            "onFailure": "block",
+        }
+    ],
+})
+
+os.makedirs(os.path.dirname(settings_path), exist_ok=True)
+with open(settings_path, "w", encoding="utf-8") as f:
+    json.dump(data, f, indent=2)
+    f.write("\n")
+PY
+}
+
 install_ai_links() {
   local name
   local instructions
@@ -45,6 +99,7 @@ install_ai_links() {
     ensure_symlink "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$HOME/.$name/$instructions"
   done
   ensure_symlink "$DOTFILES_ROOT/ai/hooks/pre-tool-guard.sh" "$HOME/.claude/hooks/pre-tool-guard.sh"
+  ensure_claude_pre_tool_guard_registered
 }
 
 install_dotfiles() {

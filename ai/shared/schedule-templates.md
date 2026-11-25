@@ -15,8 +15,8 @@ Every scheduled routine must follow three rules:
 
 ## 2. Weekly Hygiene & Drift Check (Hourbun / Inspiria)
 - **Suggested cadence:** Weekly (e.g. `0 8 * * 5`, Friday 08:00 local).
-- **Pre-check:** Compare `git rev-parse HEAD` against `.local/.last-hygiene-sha`. If unchanged, log `no_change` and stop immediately. Do not explore.
-- **Draft output:** Record the new SHA, run `scripts/verify full` (read-only), and if anything fails or stale `.local/*-plan*.md` files exceed 30 days, write a ≤15-line summary of findings without editing code or deleting files.
+- **Pre-check:** Check two signals independently: (a) whether any `.local/*-plan*.md` file is older than 30 days, and (b) whether `git rev-parse HEAD` differs from `.local/.last-hygiene-sha`. If no plan file exceeds 30 days AND HEAD is unchanged, log `no_change` and stop immediately. Do not explore.
+- **Draft output:** When HEAD changed, record the new SHA and run `scripts/verify full` (read-only); whenever `scripts/verify full` fails or any `.local/*-plan*.md` file exceeds 30 days, write a ≤15-line summary of findings without editing code or deleting files.
 
 ## 3. Monthly AI Discoverability Prompt Check (Hourbun)
 - **Suggested cadence:** Monthly (e.g. `0 9 1 * *`, 1st of the month).
