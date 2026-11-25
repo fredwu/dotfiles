@@ -1097,15 +1097,15 @@ DB_SELECTOR_ENV_VARS = {"PGDATABASE", "DATABASE_URL", "PGSERVICE"}
 SIMPLE_VAR_REF_RE = re.compile(r"^\$(?:([A-Za-z_][A-Za-z0-9_]*)|\{([A-Za-z_][A-Za-z0-9_]*)\})$")
 
 
-def _record_env_assign(env_map, token):
+def _record_env_assign(env_map, token, expansion_env):
     if "=" not in token:
         return
     key, val = token.split("=", 1)
     m = SIMPLE_VAR_REF_RE.match(val)
     if m:
         ref = m.group(1) or m.group(2)
-        if ref in env_map:
-            env_map[key] = set(env_map[ref])
+        if ref in expansion_env:
+            env_map[key] = set(expansion_env[ref])
             return
         # Unresolved reference: retain any prior known candidate values
         env_map[key] = set(env_map.get(key, ())) | {val}
@@ -1120,7 +1120,8 @@ def _record_env_assign(env_map, token):
 def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
     """Unwrap env assignments and exec wrappers. Returns (tokens, wrappers_seen, env_map, effective_cwd, err)."""
     wrappers = set(inherited_wrappers or ())
-    env_map = {k: set(v) for k, v in (inherited_env or {}).items()}
+    expansion_env = {k: set(v) for k, v in (inherited_env or {}).items()}
+    env_map = {k: set(v) for k, v in expansion_env.items()}
     eff_cwd = cwd
     idx = 0
     n = len(tokens)
@@ -1128,7 +1129,7 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
     while idx < n:
         tok = tokens[idx]
         if ENV_ASSIGN_RE.match(tok):
-            _record_env_assign(env_map, tok)
+            _record_env_assign(env_map, tok, expansion_env)
             idx += 1
             continue
 
@@ -1172,7 +1173,7 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
                     n = len(tokens)
                     break
                 if ENV_ASSIGN_RE.match(t):
-                    _record_env_assign(env_map, t)
+                    _record_env_assign(env_map, t, expansion_env)
                     idx += 1
                     continue
                 if t.startswith("-"):
@@ -1279,7 +1280,7 @@ def unwrap_tokens(tokens, cwd, inherited_wrappers=None, inherited_env=None):
                     idx += 1
                     continue
                 if ENV_ASSIGN_RE.match(t):
-                    _record_env_assign(env_map, t)
+                    _record_env_assign(env_map, t, expansion_env)
                     idx += 1
                     continue
                 if t.startswith("-"):
