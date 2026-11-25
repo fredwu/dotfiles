@@ -172,6 +172,23 @@ check("allow anchored allowlist pg_dump", "allow", mk("docker compose exec -T db
 check("deny raw pg_dump", "deny", mk("pg_dump hourbun_dev > /tmp/x"), INTERACTIVE_CLI)
 check("deny comment spoofing allow_if_regex", "deny", mk("pg_dump hourbun_dev # docker compose exec -T db pg_dump"), INTERACTIVE_CLI)
 
+# 4b. Round 3 heredoc & child-shell brace group regressions
+check("deny shell heredoc with trailing comment", "deny", mk("bash <<'EOF' # comment\nmise exec -- mix ecto.drop\nEOF"), INTERACTIVE_CLI)
+check("deny shell heredoc followed by cd on same line", "deny", mk("bash <<'EOF'; cd /tmp\nmise exec -- mix ecto.drop\nEOF"), INTERACTIVE_CLI)
+check("deny leading heredoc redirection before bash and cd", "deny", mk("<<'EOF' bash; cd /tmp\nmise exec -- mix ecto.drop\nEOF"), INTERACTIVE_CLI)
+check("allow heredoc inside brace group", "allow", mk("{\n  cat <<'EOF'\nhello\nEOF\n}"), INTERACTIVE_CLI)
+check("deny shell heredoc inside subshell after cd", "deny", mk(f"( cd {repo_a} && bash <<'EOF'\nmix test\nEOF\n)", cwd="/tmp"), INTERACTIVE_CLI)
+check("allow harmless shell heredoc inside brace group after cd", "allow", mk("cd /tmp && { bash <<'EOF'\necho ok\nEOF\n}"), INTERACTIVE_CLI)
+check("deny after piped brace group cd (left of pipe)", "deny", mk("{ cd /tmp; } | cat; mix test"), INTERACTIVE_CLI)
+check("deny after piped brace group cd (right of pipe)", "deny", mk("echo hi | { cd /tmp; }; mix test"), INTERACTIVE_CLI)
+check("deny after redirected piped brace group cd", "deny", mk("{ cd /tmp; } 2>/dev/null | cat; mix test"), INTERACTIVE_CLI)
+check("deny after backgrounded brace group cd", "deny", mk("{ cd /tmp; } & mix test"), INTERACTIVE_CLI)
+check("deny after backgrounded list cd", "deny", mk("cd /tmp && echo ok & mix test"), INTERACTIVE_CLI)
+check("allow dotted heredoc delimiter", "allow", mk("cat <<END.1\nhello\nEND.1"), INTERACTIVE_CLI)
+check("allow mixed-quote dotted heredoc delimiter", "allow", mk("cat <<E'N'D.1\nhello\nEND.1"), INTERACTIVE_CLI)
+check("allow << inside multiline double-quoted string", "allow", mk('echo "line 1\nnot a <<EOF heredoc\nline 3"'), INTERACTIVE_CLI)
+check("allow << inside multiline single-quoted string", "allow", mk("echo 'line 1\nnot a <<EOF heredoc\nline 3'"), INTERACTIVE_CLI)
+
 # 5. tmux global options, multi-line send-keys, pane resolution
 check("deny tmux send-keys into repo_a pane", "deny", mk("tmux send-keys -t dev 'mise exec -- mix ecto.drop' Enter", cwd=repo_b), {**INTERACTIVE_CLI, "PRE_TOOL_GUARD_TMUX_PANE_PATH": repo_a})
 check("deny tmux -L sock send-keys with embedded Enter", "deny", mk("tmux -L alt send-keys -t dev 'echo ok' Enter 'mise exec -- mix ecto.drop' Enter", cwd=repo_b), {**INTERACTIVE_CLI, "PRE_TOOL_GUARD_TMUX_PANE_PATH": repo_a})

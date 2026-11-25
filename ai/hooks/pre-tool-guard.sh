@@ -189,17 +189,75 @@ def normalize_continuations(cmd):
     return "".join(out)
 
 
-def find_heredoc_ops_on_line(line):
+def parse_heredoc_delimiter(line, j):
     """
-    Scan a single line outside single/double quotes and unquoted `#` comments for
-    heredoc operators (`<<` / `<<-`), explicitly skipping here-strings (`<<<`).
-    Returns list of (strip_tabs, delimiter) tuples.
+    Parse a POSIX/Bash heredoc delimiter word starting at `j` with shell
+    quote-removal rules. Returns (delim, next_idx, error_reason).
+    """
+    n = len(line)
+    delim_chars = []
+    delim_sq = False
+    delim_dq = False
+    delim_esc = False
+    meta = (" ", "\t", "\r", ";", "&", "|", "<", ">", "(", ")")
+    while j < n:
+        ch = line[j]
+        if delim_esc:
+            delim_chars.append(ch)
+            delim_esc = False
+            j += 1
+            continue
+        if delim_sq:
+            if ch == "'":
+                delim_sq = False
+            else:
+                delim_chars.append(ch)
+            j += 1
+            continue
+        if delim_dq:
+            if ch == '"':
+                delim_dq = False
+                j += 1
+                continue
+            if ch == "\\" and j + 1 < n and line[j + 1] in ('"', "\\"):
+                delim_chars.append(line[j + 1])
+                j += 2
+                continue
+            delim_chars.append(ch)
+            j += 1
+            continue
+        if ch in meta:
+            break
+        if ch == "\\":
+            delim_esc = True
+            j += 1
+            continue
+        if ch == "'":
+            delim_sq = True
+            j += 1
+            continue
+        if ch == '"':
+            delim_dq = True
+            j += 1
+            continue
+        delim_chars.append(ch)
+        j += 1
+
+    if delim_sq or delim_dq or delim_esc:
+        return None, j, "Unterminated quote in heredoc delimiter; refusing fail-closed."
+    return "".join(delim_chars), j, None
+
+
+def find_heredoc_ops_on_line(line, in_sq=False, in_dq=False):
+    """
+    Scan a single line carrying quote state across lines, skipping single/double
+    quoted text, unquoted `#` comments, and here-strings (`<<<`).
+    Returns (ops, end_in_sq, end_in_dq, error_reason), where each op is
+    (start_idx, end_idx, strip_tabs, delimiter).
     """
     ops = []
     i = 0
     n = len(line)
-    in_sq = False
-    in_dq = False
     esc = False
     while i < n:
         ch = line[i]
@@ -227,6 +285,7 @@ def find_heredoc_ops_on_line(line):
                 if i + 2 < n and line[i + 2] == "<":
                     i += 3
                     continue
+                op_start = i
                 j = i + 2
                 strip_tabs = False
                 if j < n and line[j] == "-":
@@ -237,39 +296,28 @@ def find_heredoc_ops_on_line(line):
                 if j >= n:
                     i = j
                     continue
-                # Parse delimiter token (quoted or unquoted word)
-                if line[j] in ("'", '"'):
-                    q = line[j]
-                    j += 1
-                    start = j
-                    while j < n and line[j] != q:
-                        j += 1
-                    delim = line[start:j]
-                    if j < n:
-                        j += 1
-                else:
-                    if line[j] == "\\":
-                        j += 1
-                    start = j
-                    while j < n and (line[j].isalnum() or line[j] in ("_", "-")):
-                        j += 1
-                    delim = line[start:j]
+                delim, j, err = parse_heredoc_delimiter(line, j)
+                if err:
+                    return [], in_sq, in_dq, err
                 if delim:
-                    ops.append((strip_tabs, delim))
+                    ops.append((op_start, j, strip_tabs, delim))
                 i = j
                 continue
         i += 1
-    return ops
+    return ops, in_sq, in_dq, None
 
 
-def strip_heredocs(cmd):
+def strip_heredocs(cmd, token_offset=0):
     """
-    Quote- and comment-aware heredoc stripper.
-    Returns (cleaned_cmd, heredoc_map, error_reason).
-    - Non-shell heredoc bodies (e.g. `git commit -m "$(cat <<'EOF'...EOF)"`) are stripped.
-    - Shell-fed heredoc bodies (`sh`/`bash`/`zsh <<EOF`) are stored in `heredoc_map`
-      and replaced inline with a placeholder so they are evaluated at the command's
-      exact active `cwd`.
+    Quote- and comment-aware heredoc stripper that preserves multiline quote
+    state and replaces each `<<[-]?DELIM` operator in place with a unique
+    marker token (`__PRE_TOOL_GUARD_HEREDOC_<N>__`).
+    - Because the `<<` operator is removed in place, nested `{ ... }` / `( ... )`
+      evaluations never misread already-stripped heredocs as unterminated.
+    - Because the marker sits directly on the owning command (before trailing
+      comments or later `; cd ...` commands), shell-fed heredoc bodies are
+      inspected in the exact effective `cwd` of the command that owns the
+      redirection.
     - An unclosed heredoc fails closed (`error_reason`).
     """
     lines = cmd.split("\n")
@@ -277,17 +325,21 @@ def strip_heredocs(cmd):
     heredoc_map = {}
     i = 0
     n = len(lines)
+    in_sq = False
+    in_dq = False
+    next_id = token_offset
     while i < n:
         line = lines[i]
-        ops = find_heredoc_ops_on_line(line)
+        ops, in_sq, in_dq, op_err = find_heredoc_ops_on_line(line, in_sq, in_dq)
+        if op_err:
+            return "", {}, op_err
         if not ops:
             out_lines.append(line)
             i += 1
             continue
 
-        feeds_shell = bool(re.search(r"(?:^|[;&|(\s])(?:sh|bash|zsh)\b[^#]*<<", line))
-        captured_bodies = []
-        for strip_tabs, delim in ops:
+        replacements = []
+        for op_start, op_end, strip_tabs, delim in ops:
             body = []
             found_end = False
             i += 1
@@ -300,16 +352,19 @@ def strip_heredocs(cmd):
                 i += 1
             if not found_end:
                 return "", {}, f"Unterminated heredoc (missing delimiter `{delim}`); refusing fail-closed."
-            if feeds_shell and body:
-                captured_bodies.append("\n".join(body))
+            token_id = f"__PRE_TOOL_GUARD_HEREDOC_{next_id}__"
+            next_id += 1
+            heredoc_map[token_id] = "\n".join(body)
+            replacements.append((op_start, op_end, f" {token_id} "))
 
-        if feeds_shell and captured_bodies:
-            token_id = f"__PRE_TOOL_GUARD_HEREDOC_{len(heredoc_map)}__"
-            heredoc_map[token_id] = "\n".join(captured_bodies)
-            # Keep any leading `cd ... &&` on the same line, and attach the placeholder command
-            out_lines.append(f"{line} ; {token_id}")
-        else:
-            out_lines.append(line)
+        rebuilt = []
+        cursor = 0
+        for op_start, op_end, repl in replacements:
+            rebuilt.append(line[cursor:op_start])
+            rebuilt.append(repl)
+            cursor = op_end
+        rebuilt.append(line[cursor:])
+        out_lines.append("".join(rebuilt))
         i += 1
     return "\n".join(out_lines), heredoc_map, None
 
@@ -346,9 +401,9 @@ def strip_unquoted_comment(segment):
 
 def split_top_level(cmd):
     """
-    Split a shell string into a list of (kind, content, prev_op) items.
+    Split a shell string into a list of (kind, content, prev_op, next_op) items.
     kind is 'cmd' | 'subshell' | 'group' | 'subst'.
-    prev_op is None | ';' | '&&' | '||' | '|' | '&' | '\\n'.
+    prev_op / next_op is None | ';' | '&&' | '||' | '|' | '&' | '\\n'.
     """
     items = []
     substs = []
@@ -365,7 +420,14 @@ def split_top_level(cmd):
         s = strip_unquoted_comment("".join(buf).strip())
         buf.clear()
         if s:
-            items.append(("cmd", s, prev_op))
+            # If the immediately preceding item was a group/subshell followed by
+            # trailing redirections (no separator between them), attach `next_op`
+            # to that group/subshell as well so pipeline/background scope holds.
+            if items and items[-1][0] in ("group", "subshell") and items[-1][3] is None:
+                items[-1][3] = next_op
+            items.append(["cmd", s, prev_op, next_op])
+        elif items and items[-1][3] is None:
+            items[-1][3] = next_op
         prev_op = next_op
 
     while i < n:
@@ -475,7 +537,7 @@ def split_top_level(cmd):
                     inner = cmd[i + 1 : j - 1].strip()
                     buf.clear()
                     if inner:
-                        items.append(("subshell", inner, prev_op))
+                        items.append(["subshell", inner, prev_op, None])
                     i = j
                     continue
 
@@ -506,7 +568,7 @@ def split_top_level(cmd):
                     inner = cmd[i + 1 : j - 1].strip()
                     buf.clear()
                     if inner:
-                        items.append(("group", inner, prev_op))
+                        items.append(["group", inner, prev_op, None])
                     i = j
                     continue
 
@@ -542,8 +604,8 @@ def split_top_level(cmd):
 
     flush(None)
     for sc in substs:
-        items.append(("subst", sc, None))
-    return items
+        items.append(["subst", sc, None, None])
+    return [tuple(it) for it in items]
 
 
 def tokenize(segment):
@@ -897,7 +959,7 @@ def split_tmux_send_keys(args):
     return target, lines, None
 
 
-def extract_subpayloads(tokens, cwd, prev_op, wrappers):
+def extract_subpayloads(tokens, cwd, prev_op, wrappers, attached_heredocs=None, heredoc_map=None):
     """Extract list of (payload_cmd, payload_cwd, inherited_wrappers, error_reason)."""
     if not tokens:
         return []
@@ -923,7 +985,12 @@ def extract_subpayloads(tokens, cwd, prev_op, wrappers):
                 has_script_file = True
                 break
             i += 1
-        if not found_c and not has_script_file and prev_op == "|":
+        if attached_heredocs and heredoc_map:
+            for tok in attached_heredocs:
+                body = heredoc_map.get(tok, "")
+                if body.strip():
+                    results.append((body, cwd, wrappers, None))
+        if not found_c and not has_script_file and not attached_heredocs and prev_op == "|":
             # Piped input into sh/bash/zsh cannot be safely inspected in a guarded repo
             if load_policy(find_git_root(cwd), {}):
                 results.append((None, None, None, f"Piping commands into `{base}` is blocked in guarded repositories."))
@@ -1067,17 +1134,19 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
 
     fallback_cwds = set()
     in_conditional = False
+    list_start_cwds = set(active_cwds)
     worst = None
 
     norm = normalize_continuations(cmd)
-    cleaned, local_heredocs, hd_err = strip_heredocs(norm)
+    existing_heredocs = dict(heredoc_map or {})
+    cleaned, local_heredocs, hd_err = strip_heredocs(norm, token_offset=len(existing_heredocs))
     if hd_err:
         return ("deny", hd_err), active_cwds
 
-    merged_heredocs = dict(heredoc_map or {})
+    merged_heredocs = existing_heredocs
     merged_heredocs.update(local_heredocs)
 
-    for kind, content, prev_op in split_top_level(cleaned):
+    for kind, content, prev_op, next_op in split_top_level(cleaned):
         if prev_op in ("&&", "||"):
             if not in_conditional:
                 fallback_cwds = set(active_cwds)
@@ -1089,6 +1158,9 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
                 active_cwds = active_cwds | fallback_cwds
                 fallback_cwds = set()
                 in_conditional = False
+            list_start_cwds = set(active_cwds)
+
+        runs_in_child_shell = prev_op == "|" or next_op in ("|", "&")
 
         if kind in ("subshell", "subst"):
             # Subshell / command substitution keeps its cwd strictly local
@@ -1096,29 +1168,41 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
             worst = merge_decisions(worst, res)
             if worst and worst[0] == "deny":
                 return worst, active_cwds
+            if next_op == "&":
+                active_cwds = set(list_start_cwds)
+                fallback_cwds = set()
+                in_conditional = False
             continue
 
         if kind == "group":
-            # Brace group runs in parent shell: carry its final cwds forward!
+            # Brace group runs in parent shell unless piped or backgrounded.
             res, group_cwds = eval_command(content, active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs)
             worst = merge_decisions(worst, res)
-            active_cwds = group_cwds
+            if not runs_in_child_shell:
+                active_cwds = group_cwds
             if worst and worst[0] == "deny":
                 return worst, active_cwds
-            continue
-
-        # Inline shell heredoc body evaluated at this exact active_cwds!
-        if content in merged_heredocs:
-            res, _hd_cwds = eval_command(
-                merged_heredocs[content], active_cwds, policy_cache, depth + 1, inherited_wrappers, merged_heredocs
-            )
-            worst = merge_decisions(worst, res)
-            if worst and worst[0] == "deny":
-                return worst, active_cwds
+            if next_op == "&":
+                active_cwds = set(list_start_cwds)
+                fallback_cwds = set()
+                in_conditional = False
             continue
 
         tokens = tokenize(content)
         if not tokens:
+            if next_op == "&":
+                active_cwds = set(list_start_cwds)
+                fallback_cwds = set()
+                in_conditional = False
+            continue
+
+        attached_heredocs = [t for t in tokens if t in merged_heredocs]
+        tokens = [t for t in tokens if t not in merged_heredocs]
+        if not tokens:
+            if next_op == "&":
+                active_cwds = set(list_start_cwds)
+                fallback_cwds = set()
+                in_conditional = False
             continue
 
         first_base = os.path.basename(tokens[0])
@@ -1138,7 +1222,12 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
                         f"Cannot determine target directory for `{first_base} {target or ''}`. Use an explicit path so repository guardrails can be verified.",
                     ), active_cwds
                 next_cwds.add(resolved)
-            active_cwds = next_cwds
+            if not runs_in_child_shell:
+                active_cwds = next_cwds
+            if next_op == "&":
+                active_cwds = set(list_start_cwds)
+                fallback_cwds = set()
+                in_conditional = False
             continue
 
         if first_base == "popd":
@@ -1154,7 +1243,7 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
             if not unwrapped:
                 continue
 
-            subpayloads = extract_subpayloads(unwrapped, seg_cwd, prev_op, wrappers)
+            subpayloads = extract_subpayloads(unwrapped, seg_cwd, prev_op, wrappers, attached_heredocs, merged_heredocs)
             if subpayloads:
                 for p_cmd, p_cwd, p_wrappers, p_err in subpayloads:
                     if p_err:
@@ -1171,6 +1260,11 @@ def eval_command(cmd, start_cwds, policy_cache, depth=0, inherited_wrappers=None
             worst = merge_decisions(worst, evaluate_policy(unwrapped, wrappers, content, policy))
             if worst and worst[0] == "deny":
                 return worst, active_cwds
+
+        if next_op == "&":
+            active_cwds = set(list_start_cwds)
+            fallback_cwds = set()
+            in_conditional = False
 
     if in_conditional:
         active_cwds = active_cwds | fallback_cwds
