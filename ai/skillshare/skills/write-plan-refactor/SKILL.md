@@ -1,6 +1,6 @@
 ---
 name: write-plan-refactor
-description: Save a refactoring audit plan for project-owned code, covering architecture, data flow, security, legacy removal, code quality, readability, tests, and documentation. Use only on explicit invocation, for periodic audits after feature work.
+description: Save a refactoring audit plan for project-owned code covering architecture, security, legacy removal, tests, and docs (explicit invocation only).
 metadata:
   origin: custom
 ---

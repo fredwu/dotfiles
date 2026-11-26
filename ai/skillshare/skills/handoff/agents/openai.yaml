@@ -1,0 +1,6 @@
+interface:
+  display_name: "Handoff"
+  short_description: "Save a lean handoff file for a fresh session or fork parallel work"
+  default_prompt: "Use $handoff to write a concise .local/YYMMDD-handoff-<topic>.md state packet so work can resume cleanly in a fresh session without compaction."
+policy:
+  allow_implicit_invocation: false

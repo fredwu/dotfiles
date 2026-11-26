@@ -212,12 +212,19 @@ test_dotfile_install() {
   assert_false "Codex config should not be linked" test -L "$HOME/.codex"
   assert_true "Grok config should be a directory" test -d "$HOME/.grok"
   assert_false "Grok config should not be linked" test -L "$HOME/.grok"
+  assert_true "Gemini config should be a directory" test -d "$HOME/.gemini"
+  assert_false "Gemini config should not be linked" test -L "$HOME/.gemini"
   assert_eq "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$(readlink "$HOME/.claude/CLAUDE.md")" \
     "Claude instructions should link to shared instructions"
   assert_eq "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$(readlink "$HOME/.codex/AGENTS.md")" \
     "Codex instructions should link to shared instructions"
   assert_eq "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$(readlink "$HOME/.grok/AGENTS.md")" \
     "Grok instructions should link to shared instructions"
+  assert_eq "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$(readlink "$HOME/.gemini/GEMINI.md")" \
+    "Gemini instructions should link to shared instructions"
+  assert_eq "$DOTFILES_ROOT/ai/shared/cua-driver-prefs.md" \
+    "$(readlink "$XDG_CONFIG_HOME/ai/cua-driver-prefs.md")" \
+    "cua-driver prefs should link under XDG_CONFIG_HOME"
   assert_eq 700 "$(stat -f '%Lp' "$HOME/.ssh" 2>/dev/null || stat -c '%a' "$HOME/.ssh")" \
     "SSH directory should have mode 700"
   assert_eq 0 "$(find "$DOTFILES_BACKUP_ROOT" -type f 2>/dev/null | awk 'END { print NR + 0 }')" \
@@ -391,6 +398,7 @@ test_repository_path_with_spaces() {
     "$DOTFILES_ROOT/ai/skillshare/skills/example"
   printf 'repository skill\n' > "$DOTFILES_ROOT/ai/skillshare/skills/example/SKILL.md"
   printf 'instructions\n' > "$DOTFILES_ROOT/ai/shared/AGENTS.md"
+  printf 'cua prefs\n' > "$DOTFILES_ROOT/ai/shared/cua-driver-prefs.md"
   printf '#!/usr/bin/env python3\n' > "$DOTFILES_ROOT/ai/hooks/pre-tool-guard.sh"
   cp -R "$source_root/templates" "$DOTFILES_ROOT/"
   cp "$source_root/zsh/custom.example" "$DOTFILES_ROOT/zsh/custom.example"
@@ -413,6 +421,11 @@ test_repository_path_with_spaces() {
     "XDG paths containing spaces should be preserved"
   assert_eq "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$(readlink "$HOME/.codex/AGENTS.md")" \
     "shared instruction links should preserve repository paths containing spaces"
+  assert_eq "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$(readlink "$HOME/.gemini/GEMINI.md")" \
+    "Gemini instruction link should preserve repository paths containing spaces"
+  assert_eq "$DOTFILES_ROOT/ai/shared/cua-driver-prefs.md" \
+    "$(readlink "$XDG_CONFIG_HOME/ai/cua-driver-prefs.md")" \
+    "cua-driver prefs link should preserve repository and XDG paths containing spaces"
   assert_eq "$DOTFILES_ROOT/ai/hooks/pre-tool-guard.sh" "$(readlink "$HOME/.claude/hooks/pre-tool-guard.sh")" \
     "pre-tool-guard hook link should preserve repository paths containing spaces"
   assert_true "pre-tool-guard hook should be registered in Claude settings with onFailure block" \
@@ -434,24 +447,41 @@ test_repository_path_with_spaces() {
 test_ai_config_directories_preserve_provider_data() {
   local DOTFILES_ROOT=$TEST_ROOT
   local name
+  local sibling_prefs
   export DOTFILES_ROOT
 
-  for name in claude codex grok; do
+  for name in claude codex grok gemini; do
     mkdir -p "$HOME/.$name/skills/provider-owned"
     printf '%s config\n' "$name" > "$HOME/.$name/preserved"
     printf '%s skill\n' "$name" > "$HOME/.$name/skills/provider-owned/SKILL.md"
   done
+  printf 'legacy rtk boilerplate\n' > "$HOME/.gemini/GEMINI.md"
 
   install_dotfiles
-  for name in claude codex grok; do
+  for name in claude codex grok gemini; do
     assert_false "$name config should remain a real directory" test -L "$HOME/.$name"
     assert_true "$name config should be preserved" test -f "$HOME/.$name/preserved"
     assert_true "$name provider skill should be preserved" \
       test -f "$HOME/.$name/skills/provider-owned/SKILL.md"
   done
+  assert_eq "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$(readlink "$HOME/.gemini/GEMINI.md")" \
+    "pre-existing GEMINI.md should be replaced with shared link"
+  assert_eq 1 "$(find "$DOTFILES_BACKUP_ROOT" -path '*/.gemini/GEMINI.md' -type f | awk 'END { print NR + 0 }')" \
+    "pre-existing GEMINI.md should be archived to backup"
+
+  # Verify pre-install discovery from outside the checkout when the XDG link is absent
+  rm -f "$XDG_CONFIG_HOME/ai/cua-driver-prefs.md"
+  sibling_prefs=$(cd /tmp && printf '%s/cua-driver-prefs.md' "$(dirname -- "$(readlink "$HOME/.claude/CLAUDE.md")")")
+  assert_true "sibling cua-driver-prefs.md should resolve via provider symlink when XDG link is absent" \
+    test -f "$sibling_prefs"
+
+  # Restore XDG link and verify repeat install creates no additional backups
+  BACKUP_SESSION_DIR=
+  rm -rf "$DOTFILES_BACKUP_ROOT"
+  install_dotfiles
   install_dotfiles
   assert_false "repeat install should create no backup" test -e "$DOTFILES_BACKUP_ROOT"
-  finish_test "AI config directories and provider-local skills are preserved"
+  finish_test "AI config directories, Gemini backup, and cua-driver fallback are preserved"
 }
 
 test_legacy_ai_symlink_is_reversed() {

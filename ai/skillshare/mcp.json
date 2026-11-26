@@ -20,16 +20,6 @@
         "@upstash/context7-mcp@4.4.4"
       ],
       "transport": "stdio"
-    },
-    "playwright": {
-      "transport": "stdio",
-      "command": {
-        "executable": "npx"
-      },
-      "args": [
-        "-y",
-        "@playwright/mcp@0.0.83"
-      ]
     }
   }
 }

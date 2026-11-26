@@ -1,6 +1,6 @@
 ---
 name: write-plan-perf
-description: Save a performance audit plan for project-owned code, covering runtime latency, data access, concurrency, rendering lifecycles, and test-suite value and speed. Use only on explicit invocation, for periodic audits after feature work.
+description: Save a performance audit plan for project-owned code covering latency, data access, concurrency, rendering, and tests (explicit invocation only).
 metadata:
   origin: custom
 ---

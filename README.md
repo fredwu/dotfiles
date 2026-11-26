@@ -35,9 +35,13 @@ moved to a timestamped directory under `~/.dotfiles-backups` before links are
 created. Correct links, existing package installations, fonts, and Git
 checkouts are left alone.
 
-Claude Code, Codex, and Grok keep real configuration directories at
-`~/.claude`, `~/.codex`, and `~/.grok`. Their instruction files link to
-`ai/shared`. [Skillshare](https://skillshare.runkids.cc/) 0.29.1 or newer manages
+Claude Code, Codex, Grok, and Gemini keep real configuration directories at
+`~/.claude`, `~/.codex`, `~/.grok`, and `~/.gemini`. Their instruction files
+(`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`) link to `ai/shared/AGENTS.md` (existing
+standalone files such as `~/.gemini/GEMINI.md` are archived to
+`~/.dotfiles-backups` before linking), and local `cua-driver` delivery
+preferences link to `${XDG_CONFIG_HOME:-$HOME/.config}/ai/cua-driver-prefs.md`.
+[Skillshare](https://skillshare.runkids.cc/) 0.29.1 or newer manages
 shared resources from `ai/skillshare`; Homebrew installs it and keeps it at
 the latest release. Bootstrap provisions a locked, private YAML
 parser under `.local/skillshare-node` with `npm ci --ignore-scripts`.
@@ -188,7 +192,7 @@ repeatable and then performs the normal install.
 - Git, GnuPG, direnv, fzf, zoxide, ripgrep, fd, Node.js, mise, and related build tools
 - Grok, Codex, and Claude Code CLI casks on macOS
 - Skillshare, with shared skills stored in this repository
-- Shared instructions for Claude Code, Codex, and Grok
+- Shared instructions for Claude Code, Codex, Grok, and Gemini, plus local `cua-driver` preferences
 
 Homebrew installs the same command-line formulae on macOS and Linux, under
 `/home/linuxbrew/.linuxbrew` on Linux. Each install run upgrades them to their

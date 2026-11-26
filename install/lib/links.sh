@@ -102,18 +102,20 @@ PY
 }
 
 install_ai_links() {
+  local config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
   local name
   local instructions
 
-  for name in claude codex grok; do
+  for name in claude codex grok gemini; do
     ensure_ai_directory "$name"
-    if [[ "$name" == claude ]]; then
-      instructions=CLAUDE.md
-    else
-      instructions=AGENTS.md
-    fi
+    case "$name" in
+      claude) instructions=CLAUDE.md ;;
+      gemini) instructions=GEMINI.md ;;
+      *) instructions=AGENTS.md ;;
+    esac
     ensure_symlink "$DOTFILES_ROOT/ai/shared/AGENTS.md" "$HOME/.$name/$instructions"
   done
+  ensure_symlink "$DOTFILES_ROOT/ai/shared/cua-driver-prefs.md" "$config_home/ai/cua-driver-prefs.md"
   ensure_symlink "$DOTFILES_ROOT/ai/hooks/pre-tool-guard.sh" "$HOME/.claude/hooks/pre-tool-guard.sh"
   ensure_claude_pre_tool_guard_registered
 }

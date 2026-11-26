@@ -21,7 +21,7 @@ Start by reviewing the full change set—code, documentation, tests, and configu
 
 ## Post-review recovery
 
-While a review loop is active and has rounds left, it owns fresh review. Do not use this recovery to replace a required review; failed attempts follow the loop's failure recovery (`code-review-loop`, `Recover failed attempts`).
+While a review loop is active and has rounds left, it owns fresh review. Do not use this recovery to replace a required review; failed attempts follow the loop's failure recovery (`code-review-loop/references/failure-recovery.md`).
 
 When the loop has ended at its cap or a concrete blocker, list the missing coverage and the repairs no reviewer has seen, against the original target, acceptance criteria, and review lenses. Inspect that coverage directly and record the evidence in context. Do not retry the failed call, restart the loop, or add disguised review rounds. The checkpoint can close when this coverage and all required repairs and checks are complete. Report the loop's actual capped or incomplete status and the unreviewed repairs; this recovery does not make a clean loop result. If you cannot establish the coverage, keep the checkpoint incomplete.
 
@@ -29,9 +29,21 @@ When the loop has ended at its cap or a concrete blocker, list the missing cover
 
 Before running the full checks, do one cleanup round over changed and directly affected files. Remove confirmed obsolete, duplicate, dead, or unnecessary compatibility code and the related tests, configuration, and documentation. Keep required behavior, explicit compatibility, and unrelated work. With read-only or documentation-only authority, report material implementation findings without editing them. A clean result is valid.
 
+## Visual verification
+
+For any change affecting rendered UI, layout, styling, diagrams, or motion—including small CSS or bug fixes excluded from full mockup exploration (`execute-plan/references/ui-mockups.md`)—render and visually inspect the affected output before closing. Inspect the actual screenshot, frames, or clip for clipped text, wrapped labels, broken alignment, or broken transitions.
+
+- **Checkpoint scope:** Required at final phase `T`, closing `final-pass`, and standalone `final-pass` whenever a permitted local render path exists. Intermediate phases (`1..T-1`) run it when the phase delivers a UI surface. Docs-only diagrams (such as Mermaid) run visual verification when a local renderer is available; otherwise record the unverified visual limit without blocking doc work.
+- **Tool routing (single source of truth):**
+  - **Static HTML / mockups:** Inside T3 Code, use `html_preview` (returns a PNG without opening a shared tab; do not call `html_render` or `preview_*` unless asked). Outside T3 Code, use an available browser or screenshot tool (such as Playwright).
+  - **Web UI & CSS/JS motion:** Inside T3 Code, use `preview_*` / `preview_recording_*` **only** when browser work was requested by the user (closing any tab you opened when done); otherwise use an isolated browser tool such as Playwright CLI (screenshots, state-transition captures, or video) for self-verification without opening unasked shared tabs.
+  - **Mobile / TV simulators & emulators:** Use `device_screenshot` / `agent-device`.
+  - **Native desktop UI:** Use `cua-driver` (following `cua-driver-prefs.md`) with **background capture only** for unasked self-verification checks. If background capture is unavailable for an unasked check, record a verification limit instead of taking foreground focus.
+- **Server & headless boundary:** Starting an ephemeral local dev/preview server is permitted within existing local-check authority and must be stopped afterward; never touch production/external services or open unasked browser tabs. When no permitted local rendering environment exists for a non-mandatory visual check (such as a headless environment lacking a display, browser, or simulator), record the exact verification limit in the report rather than stalling `final-pass` as `incomplete` unless the project explicitly defines a required visual gate.
+
 ## Run the full checks
 
-Run this step only after `Resolve issues`, applicable `Post-review recovery`, and `Clean up` are complete and no further edits are planned. Do not launch full test or quality suites speculatively at the start of `final-pass` or in parallel with review or cleanup.
+Run this step only after `Resolve issues`, applicable `Post-review recovery`, `Clean up`, and applicable `Visual verification` are complete and no further edits are planned. Do not launch full test or quality suites speculatively at the start of `final-pass` or in parallel with review, cleanup, or visual verification.
 
 Find the project's full test and quality gates in repository instructions (including AGENTS.md), CI workflows, scripts, and contributor or testing documentation. In each invocation, establish passing evidence for every required gate on the final state, by running it or by reusing valid evidence under [Check evidence and reuse](references/check-evidence.md). Targeted tests, smoke tests, and document validators do not replace full suites or quality checks. Small changes and long run times do not reduce coverage. Add checks in proportion to risk where the required gates leave a gap.
 
@@ -44,7 +56,7 @@ Only these permit a skip:
 
 Missing access, services, or authority blocks a required check; it does not exempt it. Try reasonable authorized alternatives first, and keep authorization boundaries for external effects.
 
-If the full checks expose authorized in-scope failures, batch the repairs and any resulting cleanup first (using targeted checks if needed while fixing), then reassess evidence and rerun only the invalidated gates. Repeat until no actionable task-relevant issue remains and required checks pass. A failed or blocked required gate keeps the checkpoint incomplete. For each required gate, record the command, the result (passed, failed, skipped, or blocked), whether a pass was executed or reused (with its origin), and the reason for any skip or blocker.
+If the full checks expose authorized in-scope failures, batch the repairs and any resulting cleanup first (using targeted checks if needed while fixing), repeat affected `Visual verification` when repairs change rendered UI, layout, diagram, or motion output, then reassess evidence and rerun only the invalidated gates. Repeat until no actionable task-relevant issue remains and required checks pass. A failed or blocked required gate keeps the checkpoint incomplete. For each required gate, record the command, the result (passed, failed, skipped, or blocked), whether a pass was executed or reused (with its origin), and the reason for any skip or blocker.
 
 ## Finish
 

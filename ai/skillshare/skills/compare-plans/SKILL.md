@@ -1,6 +1,6 @@
 ---
 name: compare-plans
-description: Compare the current completed analysis plan with one or more supplied or identifiable peer plans and return prioritized findings to improve the current plan. Use definitive-version for winner selection.
+description: Compare the current plan against peer plans and return prioritized findings to improve it. Use definitive-version for winner selection.
 metadata:
   origin: custom
 ---

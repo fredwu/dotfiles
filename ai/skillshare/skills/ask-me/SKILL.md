@@ -1,6 +1,6 @@
 ---
 name: ask-me
-description: Find the open decisions in the current context that need the user, ask only the ambiguous, critical, or hard-to-reverse ones with recommendations, record the answers for later skills such as write-plan, and update a plan in context when the questions were about it.
+description: Ask only critical, ambiguous, or hard-to-reverse open decisions with recommendations, record the answers, and update a plan in context when applicable.
 metadata:
   origin: custom
 ---
@@ -26,7 +26,7 @@ Do not ask about facts that you can find, routine implementation details, choice
 
 ## Ask
 
-Use the harness's user-input tool when one is available. Otherwise, ask in the response and stop. Make each question stand alone: give the necessary context, the options when they help, your recommendation and its reason, and consequences that are not obvious.
+Use the harness's user-input tool when one is available. Otherwise, ask in the response and stop. Make each question stand alone: give the necessary context, the options when they help, your recommendation and its reason, and consequences that are not obvious. When visual layout, styling, or motion is ambiguous, invite a reference screenshot or short recording rather than long prose descriptions.
 
 After each set of answers, examine the decisions again. Answers can resolve other decisions or open new ones. Ask the new questions that meet the same bar, and continue until no decision meets it.
 

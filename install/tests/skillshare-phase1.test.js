@@ -182,12 +182,32 @@ try {
     const status = JSON.parse(native(a, ['status', '--json', '-g']));
     assert(status);
     const mcp = native(a, ['mcp', '--json', '-g']);
-    for (const name of Object.keys(m.loadCanonicalMcp(a))) assert(mcp.includes(name));
+    const canonicalNames = Object.keys(m.loadCanonicalMcp(a)).sort();
+    assert.deepEqual(canonicalNames, ['chrome-devtools', 'context7']);
+    for (const name of canonicalNames) assert(mcp.includes(name));
+    assert(!mcp.includes('playwright'));
     assert(!mcp.includes('node_repl'));
+    const generatedServers = yaml.parse(fs.readFileSync(p.paths.mcpFile, 'utf8')).servers;
+    assert(Object.hasOwn(generatedServers, 'chrome-devtools'));
+    assert(Object.hasOwn(generatedServers, 'context7'));
+    assert(!Object.hasOwn(generatedServers, 'playwright'));
     const again = m.prepare(a);
     assert.equal(again.config.changed, false);
     assert.equal(again.mcp.changed, false);
     assert.equal(again.config.text, fs.readFileSync(p.paths.configFile, 'utf8'));
+  });
+  check('canonical MCP catalog omits playwright across synced native client outputs', () => {
+    const b = fixture('canonical-mcp-sync');
+    const intent = m.loadIntent(b);
+    intent.config.mcp.targets = ['claude'];
+    const prepared = m.prepare({ ...b, intent });
+    m.applyPrepared(prepared);
+    m.writeState(b, prepared.state);
+    native(b, ['sync', 'mcp', '--json', '-g']);
+    const claudeServers = JSON.parse(fs.readFileSync(path.join(b.home, '.claude.json'), 'utf8')).mcpServers;
+    assert(Object.hasOwn(claudeServers, 'chrome-devtools'));
+    assert(Object.hasOwn(claudeServers, 'context7'));
+    assert(!Object.hasOwn(claudeServers, 'playwright'));
   });
   check('native account targets sync shared skills and skip disabled targets', () => {
     native(a, ['sync', '--json', '-g']);

@@ -1,6 +1,6 @@
 ---
 name: write-plan-audit
-description: Save a single combined refactoring and performance audit plan for project-owned code by applying write-plan-refactor and write-plan-perf together. Use only on explicit invocation, for periodic audits after feature work.
+description: Save a combined refactoring and performance audit plan for project-owned code (explicit invocation only).
 metadata:
   origin: custom
 ---

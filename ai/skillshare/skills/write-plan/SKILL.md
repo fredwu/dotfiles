@@ -23,7 +23,7 @@ Honor an explicit output path, and report a conflict instead of overwriting. Oth
 
 ## Coordinate agents
 
-Keep end-to-end reasoning, decisions, and plan writing in the main agent. Delegation is optional; use it when independent research, verification, or context isolation justifies the handoff cost, under the user's agent-routing instructions and Subagent roles and reasoning (`execute-plan/references/subagent-reasoning.md`). Good assignments are independent evidence questions or separate components with stable interfaces. Inside T3 Code, use native subagent controls for same-provider research that needs no extra settings, and T3 `delegate_task` when explicit options, isolation, or background execution are needed; outside T3 Code, use the harness's native controls. Do not substitute external reviewer services.
+Keep end-to-end reasoning, decisions, and plan writing in the main agent. Delegation is optional; use it when independent research, verification, or context isolation justifies handoff cost, under `AGENTS.md` and [Subagent roles and reasoning](../execute-plan/references/subagent-reasoning.md) (which owns T3 `delegate_task` vs native subagent selection). Good assignments are independent evidence questions or separate components with stable interfaces. Do not substitute external reviewer services.
 
 Give each agent the outcome, a precise question, scope, relevant requirements and decisions, dependencies, acceptance criteria, and all read-only, authority, and original-planning exclusions. Ask for a compact result with source locations, evidence, assumptions, gaps, and exact check results. Continue non-overlapping work while agents run, reuse their evidence, and duplicate investigation only for deliberate corroboration.
 
@@ -31,7 +31,7 @@ When independent scrutiny would expose missing requirements, architectural flaws
 
 ## Investigate and decide
 
-Read repository instructions and worktree state. Use read-only inspection and non-mutating checks only. Starting services, using production, incurring cost, or making external calls needs explicit authorization; put checks that need writes or extra authority into the plan instead.
+Read repository instructions and worktree state. Use read-only inspection and non-mutating checks only. Starting services, using production, incurring cost, or making external calls needs explicit authorization; put checks that need writes or extra authority into the plan instead. When UI layout, diagrams, or motion matter, prefer supplied screenshots or short screen recordings over verbose styling prose.
 
 Inspect responsibilities, boundaries and contracts, data flow, persistence, integrations, failure modes, and existing tests only far enough to justify the architecture and its feasibility. Verify material claims, separate facts, inferences, gaps, and recommendations, and cite sources precisely. Plan safe removal of evidenced cleanup in the directly affected scope; leave exhaustive tracing to execution.
 
