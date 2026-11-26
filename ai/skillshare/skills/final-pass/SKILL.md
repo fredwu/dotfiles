@@ -58,11 +58,20 @@ Missing access, services, or authority blocks a required check; it does not exem
 
 If the full checks expose authorized in-scope failures, batch the repairs and any resulting cleanup first (using targeted checks if needed while fixing), repeat affected `Visual verification` when repairs change rendered UI, layout, diagram, or motion output, then reassess evidence and rerun only the invalidated gates. Repeat until no actionable task-relevant issue remains and required checks pass. A failed or blocked required gate keeps the checkpoint incomplete. For each required gate, record the command, the result (passed, failed, skipped, or blocked), whether a pass was executed or reused (with its origin), and the reason for any skip or blocker.
 
+## Commit changes
+
+When invoked by another workflow (such as `execute-plan`, `ship-plan`, `deps-upgrade`, `upstream-merge`, or `code-review-loop`), that workflow owns Git commits.
+
+In a **standalone** run with tracked repository changes, apply this default unless the user gives other Git directions:
+
+- Commit the task's tracked changes (excluding unrelated dirty or untracked work) on the default branch (`main` or `master`) after all required checks pass. Follow the repository's commit message conventions. Do not push, open a pull request, or deploy unless requested.
+- If the checkout starts on another branch and the user did not give Git directions, ask up front before starting whether to commit on that branch or leave changes uncommitted.
+
 ## Finish
 
 A phase checkpoint returns to the executor; it does not end execution. Stop with work remaining only on user direction, an explicit authorized session boundary, or a concrete blocker that needs missing authority, input, or external change. First try alternatives and finish independent work. Report blocked work as incomplete, not as a completed result with residuals.
 
-Lead with changes or findings, then executed and reused check results, skips, and blockers, in short plain prose without stock headings or repeated summaries. Do not claim implementation verification from document validators, or fresh review from reused check evidence. Save a report only on request.
+Lead with changes or findings, commits made (when applicable), then executed and reused check results, skips, and blockers, in short plain prose without stock headings or repeated summaries. Do not claim implementation verification from document validators, or fresh review from reused check evidence. Save a report only on request.
 
 ## Temporary files
 

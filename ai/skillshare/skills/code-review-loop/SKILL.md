@@ -7,7 +7,7 @@ metadata:
 
 # Code Review Loop
 
-Own assessment, repairs, verification, and completion for code, planning, or documentation targets—both standalone and when invoked by `execute-plan` or `ship-plan`. Read `code-review` and the original requirements. Preserve requested target, exclusions, authority, and unrelated work. Do not commit, push, publish comments, change branches, stash, reset, or clean the checkout without authorization.
+Own assessment, repairs, verification, and completion for code, planning, or documentation targets—both standalone and when invoked by `execute-plan` or `ship-plan`. Read `code-review` and the original requirements. Preserve requested target, exclusions, authority, and unrelated work. Do not push, publish comments, open a pull request, change branches, stash, reset, or clean the checkout without authorization.
 
 ## Select reviewers
 
@@ -48,10 +48,19 @@ Keep review and remediation sequential; never edit the target during a review. A
 
 Apply [Recover failed attempts](references/failure-recovery.md) for format normalization, 3-attempt per-round retries, independent per-reviewer panel tracking, blocked accounting (never charging zero-completion rounds), and transport coordination.
 
+## Commit changes
+
+When invoked by `execute-plan` or `ship-plan`, the calling workflow owns Git commits.
+
+In a **standalone** run with tracked repository changes, apply this default unless the user gives other Git directions:
+
+- Commit the task's tracked changes and repairs (excluding unrelated dirty or untracked work) on the default branch (`main` or `master`) once repairs and required checks pass (including after any post-cap or post-blocker direct repair and verification). Follow the repository's commit message conventions. Do not push, open a pull request, or deploy unless requested.
+- If the checkout starts on another branch and the user did not give Git directions, ask up front before starting whether to commit on that branch or leave changes uncommitted.
+
 ## Finish
 
 The loop stage is `clean` when every requested reviewer is non-blocked, holds `broad coverage`, and has no `open` P0–P2 findings, risky/structural P3 repairs, or unresolved objections; every finding has an evidence-backed disposition; and required repair verification passes (safe tail P3 fixes under P3 convergence still close `clean`, identified as check-verified without fresh review). When all non-blocked reviewers are clear and hold `broad coverage` but one or more requested reviewers are `blocked`, finish `incomplete` with each reviewer's status, rounds used, and missing coverage preserved.
 
 After the cap or a real blocker: inside `execute-plan` or `ship-plan`, hand residuals and missing coverage to `final-pass` for authorized direct repair and verification; standalone, complete authorized direct repairs and verification yourself (or run `final-pass`) before concluding. Preserve the loop's actual `capped` or `incomplete` status and identify repairs verified without fresh review. Never call direct inspection a clean review.
 
-During plan execution, follow `execute-plan` (`Completion and review checkpoints`). Report material findings, fixes, rejected claims with reasons, rounds used, per-reviewer resolved model, coverage, terminal status, check-verified tail P3 tweaks, checks, and limits concisely. Remove only task-owned scratch and verify cleanup. Save reports or transcripts only on request.
+During plan execution, follow `execute-plan` (`Completion and review checkpoints`). Report material findings, fixes, commits made (when standalone), rejected claims with reasons, rounds used, per-reviewer resolved model, coverage, terminal status, check-verified tail P3 tweaks, checks, and limits concisely. Remove only task-owned scratch and verify cleanup. Save reports or transcripts only on request.

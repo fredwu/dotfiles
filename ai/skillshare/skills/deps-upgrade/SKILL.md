@@ -7,7 +7,7 @@ metadata:
 
 # Dependency Upgrade
 
-Upgrade every discovered dependency and the project runtime/toolchain to current stable, mutually compatible releases within explicit support constraints. Existing version pins are upgrade candidates, not automatic holdbacks. Preserve unrelated work; do not commit, push, deploy, or open a pull request unless requested.
+Upgrade every discovered dependency and the project runtime/toolchain to current stable, mutually compatible releases within explicit support constraints. Existing version pins are upgrade candidates, not automatic holdbacks. Preserve unrelated work; do not push, deploy, or open a pull request unless requested.
 
 ## Inventory
 
@@ -31,10 +31,18 @@ Keep local, CI, container, and deployment targets consistent where they serve th
 
 Distinguish outdated-results exit codes from command failures. Track packages held back by constraints, overrides, engines, peers, or upstream availability. Keep notes and inventories in context unless an agent needs files; treat such files as temporary.
 
+## Commit changes
+
+Apply this default unless the user gives other Git directions:
+
+- Commit the upgrade changes (excluding unrelated dirty or untracked work) on the default branch (`main` or `master`) after `final-pass` and required checks pass (or as verified logical commits, with the final commit after `final-pass` settles). Do not push, open a pull request, or deploy unless requested.
+- If the checkout starts on another branch and the user did not give Git directions, ask up front before edits begin whether to commit on that branch or leave changes uncommitted.
+- The main agent owns committing (delegated workers do not commit unless directed). Follow the repository's commit message conventions.
+
 ## Integrate and verify
 
 Before running heavy quality gates or container builds, rerun outdated inventories and recheck version declarations and effective versions against the targets to catch stale pins, fix any remaining stragglers, inspect combined diffs for coverage and canonical locks, and remove confirmed code, tests, configuration, or documentation made obsolete by the upgrades. Preserve required behavior and explicit supported-version compatibility.
 
 Once all upgrade edits and cleanup are settled, close with `final-pass` on the complete integrated upgrade, including runtime and environment configuration. Fold the repository-required quality gates together with upgrade-specific checks not already covered—relevant dependency/security audits, reproducible installs from the updated locks, builds, Tailwind checks, affected container target builds and startup smoke tests, and CI/matrix validation where feasible—into that single settled verification pass. Follow `final-pass`'s evidence-reuse, repair-batching, stop, and `Temporary files` rules, and respect authorization boundaries for checks with cost or external effects. A failed or blocked required check keeps the upgrade incomplete.
 
-Report package and runtime upgrades, environment consistency, intentional differences, required migrations, held-back items with reasons, and material check results or gaps in short, plain prose. Distinguish local execution, container checks, and hosted CI/deployment evidence. Skip stock headings and repeated summaries; save a user report only if requested. An unavailable required check is not a pass.
+After `final-pass` and required checks pass, commit the upgrade changes under [Commit changes](#commit-changes). Report package and runtime upgrades, commits made, environment consistency, intentional differences, required migrations, held-back items with reasons, and material check results or gaps in short, plain prose. Distinguish local execution, container checks, and hosted CI/deployment evidence. Skip stock headings and repeated summaries; save a user report only if requested. An unavailable required check is not a pass.
