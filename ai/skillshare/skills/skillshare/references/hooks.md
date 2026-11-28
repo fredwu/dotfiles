@@ -15,6 +15,9 @@ OMP writes verbatim `code` to `~/.omp/agent/extensions/skillshare-NAME.ts`,
 next OMP startup, never during Skillshare management. Use OMP's installed
 extension API; Pi compatibility is not guaranteed. Native `hooks/pre` and
 `hooks/post` factories are listed as additional unmanaged sources, not imported.
+`hooks list --json` marks such list-only sources (also Codex inline TOML,
+Droid's legacy `hooks/hooks.json`, Claude's project `settings.local.json` and
+Git config) with `"importable": false`.
 Pi and OMP share `PI_CODING_AGENT_DIR`; colliding output paths block before writes.
 
 ```bash
@@ -37,15 +40,20 @@ skillshare hooks restore BACKUP_ID
 The file for add/edit is an Entry, without the `hooks.entries` wrapper. Import
 without a name lists candidates; provide a name to save one. Saving an import
 takes over the registrations it read, so the next sync adopts them without
-`--replace`; unknown event names only warn. Import `--file`
+`--replace` (for flat code files and Copilot `.json` hooks discovered from the
+target folder without `--file`, sync writes `skillshare-NAME` and retires the
+imported original after backup, or adopts an existing `skillshare-NAME` in
+place, except on OpenCode v2; `hooks restore` restores retired originals);
+unknown event names only warn. Import `--file`
 reads supplied native configuration or code with `--from` selecting its dialect.
 No import, preview or sync executes hook commands.
 
 Mutations save source only unless `--sync` is supplied. An empty bindings map
 keeps source without publishing; disabling keeps source and queues removal of
 owned unchanged outputs. `--replace` explicitly replaces an existing source
-or the selected entry's conflicting native output. Never add it to bypass a
-conflict automatically. A stale preview requires refresh (`--revision` can
+or the selected entry's conflicting native output; `hooks sync A B --replace`
+takes over several entries at once, and any conflict left unnamed still blocks
+the sync. Never add it to bypass a conflict automatically. A stale preview requires refresh (`--revision` can
 require a specific one). Unrelated native settings and unowned hooks survive.
 `remove --keep-files` stops managing an entry: its native entries stay as they
 are, sync no longer touches them, and import offers them again (not with `--sync`).
@@ -89,17 +97,16 @@ once; nothing to trust means no question. `--yes`/`-y` (only with `--trust`) ski
 the question. Without a terminal and without `--yes`, nothing is trusted: it lists
 the hooks and exits with an error naming `--yes`, because Codex's review exists so a
 person sees the command before it runs. `--json` never asks: without `--yes` it
-reports the hooks as `needed` and exits non-zero with no error text. A home Codex cannot list, or whose
+reports the hooks as `needed` and exits non-zero. Project JSON includes the reason in `codexTrustError`; each verified project hook includes its destination `home`. A home Codex cannot list, or whose
 write fails, is named in the error and does not stop the other homes. Only `trusted_hash` is
 added (disabled hooks are reported, not enabled). A moved or removed hook leaves its
 old entry in `config.toml`; it matches only the same event, matcher and handler at
-that position, so it cannot trust another hook. Global mode only; `sync hooks`,
-`hooks list` and project mode reject `--trust`; hooks written for `hooks.projects`
+that position, so it cannot trust another hook. Use `hooks sync -p --trust` for this checkout. Trust is recorded in each verified user's Codex home, not in the repository; folder trust is never granted. A home that cannot verify every owned command is skipped. Partial completion exits non-zero. `sync hooks` and `hooks list` reject `--trust`; hooks written for `hooks.projects`
 are skipped, so trust those in Codex `/hooks`. `--json` has a `codexTrust` list
 (`target`, `entry`, `key`, `command`, `action`, `disabled`). If Codex fails, files
 are still written and it errors "hook files were written, but Codex trust was not
 recorded". Plain `hooks sync` never touches trust. The dashboard Hooks page
-(global) does the same after a confirm dialog.
+(global or project mode) does the same after a confirm dialog.
 
 ## Git config hooks
 

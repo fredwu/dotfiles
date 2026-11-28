@@ -2,7 +2,7 @@
 
 Plugins are complete native packages, not standalone skills. Keep their components
 together. Install targets: `claude`, `codex`, `cursor`, `antigravity` (`agy` alias),
-`antigravity-cli`, `copilot`, `pi`, `opencode`, and `omp`. Grok supports native import/removal,
+`antigravity-cli`, `copilot`, `pi`, `opencode`, `omp`, and `herdr-app`. Grok supports native import/removal,
 with trust/install handled in Grok. Kimi, Hermes, and Devin are discovery-only.
 Read `targetDefinitions` from JSON output instead of assuming every format supports
 all operations. `targetInfo` reports per-target components, version, and problems.
@@ -31,20 +31,21 @@ preview and apply. Repeat `--target` to select several supported clients. Use
 separate from `--revision`, the token that binds an apply to a reviewed preview.
 `add` installs the selected targets immediately; `sync plugins` reconciles
 managed target selection, while `plugin update` refreshes upstream content.
-When adding a new package, omit `--source-ref` to follow the remote's default branch.
-Updates reuse its stored ref; omitting the flag on update does not unpin an existing package.
+When adding a new package, omit `--source-ref` to follow the remote's default branch
+or the ref named in a GitHub folder or Herdr mod link. Updates reuse the selected ref;
+omitting the flag on update does not unpin an existing package.
 Adding a plugin does not schedule automatic updates; run `check` and `update` later.
 `sync --all` does not update or sync plugins; use `plugin update --all` (`-a`) to update all managed plugins.
 To follow a branch again after a pin, run `plugin update NAME --source-ref BRANCH`: the stored
 ref becomes that branch, and later updates fetch its latest commit. Pin a tag or commit only
 when the user asks for that version.
 
-A remote source is read at its repository root, where discovery looks for plugin manifests and
-marketplaces. For a plugin in a subdirectory that no root marketplace lists, clone the
-repository's default branch to a dedicated directory and add the plugin's folder from that
-clone. A local source takes no `--source-ref`, so `check` and `update` see only what the clone
-holds: run `git -C CLONE pull --ff-only` first. Do not check out a release tag in the clone
-unless the user asked for that version.
+Discovery reads the source root for plugin manifests and marketplaces. To use a package
+inside a GitHub repository, pass the package folder's `https://github.com/OWNER/REPO/tree/REF/PATH`
+link. For a Herdr mod, pass its package folder (containing `mods/`) or the GitHub link to its
+`mods/<id>/main.js` file. For other hosts, clone the repository and use the local package folder.
+A local source takes no `--source-ref`; run `git -C CLONE pull --ff-only` before checking for
+updates. Do not check out a release tag unless the user asked for that version.
 
 ## Inspect before changing
 
@@ -147,6 +148,11 @@ OMP and OpenCode, never falling back to global scope. An update reports failed t
   `.agents/plugins/` (existing `_agents/plugins/` is supported). This targets desktop/workspace
   discovery, not the separate standalone agy CLI plugin store. Use `antigravity-cli` for that
   store; `agy` remains the desktop alias. No Gemini CLI adapter is provided.
+- Herdr app (`herdr-app`, global only): a source with no plugin manifest and root
+  `mods/<id>/main.js`, copied to `<home>/mods/<id>` (home `$HERDR_APP_HOME`, default `~/.config/herdr-app`);
+  `--entry bin/<command>` installs a launcher and prints its stable managed entry path (macOS and Linux).
+  The whole folder is managed; local edits block replacement and removal. Foreign mods or launchers are refused; move them aside. Skipped
+  by sync/check/update where the Herdr home is absent.
 - Pi: `package.json` with a `pi` resource manifest or `pi-package` conventions. Native install/remove; read-only
   settings inventory honors `PI_CODING_AGENT_DIR`. Project trust must be completed
   in Pi; do not bypass it with automatic approval flags.

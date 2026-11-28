@@ -76,7 +76,7 @@ skillshare search <query> -n 10     # Limit results (default: 20)
 
 Diagnose configuration and environment issues. Also checks sync drift for skills, agents and extras, plus MCP servers, hooks and plugins (offline; `mcp check --live` and `plugin check` go further).
 
-In global and project mode, each first-level symlink or Windows junction in the skills source gets a line. With `follow_source_links` off (default) it is info: discovery does not follow it, so its contents are invisible to skillshare; set `follow_source_links: true` in the global or project config to follow such links one level. With it on, the line says `followed as a directory`, or warns `not followed: <reason>` (target missing, source root, or sync target overlap); target links behind an unavailable link are reported as kept, not as broken links to prune. With no such links, it adds no output. In `doctor --json`, each link is an `undeclared_source_links` check with status `info` or `warning`.
+In global and project mode, each first-level symlink or Windows junction in the skills source gets a line. With `follow_source_links` off (default) it is info: discovery does not follow it, so its contents are invisible to skillshare; set `follow_source_links: true` in the global or project config to follow such links one level. With it on, the line says `followed as a directory`, or warns `not followed: <reason>` (target missing, source root, or sync target overlap); target links behind an unavailable link are reported as kept, not as broken links to prune; while any link is unavailable, sync prunes nothing, so other broken links it would prune are reported as kept too. With no such links, it adds no output. In `doctor --json`, each link is an `undeclared_source_links` check with status `info` or `warning`.
 
 ```bash
 skillshare doctor
@@ -86,7 +86,9 @@ skillshare doctor
 
 Use `skillshare analyze --json` to inspect description/body size and estimated context
 cost per target. Estimates describe loaded skill text, not measured billing or cache savings.
-Use `--no-tui` for plain terminal output.
+Use `--no-tui` for plain terminal output. A whole-source run also lists MCP tool-definition
+tokens per MCP target (and `--json` adds `mcp`) once `skillshare mcp check --live` has counted
+servers. The lint warns when a SKILL.md body passes 500 lines (`body-too-long`).
 
 ## updates
 
@@ -121,8 +123,17 @@ skillshare upgrade --dry-run    # Preview
 `upgrade --skill --force` installs without that prompt. Use this only when installation
 is requested. `init --skill` also opts in explicitly.
 
+**Disabled built-in skill:** when `.skillignore` disables it, sync leaves it out of
+every target and `doctor` and `status` warn. Run `skillshare enable skillshare -g && skillshare sync -g`.
+
 **Nix installs:** the CLI binary is never replaced, even with `--force`; `upgrade` prints
 `nix profile upgrade skillshare` or says to rebuild the Nix configuration. The skill still updates.
+
+**PyPI installs** (`skillshare-cli` from uv, pipx, pip or pixi): the CLI binary is never replaced, even with
+`--force`; `upgrade` prints the installer's command, such as `uv tool upgrade skillshare-cli`. The skill still updates.
+
+**pixi installs** (the `skillshare` conda package): the CLI binary is never replaced, even with `--force`;
+`upgrade` prints `pixi global update skillshare`, or `pixi upgrade skillshare` in a pixi project. The skill still updates.
 
 **After upgrading skill:** `skillshare sync`
 
